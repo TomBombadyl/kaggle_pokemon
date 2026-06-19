@@ -19,6 +19,33 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 9 - packaged artifact validation)
+- **Worked on:** validating that the local candidate tarballs themselves behave like
+  the source runs, not just that the source agent works. No Kaggle submission
+  attempted.
+- **Changed:** added `scripts/verify_archive.py`, which extracts a candidate
+  `.tar.gz`, imports the packaged top-level `main.py`, uses packaged `deck.csv`,
+  and runs side-swapped games against legal random. It supports `--opponent-deck`
+  to distinguish mirror checks from cross-deck checks. Updated
+  `report/submission_candidates_2026-06-19.md` with package-level evidence and
+  current official Kaggle links/snippets.
+- **Official constraints rechecked:** current Kaggle search snippets for the
+  Simulation rules still show five submissions/day and two final submissions; the
+  Simulation overview snippet still says `.tar.gz` with top-level `main.py` and
+  `deck.csv`. API contract remains grounded in `data/CABT_API.md` and downloaded
+  `data/sim/sample_submission/cg/api.py`.
+- **Packaged artifact metrics vs default Abomasnow random deck (300 games each):**
+  A0 safety 282/300 = 94.0%; A1 current 288/300 = 96.0%; A2 Kyogre 294/300 =
+  98.0%; A3 Starmie 283/300 = 94.3%; A4 big-basic 291/300 = 97.0%. Mirror archive
+  checks also passed for A1/A3/A4, with A1 at 287/300, A3 at 291/300, and A4 at
+  294/300.
+- **Verification:** `python -m py_compile scripts\verify_archive.py` passed; all
+  package verification runs finished with no draws or unfinished games.
+- **NEXT (T15):** if the user explicitly says to submit, use a browser-visible
+  Kaggle final rules check, then submit A2/A1/A4 in that order unless the user
+  chooses a different portfolio. Record submission IDs/scores in
+  `report/submission_candidates_2026-06-19.md`.
+
 ### 2026-06-19 (run 8 - T15 five dry-run candidates)
 - **Worked on:** T15 five distinct Simulation submission candidates. No Kaggle
   submission attempted.
