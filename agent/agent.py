@@ -97,6 +97,9 @@ CARD_CYRANO = 1205
 CARD_LILLIE = 1227
 CARD_WAITRESS = 1235
 
+_ATTACK_DATA: "dict[int, Any] | None" = None
+_CARD_DATA: "dict[int, Any] | None" = None
+
 
 def _option_type(opt: Any) -> "int | None":
     """Return the OptionType id of an option, tolerating dict or object form."""
@@ -124,6 +127,32 @@ def load_deck(path: str = _DEFAULT_DECK_PATH) -> "list[int]":
             if cell:
                 ids.append(int(cell))
     return ids
+
+
+def _attack_data(attack_id):
+    global _ATTACK_DATA
+    if _ATTACK_DATA is None:
+        _ATTACK_DATA = {}
+        try:
+            from cg.api import all_attack
+
+            _ATTACK_DATA = {a.attackId: a for a in all_attack()}
+        except Exception:
+            _ATTACK_DATA = {}
+    return _ATTACK_DATA.get(attack_id)
+
+
+def _card_data(card_id):
+    global _CARD_DATA
+    if _CARD_DATA is None:
+        _CARD_DATA = {}
+        try:
+            from cg.api import all_card_data
+
+            _CARD_DATA = {c.cardId: c for c in all_card_data()}
+        except Exception:
+            _CARD_DATA = {}
+    return _CARD_DATA.get(card_id)
 
 
 class Agent:
@@ -196,7 +225,7 @@ class Agent:
         if opt_type == OPT_ATTACH:
             return max(indices, key=lambda i: self._attach_score(options[i], current))
         if opt_type == OPT_ATTACK:
-            return max(indices, key=lambda i: self._attack_score(options[i]))
+            return max(indices, key=lambda i: self._attack_score(options[i], current))
         if opt_type == OPT_RETREAT:
             return indices[0]
         return indices[0]
@@ -221,15 +250,18 @@ class Agent:
 
         if context in (CTX_SETUP_ACTIVE_POKEMON, CTX_TO_ACTIVE, CTX_SWITCH):
             return [max(range(len(options)),
-                        key=lambda i: self._card_option_score(options[i], current, select))]
+                        key=lambda i: self._promotion_score(options[i], current, select))]
 
         if context in (CTX_TO_HAND, CTX_ATTACH_FROM, CTX_ATTACH_TO, CTX_HEAL,
                        CTX_REMOVE_DAMAGE_COUNTER):
             ranked = sorted(range(len(options)),
                             key=lambda i: self._card_option_score(options[i], current, select),
                             reverse=True)
-        elif context in (CTX_DISCARD, CTX_TO_DECK, CTX_TO_DECK_BOTTOM,
-                         CTX_DAMAGE_COUNTER, CTX_DAMAGE_COUNTER_ANY, CTX_DAMAGE):
+        elif context in (CTX_DAMAGE_COUNTER, CTX_DAMAGE_COUNTER_ANY, CTX_DAMAGE):
+            ranked = sorted(range(len(options)),
+                            key=lambda i: self._damage_target_score(options[i], current, select),
+                            reverse=True)
+        elif context in (CTX_DISCARD, CTX_TO_DECK, CTX_TO_DECK_BOTTOM):
             ranked = sorted(range(len(options)),
                             key=lambda i: self._card_option_score(options[i], current, select))
         else:
@@ -265,11 +297,29 @@ class Agent:
     def _best_attack_index(self, options):
         return max(range(len(options)), key=lambda i: self._attack_score(options[i]))
 
-    def _attack_score(self, opt):
-        # Attack details are sparse in Option. Higher attackId is a stable
-        # tie-break and currently pilots the sample Water deck better than the
-        # first damage-estimator attempt logged in PROGRESS.md.
-        return _get(opt, "attackId", 0) or 0
+    def _attack_score(self, opt, current=None):
+        attack_id = _get(opt, "attackId", 0) or 0
+        attack = _attack_data(attack_id)
+        damage = int(_get(attack, "damage", 0) or 0) if attack is not None else 0
+        score = damage * 10 + attack_id / 10000.0
+        text = (_get(attack, "text", "") or "") if attack is not None else ""
+        if damage <= 0:
+            # Variable-damage attacks are legal but risky for a deterministic
+            # first-pass pilot. Keep them below known fixed 130/200 attacks.
+            if "100 damage for each" in text:
+                score += 500
+            elif "20 damage for each" in text:
+                score += 150
+        if "Discard" in text:
+            score -= 80
+        opp_active = self._opponent_active(current or {})
+        if opp_active is not None and damage > 0:
+            hp = int(_get(opp_active, "hp", 0) or 0)
+            if hp and damage >= hp:
+                score += 5000
+            else:
+                score += max(0, 220 - hp)
+        return score
 
     def _attach_score(self, opt, current):
         target_area = _get(opt, "inPlayArea")
@@ -289,13 +339,86 @@ class Agent:
     def _card_option_score(self, opt, current, select=None):
         pokemon = self._card_option_pokemon(opt, current)
         if pokemon is not None:
-            hp = _get(pokemon, "hp", 0) or 0
-            max_hp = _get(pokemon, "maxHp", hp) or hp
-            energy_count = len(_get(pokemon, "energies", []) or [])
-            return max_hp + hp + 20 * energy_count
+            context = _get(select, "context") if select is not None else None
+            if context in (CTX_HEAL, CTX_REMOVE_DAMAGE_COUNTER):
+                return self._heal_target_score(opt, current, pokemon)
+            return self._promotion_score(opt, current, select)
         card = self._card_from_option(opt, current, select)
         card_id = _get(card, "id", 0) or _get(opt, "cardId", 0) or 0
         return self._card_id_score(card_id, current)
+
+    def _promotion_score(self, opt, current, select=None):
+        pokemon = self._card_option_pokemon(opt, current)
+        if pokemon is None:
+            card = self._card_from_option(opt, current, select)
+            card_id = _get(card, "id", 0) or _get(opt, "cardId", 0) or 0
+            return self._card_id_score(card_id, current)
+        hp = int(_get(pokemon, "hp", 0) or 0)
+        max_hp = int(_get(pokemon, "maxHp", hp) or hp)
+        energy_count = len(_get(pokemon, "energies", []) or [])
+        card_id = _get(pokemon, "id", 0) or 0
+        score = hp + max_hp + 45 * energy_count + self._pokemon_role_bonus(card_id)
+        if _get(opt, "area") == 4:
+            score += 30
+        return score
+
+    def _damage_target_score(self, opt, current, select=None):
+        pokemon = self._card_option_pokemon(opt, current)
+        if pokemon is None:
+            return 0
+        your_index = _get(current, "yourIndex", 0) or 0
+        player_index = _get(opt, "playerIndex", your_index)
+        opponent_bonus = 100000 if player_index != your_index else -100000
+        hp = int(_get(pokemon, "hp", 0) or 0)
+        max_hp = int(_get(pokemon, "maxHp", hp) or hp)
+        damage = max(0, max_hp - hp)
+        energy_count = len(_get(pokemon, "energies", []) or [])
+        remaining_counters = int(_get(select, "remainDamageCounter", 0) or 0) if select else 0
+        ko_bonus = 15000 if remaining_counters and remaining_counters * 10 >= hp else 0
+        active_bonus = 1200 if _get(opt, "area") == 4 else 0
+        card_id = _get(pokemon, "id", 0) or 0
+        prize_bonus = self._target_prize_bonus(card_id)
+        return (
+            opponent_bonus + ko_bonus + active_bonus + prize_bonus +
+            damage * 12 + energy_count * 250 + max(0, 400 - hp)
+        )
+
+    def _heal_target_score(self, opt, current, pokemon):
+        your_index = _get(current, "yourIndex", 0) or 0
+        player_index = _get(opt, "playerIndex", your_index)
+        if player_index != your_index:
+            return -100000
+        hp = int(_get(pokemon, "hp", 0) or 0)
+        max_hp = int(_get(pokemon, "maxHp", hp) or hp)
+        damage = max(0, max_hp - hp)
+        energy_count = len(_get(pokemon, "energies", []) or [])
+        card_id = _get(pokemon, "id", 0) or 0
+        return damage * 20 + energy_count * 80 + self._pokemon_role_bonus(card_id)
+
+    def _pokemon_role_bonus(self, card_id):
+        if card_id == CARD_MEGA_ABOMASNOW_EX:
+            return 900
+        if card_id == CARD_KYOGRE:
+            return 500
+        if card_id == CARD_SNOVER:
+            return 180
+        card = _card_data(card_id)
+        if card is not None:
+            if bool(_get(card, "megaEx", False)):
+                return 700
+            if bool(_get(card, "ex", False)):
+                return 500
+        return 0
+
+    def _target_prize_bonus(self, card_id):
+        card = _card_data(card_id)
+        if card is None:
+            return self._pokemon_role_bonus(card_id)
+        if bool(_get(card, "megaEx", False)):
+            return 3000
+        if bool(_get(card, "ex", False)):
+            return 1800
+        return 0
 
     def _card_id_score(self, card_id, current):
         if card_id == CARD_MEGA_ABOMASNOW_EX:
@@ -330,6 +453,15 @@ class Agent:
             return {}
         your_index = _get(current, "yourIndex", 0) or 0
         return players[your_index] if 0 <= your_index < len(players) else {}
+
+    def _opponent_active(self, current):
+        players = _get(current, "players", []) or []
+        your_index = _get(current, "yourIndex", 0) or 0
+        opp_index = 1 - your_index
+        if not (0 <= opp_index < len(players)):
+            return None
+        active = _get(players[opp_index], "active", []) or []
+        return active[0] if active else None
 
     def _card_option_pokemon(self, opt, current):
         area = _get(opt, "area")

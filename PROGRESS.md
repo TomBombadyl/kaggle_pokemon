@@ -19,6 +19,33 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 6 - T15 A1 initial candidate)
+- **Worked on:** T15 first Simulation candidates, specifically A1
+  attack/targeting upgrade. No Kaggle submission attempted.
+- **Changed:** updated `agent/agent.py` only for the live agent path; preserved
+  `agent_snapshots/v2_safety.py` unchanged. The current agent now lazily reads cabt
+  attack/card metadata when available, scores attack choices by fixed damage and
+  active-KO pressure, promotes developed attackers after KO, scores heal targets by
+  damage/value, and targets opponent damaged/low-HP/high-prize Pokémon for damage
+  counters/damage effects. Added smoke coverage for active promotion and opponent
+  KO targeting.
+- **Metrics:** requested matrix
+  `python scripts\eval_matrix.py --games 20 --agents current,safety,random --deck
+  current=agent\deck.csv` completed. Current/A1 aggregate in telemetry: 60 wins /
+  20 losses over 80 agent-perspective rows (75.0%); safety aggregate: 53 wins / 27
+  losses (66.2%). Ordered rows: current vs safety 12/20, current vs random 20/20,
+  safety vs current 10/20, random vs current 2/20.
+- **Verification:** `python scripts\smoke_test.py` = 16/16 pass;
+  `python -m py_compile agent\agent.py agent_snapshots\v2_safety.py
+  scripts\eval_matrix.py scripts\smoke_test.py scripts\selfplay.py
+  scripts\package_submission.py` passed; requested 20-game matrix passed and wrote
+  `report/eval/matrix_20.*` plus `report/eval/telemetry_20.*`.
+- **Blockers / notes:** A1 is promising but not final; current losses in the
+  telemetry are still all `no_active`, so the next candidate work should test more
+  robust basic/bench/deck variants before any submission.
+- **NEXT (T15):** build A2 reduced-energy Water deck candidate, then compare A0/A1/A2
+  on the matrix before deciding whether A1 merits packaging as a Simulation slot.
+
 ### 2026-06-19 (run 5 - T14 telemetry)
 - **Worked on:** T14 game telemetry for the local evaluation matrix.
 - **Changed:** expanded `scripts/eval_matrix.py` with per-game telemetry collection

@@ -79,6 +79,11 @@ under any task. Do not skip ahead unless a task is blocked (mark `[blocked]` + r
   and Simulation Kaggle pages before upload; reconfirm submission limits, package
   format, final-submission rules, report requirements, and deadlines. Dry-run all
   packages; submit only after explicit user confirmation.
+  - [x] 2026-06-19: Implemented initial A1 attack/targeting upgrade in
+    `agent/agent.py` while preserving `agent_snapshots/v2_safety.py`: lazy attack
+    metadata scoring, KO-aware attack choice, powered-attacker promotion, healing
+    target scoring, and opponent KO/damage target scoring. Verified on the
+    requested 20-game matrix; keep testing before packaging as a submission.
 - [ ] **T16. Research-backed search/RL prototype.** Start with narrow cabt
   `search_*` tactical checks and offline behavior-cloning traces before PPO or
   heavier self-play RL.

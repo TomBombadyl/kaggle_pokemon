@@ -23,7 +23,8 @@ from agent.agent import (  # noqa: E402
     OPT_YES, OPT_NO, OPT_CARD, OPT_NUMBER,
     SEL_MAIN, SEL_CARD, SEL_YES_NO, SEL_ATTACK, SEL_COUNT,
     CTX_SETUP_BENCH_POKEMON, CTX_DRAW_COUNT, CTX_TO_HAND, CTX_ATTACH_TO,
-    CARD_MEGA_ABOMASNOW_EX, CARD_WATER_ENERGY,
+    CTX_TO_ACTIVE, CTX_DAMAGE_COUNTER,
+    CARD_MEGA_ABOMASNOW_EX, CARD_WATER_ENERGY, CARD_KYOGRE, CARD_SNOVER,
 )
 
 PASS, FAIL = 0, 0
@@ -122,6 +123,45 @@ opts = [{"type": OPT_ATTACK, "attackId": 1}, {"type": OPT_ATTACK, "attackId": 2}
 s = sel(SEL_ATTACK, opts, mn=1, mx=1)
 o = agent({"logs": [], "current": {}, "select": s})
 check("attack select returns one index", legal(o, s))
+
+# 7b. Active promotion should prefer the developed attacker, not just first slot.
+opts = [{"type": OPT_CARD, "area": 5, "index": 0},
+        {"type": OPT_CARD, "area": 5, "index": 1}]
+s = sel(SEL_CARD, opts, mn=1, mx=1, context=CTX_TO_ACTIVE)
+cur = {
+    "yourIndex": 0,
+    "players": [
+        {
+            "active": [],
+            "bench": [
+                {"id": CARD_SNOVER, "hp": 90, "maxHp": 90, "energies": []},
+                {"id": CARD_KYOGRE, "hp": 150, "maxHp": 150, "energies": [3, 3, 3]},
+            ],
+        },
+        {"active": [], "bench": []},
+    ],
+}
+o = agent({"logs": [], "current": cur, "select": s})
+check("TO_ACTIVE promotes developed attacker", o == [1] and legal(o, s))
+
+# 7c. Damage counters should target the opponent KO when available.
+opts = [{"type": OPT_CARD, "area": 5, "index": 0, "playerIndex": 0},
+        {"type": OPT_CARD, "area": 5, "index": 0, "playerIndex": 1}]
+s = sel(SEL_CARD, opts, mn=1, mx=1, context=CTX_DAMAGE_COUNTER)
+s["remainDamageCounter"] = 3
+cur = {
+    "yourIndex": 0,
+    "players": [
+        {"active": [], "bench": [
+            {"id": CARD_MEGA_ABOMASNOW_EX, "hp": 350, "maxHp": 350, "energies": [3, 3, 3]},
+        ]},
+        {"active": [], "bench": [
+            {"id": CARD_SNOVER, "hp": 20, "maxHp": 90, "energies": [3]},
+        ]},
+    ],
+}
+o = agent({"logs": [], "current": cur, "select": s})
+check("damage counters target opponent KO", o == [1] and legal(o, s))
 
 # 8. Empty option list must not crash.
 s = sel(SEL_CARD, [], mn=0, mx=0)
