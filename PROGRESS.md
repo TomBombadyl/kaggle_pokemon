@@ -19,6 +19,28 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 10 - packaged head-to-head validation)
+- **Worked on:** strengthened pre-submit validation by testing packaged candidates
+  against each other. No Kaggle submission attempted.
+- **Changed:** added `scripts/verify_archive_matrix.py`, which imports packaged
+  `main.py`/`deck.csv` from multiple candidate tarballs and runs side-swapped
+  local cabt matches between the packaged artifacts. It writes CSV/Markdown under
+  `report/eval/`. Updated `report/submission_candidates_2026-06-19.md` with the
+  top-3 packaged head-to-head matrix.
+- **Metrics:** `report/eval/archive_matrix_100_top3_candidates.md` compares A1,
+  A2, and A4 over 100 games per ordered pair. A2 is currently the best first-slot
+  candidate by combined evidence: packaged default-deck random gate 294/300 =
+  98.0%, A2 vs A1 = 55/100, and A2 vs A4 = 58/100. A1 remains the best
+  source-matrix/safety-regression candidate; A4 remains the diversity probe.
+- **Official check:** in-app browser was unavailable in this session, so the
+  current official check remained web-search snippets plus local downloaded API
+  artifacts. Do not upload until a browser-visible Kaggle rules check is possible.
+- **Verification:** `python -m py_compile scripts\verify_archive_matrix.py`
+  passed; the packaged matrix completed with no draws or unfinished games.
+- **NEXT (T15):** if the user explicitly confirms upload, perform a browser-visible
+  Kaggle final rules/slot check, submit A2 first, then A1/A4 as remaining planned
+  probes, recording submission IDs and scores.
+
 ### 2026-06-19 (run 9 - packaged artifact validation)
 - **Worked on:** validating that the local candidate tarballs themselves behave like
   the source runs, not just that the source agent works. No Kaggle submission

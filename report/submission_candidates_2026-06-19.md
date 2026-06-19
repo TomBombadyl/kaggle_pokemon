@@ -45,10 +45,35 @@ default Abomasnow deck as the opponent deck.
 | `a3_starmie.tar.gz` | `agent/deck.csv` | 283 | 17 | 94.3 |
 | `a4_big_basic.tar.gz` | `agent/deck.csv` | 291 | 9 | 97.0 |
 
+## Packaged Head-To-Head Check
+
+Command shape:
+
+```powershell
+python scripts\verify_archive_matrix.py --games 100 --tag top3_candidates `
+  --candidate A1=dist\candidates\a1_current_963.tar.gz `
+  --candidate A2=dist\candidates\a2_kyogre.tar.gz `
+  --candidate A4=dist\candidates\a4_big_basic.tar.gz
+```
+
+Report: `report/eval/archive_matrix_100_top3_candidates.md`.
+
+| A | B | A wins | B wins | A win % |
+|---|---|---:|---:|---:|
+| A1 | A2 | 55 | 45 | 55.0 |
+| A1 | A4 | 50 | 50 | 50.0 |
+| A2 | A1 | 55 | 45 | 55.0 |
+| A2 | A4 | 58 | 42 | 58.0 |
+| A4 | A1 | 45 | 55 | 45.0 |
+| A4 | A2 | 49 | 51 | 49.0 |
+
+A2 has the strongest current packaged profile: highest default-deck random gate
+and positive head-to-head rows against A1/A4.
+
 ## Submission Order Recommendation
 
-1. Submit A2 first if optimizing for the latest packaged default-deck random
-   gate.
+1. Submit A2 first if optimizing for the latest packaged default-deck random gate
+   and packaged head-to-head profile.
 2. Submit A1 second as the best source-matrix and safety-regression candidate.
 3. Submit A4 third as a distinct Black Kyurem robustness probe.
 4. Submit A0 only if we want a conservative baseline ladder anchor.
