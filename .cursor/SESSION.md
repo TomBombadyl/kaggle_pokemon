@@ -2,44 +2,43 @@
 
 ## Current focus
 
-**Track B on ladder.** Submitted today: alakazam **#53856584**, dragapult **#53856590** (PENDING).
-Kyogre heuristic **#53854707** μ **645.7** (was 672.7). Nine packages in `dist/candidates/`.
-Report: `report/track_b_deck_spread.md`. **Next:** `track_ladder.py` after ~40 min; `--fetch-logs` when COMPLETE.
+All **5 daily Simulation slots used** (2026-06-19). Kyogre heuristic leads at **633.0** μ (#53854707);
+Track B LearnedScorer probes landed lower after matchmaking — alakazam **490.4**, dragapult **468.9**.
+Track A SearchScorer probes (TA1 Kyogre+2e #53856711, TA2 Abomasnow+4e #53856676) at validation **600.0**;
+ladder μ still settling (~40 min). **Next:** sync ladder + fetch agent logs for all 5 refs; compare
+brains/decks; plan tomorrow's probes (crustle/starmie Track B or Track A @40g gate).
 
-## Track B packages (LearnedScorer + deck)
+## Key context
 
-| Slug | Archetype | Local vs pool | Archive |
-|------|-----------|---------------|---------|
-| dragapult | Spread (field meta) | 66.7% | `track_b_learned_dragapult.tar.gz` |
-| crustle | Non-ex anti-ex | 62.5% | `track_b_learned_crustle.tar.gz` |
-| alakazam | Single-prize Dudunsparce | 50.0% | `track_b_learned_alakazam.tar.gz` |
-| starmie | Spread pressure | 77.8% | `track_b_learned_starmie.tar.gz` |
-| big_basic | Black Kyurem ex | 80.6% | `track_b_learned_big_basic.tar.gz` |
-| bellibolt | Lightning aggro (wmh #1 rule-based) | 33.8% | `track_b_learned_bellibolt.tar.gz` |
-| kyogre | Big basic Water | 81.9% | `track_b_learned_kyogre.tar.gz` (dup archetype vs live) |
-
-Build all: `python scripts/package_track_b_spread.py --games 12`
-
-## Track A ladder probes (SearchScorer + deck grid)
-
-Two packages ready (`scripts/prepare_track_a_probes.py`). Manifest: `report/track_a/ladder_probes.md`.
-
-| Slot | Archive | Deck | Pool @12g | Random @50g |
-|------|---------|------|----------:|------------:|
-| **TA1** | `track_a_probe_1.tar.gz` | Kyogre +2 energy | **91.7%** | 46/50 |
-| **TA2** | `track_a_probe_2.tar.gz` | Abomasnow +4 energy | **87.5%** | 47/50 |
-
-Both use **SearchScorer** (heuristic + optional promotion search). Submit TA1 first, then TA2;
-`track_ladder.py --fetch-logs` after each (~40 min for ladder μ).
+- **Repo:** `Z:\kaggle\pokemon` | **Branch:** `main` (ahead 1 — commit `ad479ed`, unpushed)
+- **Today's ladder (latest μ):** Kyogre heuristic **633.0** | alakazam **490.4** | dragapult **468.9** | TA1/TA2 **600.0** (post-validation)
+- **Refs:** #53854707 Kyogre | #53856584 alakazam | #53856590 dragapult | #53856711 TA1 | #53856676 TA2
+- **Track B:** LearnedScorer + `distilled_v1.npz`; spread in `report/track_b_deck_spread.md`
+- **Track A:** SearchScorer; probes in `report/track_a/ladder_probes.md`
+- **RL/distill:** `torch_distill` 1096 decisions; gate 206/240 @40g (`report/distill_gate.md`)
+- **Agent logs:** 15 episodes for Kyogre ref; fetch others: `python scripts/track_ladder.py --fetch-logs`
+- **Ladder sync:** `python scripts/track_ladder.py` — history `report/ladder_history.csv`
+- **Models:** `agent/models/distilled_v1.npz` local only (gitignored path pattern — not committed)
+- **Decision:** 600 μ = validation baseline, not failure; real W/L updates after matchmaking
+- **Decision:** Diversify decks across agents; Kyogre heuristic best ladder signal so far
+- **No Kaggle submit** without explicit user OK (today's quota spent)
 
 ## Continue prompt
 
 ```text
-Continue PTCG ladder probes. Read: @.cursor/SESSION.md, @report/track_a/ladder_probes.md
+Continue PTCG ladder analysis after 5/5 daily submits. Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @.cursor/SESSION.md, @PROGRESS.md, @report/ladder_history.csv, @report/track_b_deck_spread.md
 
-Goal: Compare Track A SearchScorer probes on ladder (TA1 Kyogre, TA2 Abomasnow deck).
-Status: track_a_probe_1/2.tar.gz verified; Track B spread also ready (see track_b_deck_spread.md).
-Next: user OK → submit track_a_probe_1; track_ladder.py --fetch-logs; then probe_2.
+Goal: Sync ladder μ for all 5 refs, fetch agent logs, compare Track A vs B vs heuristic.
+Status: Kyogre 633.0 μ; Learned alakazam 490.4, dragapult 468.9; TA1/TA2 at 600 validation.
+Next: python scripts/track_ladder.py --fetch-logs; analyze misplays; prep tomorrow probes.
 
-No Kaggle submit without explicit user OK.
+Branch: main (ahead 1) | Env: Python 3.13, torch 2.6.0+cu124 | No submit without user OK.
 ```
+
+## Timeline
+
+- **2026-06-19T17:35:00Z** | handoff by user | 5/5 ladder slots live
+- **2026-06-19T17:33:00Z** | run 18 | TA1+TA2 submitted; ladder sync dragapult 468.9, alakazam 490.4
+- **2026-06-19T17:24:00Z** | run 18 | Track B alakazam + dragapult submitted
+- **2026-06-19** | run 16–17 | RL distill export; Track B deck spread; Track A probe tooling
+- **2026-06-19T16:08:00Z** | A2 Kyogre #53854707 first successful upload

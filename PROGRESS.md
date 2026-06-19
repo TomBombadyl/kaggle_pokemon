@@ -6,6 +6,16 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 19 — 5/5 daily ladder slots live)
+- **Worked on:** Handoff after full daily submit quota.
+- **Ladder μ (latest sync):** Kyogre heuristic **633.0** (#53854707); Learned alakazam
+  **490.4** (#53856584); Learned dragapult **468.9** (#53856590); TA1 Kyogre+Search **600.0**
+  (#53856711); TA2 Abomasnow+Search **600.0** (#53856676 — validation baseline, μ settling).
+- **Verification:** `python scripts/track_ladder.py` — 6 rows parsed, 4 appended.
+- **Blockers:** none; daily quota spent.
+- **NEXT:** `track_ladder.py --fetch-logs` for all refs; analyze logs; plan tomorrow probes
+  (crustle/starmie Track B or gate_track_a @40g).
+
 ### 2026-06-19 (run 18 — Kyogre ladder review + TA2 submit)
 - **Worked on:** Sync ladder/logs; decide Track A probe route after live Kyogre.
 - **Kyogre #53854707:** μ **672.7 → 645.7 → 633.0** as ladder games accumulated; agent
