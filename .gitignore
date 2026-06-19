@@ -1,0 +1,21 @@
+# Secrets
+.kaggle/
+*.json.key
+kaggle.json
+
+# Data / large assets (ignore downloads, keep our reference docs)
+data/*
+!data/*.md
+*.zip
+*.csv.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Scratch
+dist/
+*.log
+.DS_Store

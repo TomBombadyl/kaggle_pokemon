@@ -1,0 +1,7 @@
+agent_a,agent_b,games,a_wins,b_wins,draws,unfinished,a_win_rate_decided,avg_steps
+current,safety,4,2,2,0,0,50.0,45.2
+current,random,4,3,1,0,0,75.0,28.8
+safety,current,4,2,2,0,0,50.0,22.8
+safety,random,4,3,1,0,0,75.0,36.2
+random,current,4,0,4,0,0,0.0,22.5
+random,safety,4,0,4,0,0,0.0,24.2
