@@ -1,0 +1,29 @@
+{
+  "started": "2026-06-19T19:50:21.431210+00:00",
+  "deck": "Z:\\kaggle\\pokemon\\report\\rl_deck_campaign\\best_deck.csv",
+  "slug": "rl_deck",
+  "opponents": "benchmark",
+  "timesteps": 100000,
+  "distilled": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_rl_deck_v1.npz",
+  "package_name": "track_b_learned_rl_deck",
+  "train": {
+    "status": "ok",
+    "timesteps": 100000,
+    "model": "Z:\\kaggle\\pokemon\\agent\\models\\rl_policy.zip",
+    "device": "cuda",
+    "deck": "Z:\\kaggle\\pokemon\\report\\rl_deck_campaign\\best_deck.csv",
+    "deck_slug": "best-deck",
+    "opponents": "benchmark",
+    "n_envs": 6,
+    "n_opponents": 9,
+    "holdout": [
+      "a2_kyogre"
+    ],
+    "eval_log": "Z:\\kaggle\\pokemon\\report\\rl_train\\eval_best-deck.json"
+  },
+  "promoted": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_v1.npz",
+  "gate_passed": true,
+  "gate_report": "Z:\\kaggle\\pokemon\\report\\track_b_gates\\track_b_learned_rl_deck_gate.md",
+  "status": "ok",
+  "finished": "2026-06-19T19:54:32.568381+00:00"
+}

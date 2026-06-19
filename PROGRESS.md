@@ -6,6 +6,24 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 29 — Track B GATE PASSED on fixed reward; package built, NOT submitted)
+- **Ran full 100k pipeline (fixed reward + Kyogre holdout) → train→distill→gate→package.**
+- **Gate PASSED:** Learned **198/240 = 82.5%** vs pool, Search 202/240 = 84.2%,
+  SPRT **accept_b**. Reward fix took Learned from run-26's 57/240 (23.8%) to 82.5%.
+- **Held-out generalization:** Kyogre (never trained on) ~50–60% across training,
+  55% @100k — vs the heuristic's 37%. Train WR plateaued ~70–80%.
+- **Package:** `dist/candidates/track_b_learned_rl_deck.tar.gz` (5.4 MiB), dry-run
+  import OK (returns 60 card IDs). **No Kaggle upload** (per rules; needs user OK).
+- **Promoted:** `distilled_rl_deck_v1.npz` → `distilled_v1.npz`.
+- **Real-deck prep (parallel, in progress):** card data confirmed in
+  `data/EN_Card_Data.csv` (2102 cards) — Dragapult ex=121, Mega Lucario ex=678,
+  Mega Abomasnow ex=723, Iono=supporter. Need full 60-card lists for the 4 real
+  decks (best source: episodes dataset or official starter decks).
+- **NEXT (user decision):** (1) upload `track_b_learned_rl_deck.tar.gz` as a ladder
+  probe when a Simulation slot frees (needs explicit OK), and/or (2) finish the 4
+  real decks → re-train/gate vs real meta. Kyogre heuristic (633μ) stays Slot-2
+  fallback until RL-deck Learned proves out on ladder μ.
+
 ### 2026-06-19 (run 28 — reward dialed in + validated; eval/holdout instrumentation; real assets found)
 - **Fixed the reward (2 bugs), verified it works.** `cabt_env.py` shaping was
   (a) asymmetric — only credited our own move, never the opponent's between-turn

@@ -39,3 +39,12 @@ the engine's true terminal `result` flips it to 18%. (Caught in code review.)
 ## Next action
 Decide: (a) fix reward + retrain (research path), or (b) ship `best_deck.csv`
 with the Search pilot (Track A), which already clears 85%.
+
+## RESOLUTION (run 29) — reward fixed, gate PASSED
+Took path (a). Fixed two reward bugs in `cabt_env.py` (asymmetric our-move-only
+shaping + opponent-perspective terminal Φ that rewarded losing). Same bad policy's
+mean reward went +9.3 → −2.06. Retrained 100k with Kyogre held out:
+- **Learned 198/240 = 82.5% vs pool** (was 23.8%), Search 202/240, SPRT accept_b → PASS.
+- Held-out Kyogre ~55% @100k (heuristic loses this 37%).
+The per-option distill was never the bottleneck; the teacher was. Track B Learned
+is now viable for this deck. Package built (not submitted).

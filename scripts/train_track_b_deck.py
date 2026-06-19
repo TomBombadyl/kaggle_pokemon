@@ -44,6 +44,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timesteps", type=int, default=100_000)
     parser.add_argument("--n-envs", type=int, default=None)
     parser.add_argument("--opponents", choices=("benchmark", "pool"), default="benchmark")
+    parser.add_argument(
+        "--holdout",
+        default="",
+        help="Comma-separated opponent names excluded from policy training as "
+             "held-out generalization probes (e.g. 'a2_kyogre'). Passed to train_rl.",
+    )
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--distill-episodes", type=int, default=100)
     parser.add_argument("--distill-epochs", type=int, default=30)
@@ -87,6 +93,8 @@ def main(argv: list[str] | None = None) -> int:
                 train_cmd.append("--resume")
             if args.n_envs is not None:
                 train_cmd.extend(["--n-envs", str(args.n_envs)])
+            if args.holdout:
+                train_cmd.extend(["--holdout", args.holdout])
             _run(train_cmd, "RL train")
             ckpt = json.loads((ROOT / "report" / "rl_train" / "checkpoint.json").read_text(encoding="utf-8"))
             summary["train"] = ckpt
