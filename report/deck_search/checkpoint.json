@@ -1,0 +1,16 @@
+{
+  "best_score": 0.9583333333333334,
+  "best_path": "Z:\\kaggle\\pokemon\\report\\deck_search\\best_deck.csv",
+  "results": [
+    {
+      "delta": 0,
+      "score": 0.8333333333333334,
+      "path": "Z:\\kaggle\\pokemon\\agent_decks\\search_variants\\energy_delta_+0.csv"
+    },
+    {
+      "delta": 2,
+      "score": 0.9583333333333334,
+      "path": "Z:\\kaggle\\pokemon\\agent_decks\\search_variants\\energy_delta_+2.csv"
+    }
+  ]
+}

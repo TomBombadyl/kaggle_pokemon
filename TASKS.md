@@ -84,15 +84,23 @@ under any task. Do not skip ahead unless a task is blocked (mark `[blocked]` + r
     metadata scoring, KO-aware attack choice, powered-attacker promotion, healing
     target scoring, and opponent KO/damage target scoring. Verified on the
     requested 20-game matrix; keep testing before packaging as a submission.
-  - [x] 2026-06-19: Prepared five local dry-run Simulation candidate archives in
-    `dist/candidates/` and documented them in
-    `report/submission_candidates_2026-06-19.md`. Current best A1 package is
-    `a1_current_963.tar.gz`, with 96.3% over 600 local agent-perspective games vs
-    legal random. Actual Kaggle upload remains blocked pending explicit user
-    confirmation and a browser-visible official rules check.
-- [ ] **T16. Research-backed search/RL prototype.** Start with narrow cabt
-  `search_*` tactical checks and offline behavior-cloning traces before PPO or
-  heavier self-play RL.
+  - [x] 2026-06-19: Rebuilt all five `dist/candidates/*.tar.gz` archives; ran
+    1000-game packaged validation for A1/A2/A4 vs default Abomasnow deck (0
+    draws, 0 unfinished). Audit + Wilson CI in
+    `report/candidate_package_audit.md`. Submit order: A2 → A4 → A1 pending
+    explicit user upload confirmation.
+- [ ] **T16. Research-backed search/RL prototype.** Phase 0–3 foundation implemented
+  2026-06-19 (run 13): validate_deck + pool, arena/SPRT, OptionScorer refactor,
+  search/BC/RL pipelines, nightly orchestrator. Remaining: SPRT-passing gates and
+  ladder-confirmed probes.
+  - [x] 2026-06-19: `scripts/validate_deck.py` + 5 pool decks
+  - [x] 2026-06-19: `scripts/arena.py`, `scripts/stats_utils.py`, eval_matrix deck agents
+  - [x] 2026-06-19: `scripts/track_ladder.py`, pluggable `OptionScorer` in agent.py
+  - [x] 2026-06-19: Track A — evalfn, search_policy, deck_search, gate_track_a
+  - [x] 2026-06-19: Track B — features, collect_traces, train_bc, learned_policy, gate_track_b
+  - [x] 2026-06-19: RL — `rl/cabt_env.py`, `rl/league.py`, `rl/train_rl.py`, `scripts/distill_policy.py`
+  - [x] 2026-06-19: `scripts/nightly.py`, `report/finals_strategy.md`, `report/ladder_history.csv`
+  - [ ] Run SPRT gates with sufficient games (40+); submit probes after user approval
 - [ ] **T17. Final Strategy report polish.** Turn
   `report/strategy_report_draft.md` into the final Strategy submission after the
   next measured agent/deck pass and after official report requirements are

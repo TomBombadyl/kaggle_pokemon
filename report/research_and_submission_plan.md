@@ -7,10 +7,9 @@ Date: 2026-06-19
 Current kept agent: deterministic rule-based Water Mega Abomasnow pilot with
 A1 attack/targeting, safer Basic benching, and first-player preference.
 
-Current local best: **96.3% over 600 agent-perspective games** against legal
-random, mirror deck, sides swapped
-(`report/eval/matrix_300_current_pref_first.md`). This is a sanity benchmark,
-not a ladder claim.
+Current local best (packaged, 1000 games vs default Abomasnow random deck):
+A4 **965/1000 = 96.50%**, A2 **963/1000 = 96.30%**, A1 **952/1000 = 95.20%**.
+Head-to-head: A2 beats A1/A4. See `report/candidate_package_audit.md`.
 
 Current package: `dist/submission.tar.gz`, dry-run validated locally. Five local
 candidate archives also exist under `dist/candidates/`; see
@@ -151,13 +150,10 @@ Each package should record:
 
 ## Immediate Next Work
 
-1. Re-open the official Kaggle Simulation and Strategy pages in a browser before
-   upload; text fetches can return JavaScript shells.
-2. If the user confirms using Simulation slots, submit A1 first and record ladder
-   submission ID/score in `report/submission_candidates_2026-06-19.md`.
-3. Use remaining daily slots deliberately: A0 for baseline, A4 for robustness,
-   A2/A3 only if diversity is worth their weaker local evidence.
-4. Continue reducing `no_active` losses; the best A1 300-game telemetry still has
-   22 `no_active` losses.
-5. Start RL/search only after candidate ladder evidence or if local heuristic
-   improvements plateau.
+1. Re-open the official Kaggle Simulation pages in a browser before upload.
+2. If the user confirms, submit **A2 → A4 → A1** and record ladder IDs/scores.
+3. **T16 deck search (no RL yet):** grid/random search over `agent_decks/` variants;
+   score each with `verify_archive.py --games 300`. Only explore RL or cabt
+   `search_*` after deck grid search plateaus.
+4. Continue reducing `no_active` losses in telemetry.
+5. T17 Strategy report polish after next measured agent/deck pass.

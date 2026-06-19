@@ -5,6 +5,9 @@ numpy>=1.26
 pandas>=2.2
 tqdm>=4.66
 pyyaml>=6.0
-# Ladder/eval harness — installs only on Python >= 3.11 (see PROGRESS.md):
-#   kaggle-environments==1.30.1
+# Training-only (install on dev machine with CUDA as needed; NOT in submission):
+# torch>=2.2
+gymnasium>=0.29
+stable-baselines3>=2.3
+sb3-contrib>=2.3
 # The `cabt` env + `cg/` engine ship from the Kaggle competition page, not PyPI.

@@ -6,6 +6,7 @@ kaggle.json
 # Data / large assets (ignore downloads, keep our reference docs)
 data/*
 !data/*.md
+data/traces/
 *.zip
 *.csv.gz
 
@@ -18,4 +19,5 @@ venv/
 # Scratch
 dist/
 *.log
+report/agent_logs/*.json
 .DS_Store

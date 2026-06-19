@@ -33,6 +33,20 @@ _legal_fallback provides a safe default for any unhandled selection.
 
 Determinism: a seeded RNG keeps nightly win-rate comparisons fair.
 
+ARCHITECTURE (pluggable scorers):
+    `Agent.act` owns the never-crash scaffold — the deck-selection short-circuit,
+    the try/except, and `_legal_fallback`. The per-decision *brain* is a pluggable
+    `OptionScorer`:
+
+        class OptionScorer:
+            def choose(self, obs_dict, select, current, options) -> list[int]: ...
+
+    The default brain is `HeuristicScorer` (the rule-based policy below). Later
+    phases inject alternate scorers (e.g. `SearchScorer`, `LearnedScorer`) via
+    `Agent(scorer=...)`; all share the same legality + fallback scaffold, so any
+    brain still degrades to a legal move. Injecting a scorer changes *which* legal
+    move is chosen, never the never-crash contract.
+
 NOTE: full validation needs the official cabt engine + a downloaded deck (Kaggle
 token required). Until then, correctness is checked offline against synthetic
 observations in scripts/smoke_test.py.
@@ -165,12 +179,38 @@ def _card_data(card_id):
     return _CARD_DATA.get(card_id)
 
 
-class Agent:
-    """Rule-based PTCG agent over the cabt observation interface.
+class OptionScorer:
+    """Pluggable per-decision brain.
 
-    Baseline: a legal, deterministic policy that develops board state before
-    attacking. Every branch ultimately defers to _legal_fallback, so the agent
-    never crashes.
+    Given a select phase (already past the deck-selection short-circuit and
+    inside `Agent.act`'s try/except), return the chosen 0-based option indices.
+
+    Contract:
+        choose(obs_dict, select, current, options) -> list[int]
+            obs_dict : the full observation (logs/current/select).
+            select   : obs_dict["select"] (never None here).
+            current  : obs_dict["current"] or {} (defensive default).
+            options  : select["option"] or [] (the legal choices).
+        The return must be distinct, in-range indices within
+        [select.minCount, select.maxCount]. Raising is allowed: `Agent.act`
+        catches it and substitutes a legal fallback, so a buggy brain never
+        breaks the never-crash contract.
+
+    Subclasses: `HeuristicScorer` (default). Later phases add `SearchScorer`
+    and `LearnedScorer` implementing this same interface.
+    """
+
+    def choose(self, obs_dict, select, current, options):
+        raise NotImplementedError
+
+
+class HeuristicScorer(OptionScorer):
+    """Rule-based PTCG decision policy over the cabt observation interface.
+
+    A legal, deterministic policy that develops board state before attacking.
+    This is the default brain behind `Agent`'s never-crash scaffold; it owns
+    only scoring/selection — the deck short-circuit and `_legal_fallback` live
+    on `Agent`.
     """
 
     # T7 v1: setup first. The initial attack-first policy measured 7.5% into
@@ -180,30 +220,12 @@ class Agent:
         OPT_ATTACK, OPT_RETREAT, OPT_END,
     )
 
-    def __init__(self, seed=0, deck_path: str = _DEFAULT_DECK_PATH) -> None:
-        self._rng = random.Random(seed)
-        self._deck_path = deck_path
+    def __init__(self, rng=None) -> None:
+        # Kept for parity / future stochastic tie-breaks; current logic is
+        # deterministic and does not consume the RNG.
+        self._rng = rng if rng is not None else random.Random(0)
 
-    def __call__(self, obs_dict):
-        return self.act(obs_dict)
-
-    def act(self, obs_dict):
-        select = obs_dict.get("select")
-        # Deck-selection phase: select is None -> return 60 card IDs.
-        if select is None:
-            deck = load_deck(self._deck_path)
-            if len(deck) == DECK_SIZE:
-                return deck
-            return deck[:DECK_SIZE] if deck else []
-        try:
-            return self._choose(obs_dict)
-        except Exception:
-            return self._legal_fallback(select)
-
-    def _choose(self, obs_dict):
-        select = obs_dict.get("select")
-        current = obs_dict.get("current") or {}
-        options = select.get("option") or []
+    def choose(self, obs_dict, select, current, options):
         if not options:
             return []
         sel_type = select.get("type")
@@ -609,6 +631,41 @@ class Agent:
                 return i
         return None
 
+
+class Agent:
+    """Never-crash scaffold around a pluggable `OptionScorer`.
+
+    `Agent` owns the competition contract: the deck-selection short-circuit, the
+    try/except guard, and `_legal_fallback`. It delegates *which legal option to
+    pick* to its `scorer` (default `HeuristicScorer`). Swapping the scorer (e.g.
+    a future search or learned policy) changes decisions but never the guarantee
+    that a legal selection is always returned.
+    """
+
+    def __init__(self, seed=0, deck_path: str = _DEFAULT_DECK_PATH,
+                 scorer: "OptionScorer | None" = None) -> None:
+        self._rng = random.Random(seed)
+        self._deck_path = deck_path
+        self._scorer = scorer if scorer is not None else HeuristicScorer(self._rng)
+
+    def __call__(self, obs_dict):
+        return self.act(obs_dict)
+
+    def act(self, obs_dict):
+        select = obs_dict.get("select")
+        # Deck-selection phase: select is None -> return 60 card IDs.
+        if select is None:
+            deck = load_deck(self._deck_path)
+            if len(deck) == DECK_SIZE:
+                return deck
+            return deck[:DECK_SIZE] if deck else []
+        try:
+            current = obs_dict.get("current") or {}
+            options = select.get("option") or []
+            return self._scorer.choose(obs_dict, select, current, options)
+        except Exception:
+            return self._legal_fallback(select)
+
     def _legal_fallback(self, select):
         """Always-legal default: the first minCount (>=1 if required) indices."""
         options = select.get("option") or []
@@ -625,9 +682,13 @@ class Agent:
         return list(range(min(count, n)))
 
 
-def build_agent(seed=0, deck_path: str = _DEFAULT_DECK_PATH) -> Agent:
+def build_agent(
+    seed=0,
+    deck_path: str = _DEFAULT_DECK_PATH,
+    scorer: "OptionScorer | None" = None,
+) -> Agent:
     """Factory. The cabt harness expects a callable agent(obs_dict)->list[int]."""
-    return Agent(seed=seed, deck_path=deck_path)
+    return Agent(seed=seed, deck_path=deck_path, scorer=scorer)
 
 
 _DEFAULT_AGENT = build_agent(seed=0)

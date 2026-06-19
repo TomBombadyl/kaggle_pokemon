@@ -1,0 +1,5 @@
+{
+  "status": "ok",
+  "timesteps": 50000,
+  "model": "Z:\\kaggle\\pokemon\\agent\\models\\rl_policy.pt"
+}

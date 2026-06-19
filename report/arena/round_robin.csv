@@ -1,0 +1,7 @@
+agent_a,agent_b,games,a_wins,b_wins,draws,unfinished,a_win_rate,wilson_low,wilson_high
+pilot,alakazam_dudunsparce,4,3,1,0,0,0.75,0.30063605244263664,0.9544139373553638
+pilot,bellibolt,4,3,1,0,0,0.75,0.30063605244263664,0.9544139373553638
+pilot,crustle,4,2,2,0,0,0.5,0.15003570882017145,0.8499642911798285
+pilot,dragapult,4,4,0,0,0,1.0,0.5100999795960008,1.0
+pilot,greninja,4,4,0,0,0,1.0,0.5100999795960008,1.0
+pilot,mega_greninja,4,4,0,0,0,1.0,0.5100999795960008,1.0

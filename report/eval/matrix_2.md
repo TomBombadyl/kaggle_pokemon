@@ -2,5 +2,5 @@
 
 | A | B | A wins | B wins | Draws | Unfinished | A win % decided | Avg steps |
 |---|---|---:|---:|---:|---:|---:|---:|
-| current | random | 1 | 1 | 0 | 0 | 50.0 | 26.0 |
-| random | current | 0 | 2 | 0 | 0 | 0.0 | 21.0 |
+| current | pool_dragapult | 2 | 0 | 0 | 0 | 100.0 | 59.0 |
+| pool_dragapult | current | 0 | 2 | 0 | 0 | 0.0 | 44.5 |

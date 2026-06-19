@@ -192,6 +192,16 @@ DEFAULT_AGENTS = {
     "random": AgentSpec("random", "random", None),
 }
 
+# Meta pool decks (agent.agent pilots any deck via deck_path).
+POOL_DECK_DIR = ROOT / "agent_decks"
+for _pool_path in sorted(POOL_DECK_DIR.glob("pool_*.csv")):
+    _pool_name = _pool_path.stem  # e.g. pool_dragapult
+    DEFAULT_AGENTS[_pool_name] = AgentSpec(
+        _pool_name, "deck", "agent.agent", _pool_path,
+    )
+    # Short alias: deck:pool_dragapult style without prefix
+    DEFAULT_AGENTS[f"deck:{_pool_name.replace('pool_', '')}"] = DEFAULT_AGENTS[_pool_name]
+
 RESULT_REASONS = {
     1: "prize",
     2: "deck_out",
@@ -266,6 +276,10 @@ def module_policy(module_name: str, seed: int, deck_path: Path):
 def make_policy(spec: AgentSpec, seed: int):
     if spec.kind == "random":
         return random_policy(seed)
+    if spec.kind == "deck":
+        if spec.module is None:
+            raise ValueError(f"deck agent {spec.name} has no module")
+        return module_policy(spec.module, seed, spec.deck_path)
     if spec.module is None:
         raise ValueError(f"module agent {spec.name} has no module")
     return module_policy(spec.module, seed, spec.deck_path)
@@ -367,6 +381,16 @@ def parse_agents(value: str) -> list[AgentSpec]:
     for raw in value.split(","):
         name = raw.strip()
         if not name:
+            continue
+        if name.startswith("deck:") and name not in DEFAULT_AGENTS:
+            deck_key = name.split(":", 1)[1]
+            deck_path = POOL_DECK_DIR / f"pool_{deck_key}.csv"
+            if not deck_path.exists():
+                deck_path = ROOT / deck_key
+            if not deck_path.exists():
+                raise ValueError(f"deck agent {name!r}: missing {deck_path}")
+            spec = AgentSpec(name.replace(":", "_"), "deck", "agent.agent", deck_path)
+            specs.append(spec)
             continue
         if name not in DEFAULT_AGENTS:
             known = ", ".join(sorted(DEFAULT_AGENTS))

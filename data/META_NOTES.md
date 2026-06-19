@@ -49,3 +49,47 @@ sample notebooks once data is downloaded):
 - Build the **context-dispatch scorer** before chasing a fancy deck.
 - Plan a **non-ex attacker** as anti-Crustle insurance in deck design (T8).
 - Keep everything **seeded/deterministic** so nightly win-rate deltas are real.
+
+## Agent logs (Simulation submissions)
+
+After each ladder submit, download per-episode agent stdout/stderr timing logs:
+
+```bash
+python scripts/fetch_agent_logs.py              # all COMPLETE refs
+python scripts/fetch_agent_logs.py --ref 53854707
+python scripts/track_ladder.py --fetch-logs     # ladder history + logs
+```
+
+Kaggle CLI (READ ONLY): `episodes <ref> -v` then `logs <episode_id> <agent_index>`.
+Saved under `report/agent_logs/{episode_id}-{agent_index}.json` with
+`report/agent_logs/manifest.csv` linking refs → episodes. Re-runs skip existing files.
+Only your agent index is downloadable (403 for the opponent). Log JSON is a list of
+steps; each step is `[{duration, stdout, stderr}]` (one dict per agent decision).
+
+## Kaggle Simulation ladder (verified 2026-06-19)
+
+First successful submit: A2 Kyogre ref **53854707** (failed first attempt ref
+53854588 — `__file__` bug in `main.py`, fixed in packager).
+
+- **Validation vs ladder:** On COMPLETE, the agent first runs a **validation
+  episode against itself** (pass/fail only). The public score shown immediately
+  (**~600.0 μ**) is the **starting μ after validation**, not performance vs the
+  field. Do **not** treat 600 as failure.
+- **Ladder matchmaking:** After ~40+ minutes, μ updates to real W/L vs other
+  submitted agents (A2: 600.0 → **670.3** → **672.7** as matches finish).
+- **Field scale:** top ~1350; mid-pack ~1100+. Local random-gate win % does not
+  predict ladder rank.
+- **Submission rules:** only **2 finals** tracked for standings; daily Simulation
+  submits still play ladder games. Most new entries likely start near 600 then spread.
+
+## Submission runtime — no online RL (verified 2026-06-19)
+
+Kaggle calls `agent(obs_dict)` **once per decision** under a **10-minute per-player**
+clock (`data/CABT_API.md`). There is no training API between games.
+
+- **Not forbidden** by competition letter, but **impractical**: torch/SB3 must not
+  ship in the tarball; `rl/` is local-only. Online weight updates burn the clock,
+  hurt stability/determinism, and add crash risk.
+- **Recommended path:** offline traces → BC/RL locally (`rl/`, GPU) → distill to
+  `.npz` → submit frozen `LearnedScorer` or heuristics. Bounded **search/rerank**
+  at inference (`SearchScorer`) is fine; gradient steps during matches are not.

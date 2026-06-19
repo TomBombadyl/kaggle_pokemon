@@ -9,8 +9,8 @@ Run:
 
 from __future__ import annotations
 
-import importlib.util
 import argparse
+import os
 import shutil
 import sys
 import tarfile
@@ -29,15 +29,32 @@ MAIN_PY = '''"""Kaggle cabt submission entry point."""
 
 from __future__ import annotations
 
-from pathlib import Path
+import os
 
 from {agent_module} import build_agent
 
+# Kaggle loads this module via exec() without __file__; use cwd + known paths only.
+KAGGLE_DECK = "/kaggle_simulations/agent/deck.csv"
 
-_AGENT = build_agent(seed=0, deck_path=str(Path(__file__).with_name("deck.csv")))
+
+def read_deck_csv() -> list[int]:
+    file_path = "deck.csv"
+    if not os.path.exists(file_path):
+        file_path = KAGGLE_DECK
+    with open(file_path, "r") as file:
+        csv = file.read().split("\\n")
+    deck = []
+    for i in range(60):
+        deck.append(int(csv[i]))
+    return deck
+
+
+_AGENT = build_agent(seed=0, deck_path=KAGGLE_DECK)
 
 
 def agent(obs_dict: dict) -> list[int]:
+    if obs_dict.get("select") is None:
+        return read_deck_csv()
     return _AGENT.act(obs_dict)
 '''
 
@@ -79,8 +96,8 @@ def build(
     if archive_path.exists():
         archive_path.unlink()
     with tarfile.open(archive_path, "w:gz") as tar:
-        for path in sorted(build_dir.rglob("*")):
-            tar.add(path, arcname=path.relative_to(build_dir))
+        for path in sorted(p for p in build_dir.rglob("*") if p.is_file()):
+            tar.add(path, arcname=path.relative_to(build_dir).as_posix())
     return archive_path
 
 
@@ -97,18 +114,24 @@ def dry_run_import(archive: Path) -> None:
             raise RuntimeError(f"archive missing required files: {sorted(missing)}")
 
         sys.path.insert(0, str(tmp_path))
+        old_cwd = os.getcwd()
         try:
-            spec = importlib.util.spec_from_file_location("submission_main", tmp_path / "main.py")
-            if spec is None or spec.loader is None:
-                raise RuntimeError("could not load main.py from archive")
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            deck_out = module.agent({"logs": [], "current": None, "select": None})
+            os.chdir(tmp_path)
+            # Match Kaggle: exec main.py without __file__ in the module namespace.
+            main_src = (tmp_path / "main.py").read_text(encoding="utf-8")
+            env: dict = {"__builtins__": __builtins__}
+            exec(compile(main_src, "main.py", "exec"), env)
+            deck_out = env["agent"]({"logs": [], "current": None, "select": None})
         finally:
+            os.chdir(old_cwd)
             sys.path.remove(str(tmp_path))
 
         if not isinstance(deck_out, list) or len(deck_out) != 60:
             raise RuntimeError(f"deck-selection smoke failed: got {len(deck_out) if isinstance(deck_out, list) else type(deck_out)}")
+
+        names = tarfile.open(archive, "r:gz").getnames()
+        if len(names) != len(set(names)):
+            raise RuntimeError(f"archive has duplicate tar entries: {len(names) - len(set(names))}")
 
 
 def _resolve_path(value: str | None) -> Path | None:

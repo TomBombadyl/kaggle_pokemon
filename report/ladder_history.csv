@@ -1,0 +1,4 @@
+recorded_at,ref,fileName,date,description,status,publicScore,privateScore
+2026-06-19T00:00:00+00:00,53854707,a2_kyogre.tar.gz,2026-06-19,A2 Kyogre probe,COMPLETE,600.0,600.0
+2026-06-19T00:00:00+00:00,53854588,a2_kyogre.tar.gz,2026-06-19,A2 Kyogre __file__ bug,ERROR,,
+2026-06-19T17:30:00+00:00,53854707,a2_kyogre.tar.gz,2026-06-19,A2 Kyogre — fix main.py __file__ for Kaggle exec,COMPLETE,672.7,

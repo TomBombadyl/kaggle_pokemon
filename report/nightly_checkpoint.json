@@ -1,0 +1,143 @@
+{
+  "next_index": 16,
+  "completed": [
+    "p0_validate",
+    "p0_smoke",
+    "p0_arena",
+    "p0_ladder",
+    "a_deck_search",
+    "a_gate",
+    "b_traces",
+    "b_bc",
+    "b_bc_gate",
+    "rl_env_smoke",
+    "rl_train",
+    "rl_league",
+    "rl_distill",
+    "package_probe",
+    "eval_matrix_pool",
+    "finals_log"
+  ],
+  "last_run": "2026-06-19T16:34:36.587693+00:00",
+  "logs": [
+    {
+      "step": "p0_validate",
+      "todo": "p0-decks",
+      "rc": 0,
+      "at": "2026-06-19T16:33:56.667469+00:00",
+      "snippet": "3_starmie_spread_33_energy.csv\n    engine: ok: battle_start ok\n[PASS] a4_basic_water_33_energy.csv\n    engine: ok: battle_start ok\n[PASS] pool_alakazam_dudunsparce.csv\n    engine: ok: battle_start ok\n[PASS] pool_bellibolt.csv\n    engine: ok: battle_start ok\n[PASS] pool_crustle.csv\n    engine: ok: battle_start ok\n[PASS] pool_dragapult.csv\n    engine: ok: battle_start ok\n[PASS] pool_greninja.csv\n    engine: ok: battle_start ok\n[PASS] pool_mega_greninja.csv\n    engine: ok: battle_start ok\n\nALL PASS"
+    },
+    {
+      "step": "p0_smoke",
+      "todo": "p0-refactor",
+      "rc": 0,
+      "at": "2026-06-19T16:33:56.711678+00:00",
+      "snippet": "urns 2..3 distinct in-range\n  PASS  optional setup bench fills slots\n  PASS  draw count picks max\n  PASS  optional TO_HAND takes best visible card\n  PASS  optional ATTACH_TO takes energy\n  PASS  attack select returns one index\n  PASS  MAIN PLAY benches Basic before support\n  PASS  TO_ACTIVE promotes developed attacker\n  PASS  damage counters target opponent KO\n  PASS  empty options returns [] without crashing\n  PASS  deck phase returns a list\n  PASS  malformed option handled\n\n17 passed, 0 failed"
+    },
+    {
+      "step": "p0_arena",
+      "todo": "p0-arena",
+      "rc": 0,
+      "at": "2026-06-19T16:33:57.775486+00:00",
+      "snippet": "wrote Z:\\kaggle\\pokemon\\report\\arena\\round_robin.md\npilot aggregate: 20/24 vs pool\nSPRT vs 50% baseline: continue (games=24)"
+    },
+    {
+      "step": "p0_ladder",
+      "todo": "p0-ladder",
+      "rc": 0,
+      "at": "2026-06-19T16:33:57.832919+00:00",
+      "snippet": "ladder history: 2 rows at Z:\\kaggle\\pokemon\\report\\ladder_history.csv\n  53854707 score=600.0 COMPLETE\n  53854588 score= ERROR"
+    },
+    {
+      "step": "a_deck_search",
+      "todo": "a-deck",
+      "rc": 0,
+      "at": "2026-06-19T16:34:00.238261+00:00",
+      "snippet": "best score vs pool: 0.958; wrote Z:\\kaggle\\pokemon\\report\\deck_search\\grid_results.csv"
+    },
+    {
+      "step": "a_gate",
+      "todo": "a-gate",
+      "rc": 1,
+      "at": "2026-06-19T16:34:02.606749+00:00",
+      "snippet": "wrote Z:\\kaggle\\pokemon\\report\\track_a_gate.md; gate passed=False"
+    },
+    {
+      "step": "a_gate",
+      "todo": "a-gate",
+      "rc": 0,
+      "at": "2026-06-19T16:34:23.716764+00:00",
+      "snippet": "wrote Z:\\kaggle\\pokemon\\report\\track_a_gate.md; gate passed=False"
+    },
+    {
+      "step": "b_traces",
+      "todo": "b-traces",
+      "rc": 0,
+      "at": "2026-06-19T16:34:24.110279+00:00",
+      "snippet": "wrote 2 trace shard(s) under Z:\\kaggle\\pokemon\\data\\traces"
+    },
+    {
+      "step": "b_bc",
+      "todo": "b-bc",
+      "rc": 0,
+      "at": "2026-06-19T16:34:26.539108+00:00",
+      "snippet": "exported BC weights to Z:\\kaggle\\pokemon\\agent\\models\\bc_v1.npz (204 samples)"
+    },
+    {
+      "step": "b_bc_gate",
+      "todo": "b-bc-gate",
+      "rc": 0,
+      "at": "2026-06-19T16:34:30.225607+00:00",
+      "snippet": "wrote Z:\\kaggle\\pokemon\\report\\track_b_gate.md; gate passed=True"
+    },
+    {
+      "step": "rl_env_smoke",
+      "todo": "rl-env",
+      "rc": 0,
+      "at": "2026-06-19T16:34:30.438643+00:00",
+      "snippet": "OK: CabtEnv reset obs shape=(2208,)"
+    },
+    {
+      "step": "rl_train",
+      "todo": "rl-train",
+      "rc": 0,
+      "at": "2026-06-19T16:34:34.625643+00:00",
+      "snippet": "{\n  \"status\": \"skipped\",\n  \"reason\": \"; fallback: \"\n}"
+    },
+    {
+      "step": "rl_league",
+      "todo": "rl-train",
+      "rc": 0,
+      "at": "2026-06-19T16:34:34.683649+00:00",
+      "snippet": "PFSP sample: pool_alakazam_dudunsparce (meta_proxy)"
+    },
+    {
+      "step": "rl_distill",
+      "todo": "rl-distill",
+      "rc": 0,
+      "at": "2026-06-19T16:34:35.583037+00:00",
+      "snippet": "distilled to Z:\\kaggle\\pokemon\\agent\\models\\distilled_v1.npz; latency=0.01ms gate=True"
+    },
+    {
+      "step": "package_probe",
+      "todo": "finals",
+      "rc": 0,
+      "at": "2026-06-19T16:34:36.335615+00:00",
+      "snippet": "built Z:\\kaggle\\pokemon\\dist\\candidates\\nightly_probe.tar.gz (2463.7 KiB)\ndry-run import OK; deck-selection returns 60 card IDs\nNo Kaggle submission was attempted."
+    },
+    {
+      "step": "eval_matrix_pool",
+      "todo": "p0-arena",
+      "rc": 0,
+      "at": "2026-06-19T16:34:36.530209+00:00",
+      "snippet": "eval matrix: 2 games per ordered matchup\n current vs pool_dragapult: 1/2 wins, 50.0% decided\npool_dragapult vs current : 1/2 wins, 50.0% decided\nwrote Z:\\kaggle\\pokemon\\report\\eval\\matrix_2.csv\nwrote Z:\\kaggle\\pokemon\\report\\eval\\matrix_2.md"
+    },
+    {
+      "step": "finals_log",
+      "todo": "finals",
+      "rc": 0,
+      "at": "2026-06-19T16:34:36.587693+00:00",
+      "snippet": "ladder history: 2 rows at Z:\\kaggle\\pokemon\\report\\ladder_history.csv\n  53854707 score=600.0 COMPLETE\n  53854588 score= ERROR"
+    }
+  ]
+}

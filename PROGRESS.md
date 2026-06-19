@@ -6,6 +6,221 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 15 — agent log fetch)
+- **Worked on:** Kaggle Simulation agent log download after submissions.
+- **Changed:** `scripts/fetch_agent_logs.py`, `scripts/track_ladder.py` (`--fetch-logs`),
+  `data/META_NOTES.md`.
+- **Metrics:** ref 53854707 — 15 episode logs under `report/agent_logs/` (manifest.csv).
+- **Verification:** `python scripts/fetch_agent_logs.py --ref 53854707` — 15 files;
+  re-run downloaded 0 (dedupe OK). `80702777-1.json` matches user example.
+- **Blockers:** none.
+- **NEXT:** After future submits, run `python scripts/track_ladder.py --fetch-logs`
+  (nightly not wired yet — manual post-submit step).
+
+### 2026-06-19 (run 14b — RL training + ptcg-rl-trainer subagent)
+- **Worked on:** User-approved RL pipeline; created `.cursor/agents/ptcg-rl-trainer.md`.
+- **Changed:** Installed `torch 2.6.0+cu124`; fixed `rl/cabt_env.py`, `rl/train_rl.py`;
+  restored `play_matchup`/`pool_decks` in `scripts/arena.py`.
+- **Metrics:** traces 100/4 shards; BC 3104 samples; RL **50k ok**; Track B gate
+  **102/120** vs pool (Search 58/120), **PASS**; distill bc_fallback 0.01 ms; smoke 17/17.
+- **Artifacts:** `agent/models/rl_policy.pt`, `report/rl_train/checkpoint.json`,
+  `dist/candidates/track_b_learned.tar.gz`.
+- **Blockers:** RL→numpy distill shape mismatch; no Kaggle submit.
+- **NEXT:** Fix RL weight export; `gate_track_b.py --games 40`.
+
+### 2026-06-19 (run 14 — ladder μ interpretation, verified Kaggle sync)
+- **Worked on:** Record verified Simulation ladder scoring learnings from first
+  successful A2 Kyogre submit (#53854707).
+- **Changed:** `report/ladder_history.csv` (+672.7 row), `report/submission_candidates_2026-06-19.md`
+  (ladder notes), `.cursor/SESSION.md`, `data/META_NOTES.md`, `report/finals_strategy.md`.
+- **Metrics:** A2 ref 53854707 — validation μ **600.0** (self-play gate, not field rank);
+  after ~40 min matchmaking **670.3**; API sync **672.7**. Failed submit #53854588
+  (__file__ bug). Top ladder ~1350; mid ~1100+.
+- **Verification:** `python scripts/track_ladder.py` — 2 rows parsed, 0 appended
+  (dedupe by ref+status; score change logged manually). Kaggle CLI publicScore=672.7.
+- **Blockers:** none.
+- **NEXT:** Continue SPRT gates / ladder probes; do not treat 600 μ as failure on upload.
+
+### 2026-06-19 (run 13 — massive-jump plan, all 16 todos implemented)
+- **Worked on:** Full massive-jump plan (Phase 0–5): meta pool, arena/SPRT, OptionScorer
+  refactor, Track A search, Track B BC, RL env/league/distill, nightly orchestrator.
+- **Changed:** Added/finished `scripts/validate_deck.py`, `arena.py`, `track_ladder.py`,
+  `deck_search.py`, `collect_traces.py`, `train_bc.py`, `gate_track_a.py`,
+  `gate_track_b.py`, `distill_policy.py`, `nightly.py`, `stats_utils.py`;
+  `agent/evalfn.py`, `search_policy.py`, `features.py`, `learned_policy.py`;
+  `rl/cabt_env.py`, `rl/league.py`, `rl/train_rl.py`; five `agent_decks/pool_*.csv`
+  meta decks; `report/ladder_history.csv`, `report/nightly_checkpoint.json`,
+  `report/finals_strategy.md`. Fixed `arena.py` scorer routing + init bug;
+  `deck_search.py` imports for new validator API.
+- **Metrics:** smoke **17/17**; all 11 `agent_decks/*.csv` PASS validate_deck +
+  battle_start; arena pilot **8/10** vs pool (2 games/matchup smoke); deck_search
+  best **0.917** vs pool (2 games/opp); current **2/2** vs pool_dragapult (2-game
+  matrix). Track A/B SPRT gates **not passed** at smoke counts (expected).
+- **Artifacts:** `agent/models/bc_v1.npz`, `distilled_v1.npz`, `rl_policy.pt`;
+  `dist/candidates/nightly_probe.tar.gz`; traces in `data/traces/`.
+- **Verification:** `python scripts/smoke_test.py` 17/17; `validate_deck.py` ALL PASS;
+  `nightly.py --run-all` 16/16 steps; `package_submission.py --name nightly_probe` dry-run OK;
+  `python -m rl.cabt_env` OK (after gymnasium install).
+- **Blockers:** no Kaggle submit (user rule). SPRT gates need more games before ladder probes.
+- **NEXT:** `python scripts/gate_track_a.py --games 40` then user-approved A4/A1 uploads;
+  scale `collect_traces.py` + `train_bc.py`; re-run arena with `--games 20`.
+
+### 2026-06-19 (run 13+ - nightly p0_validate)
+- **Worked on:** massive-jump plan todo `p0-decks`
+- **Changed:** nightly step `p0_validate` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_smoke)
+- **Worked on:** massive-jump plan todo `p0-refactor`
+- **Changed:** nightly step `p0_smoke` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_arena)
+- **Worked on:** massive-jump plan todo `p0-arena`
+- **Changed:** nightly step `p0_arena` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_ladder)
+- **Worked on:** massive-jump plan todo `p0-ladder`
+- **Changed:** nightly step `p0_ladder` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly a_deck_search)
+- **Worked on:** massive-jump plan todo `a-deck`
+- **Changed:** nightly step `a_deck_search` exit=1
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** Traceback (most recent call last):
+  File "Z:\kaggle\pokemon\scripts\deck_search.py", line 17, in <module>
+    from scripts.validate_deck import load_card_db, validate_deck_ids  # noqa: E402
+    ^^^^^
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_validate)
+- **Worked on:** massive-jump plan todo `p0-decks`
+- **Changed:** nightly step `p0_validate` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_smoke)
+- **Worked on:** massive-jump plan todo `p0-refactor`
+- **Changed:** nightly step `p0_smoke` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_arena)
+- **Worked on:** massive-jump plan todo `p0-arena`
+- **Changed:** nightly step `p0_arena` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly p0_ladder)
+- **Worked on:** massive-jump plan todo `p0-ladder`
+- **Changed:** nightly step `p0_ladder` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly a_deck_search)
+- **Worked on:** massive-jump plan todo `a-deck`
+- **Changed:** nightly step `a_deck_search` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly a_gate)
+- **Worked on:** massive-jump plan todo `a-gate`
+- **Changed:** nightly step `a_gate` exit=1
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** wrote Z:\kaggle\pokemon\report\track_a_gate.md; gate passed=False
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly a_gate)
+- **Worked on:** massive-jump plan todo `a-gate`
+- **Changed:** nightly step `a_gate` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly b_traces)
+- **Worked on:** massive-jump plan todo `b-traces`
+- **Changed:** nightly step `b_traces` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly b_bc)
+- **Worked on:** massive-jump plan todo `b-bc`
+- **Changed:** nightly step `b_bc` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly b_bc_gate)
+- **Worked on:** massive-jump plan todo `b-bc-gate`
+- **Changed:** nightly step `b_bc_gate` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly rl_env_smoke)
+- **Worked on:** massive-jump plan todo `rl-env`
+- **Changed:** nightly step `rl_env_smoke` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly rl_train)
+- **Worked on:** massive-jump plan todo `rl-train`
+- **Changed:** nightly step `rl_train` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly rl_league)
+- **Worked on:** massive-jump plan todo `rl-train`
+- **Changed:** nightly step `rl_league` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly rl_distill)
+- **Worked on:** massive-jump plan todo `rl-distill`
+- **Changed:** nightly step `rl_distill` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly package_probe)
+- **Worked on:** massive-jump plan todo `finals`
+- **Changed:** nightly step `package_probe` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly eval_matrix_pool)
+- **Worked on:** massive-jump plan todo `p0-arena`
+- **Changed:** nightly step `eval_matrix_pool` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
+
+### 2026-06-19 (run 13+ - nightly finals_log)
+- **Worked on:** massive-jump plan todo `finals`
+- **Changed:** nightly step `finals_log` exit=0
+- **Metrics:** see report/arena, report/track_*_gate.md
+- **Blockers:** none
+- **NEXT:** run `python scripts/nightly.py` for next step
 ## Template (copy for each run)
 
 ```
@@ -18,6 +233,69 @@ step** so the following run can resume instantly.
 ```
 
 ---
+
+### 2026-06-19 (run 13 - massive jump plan Phase 0–5 foundation)
+- **Worked on:** Full approved massive-jump plan (16 todos): Phase 0 foundation,
+  Track A search/deck/gate, Track B features/traces/BC/gate, RL env/train/distill,
+  nightly orchestrator, finals cadence doc.
+- **Changed:**
+  - `scripts/validate_deck.py` + 5 meta pool decks in `agent_decks/pool_*.csv`
+  - `scripts/arena.py` (multiprocess round-robin, Wilson CI, Elo, SPRT helper via
+    `scripts/stats_utils.py`); extended `scripts/eval_matrix.py` with `deck:` pool agents
+  - `scripts/track_ladder.py` → `report/ladder_history.csv`
+  - `agent/agent.py` pluggable `OptionScorer` / `HeuristicScorer`; `build_agent(scorer=...)`
+  - Track A: `agent/evalfn.py`, `agent/search_policy.py`, `scripts/deck_search.py`,
+    `scripts/gate_track_a.py` → `report/track_a_gate.md`
+  - Track B: `agent/features.py`, `scripts/collect_traces.py`, `scripts/train_bc.py`,
+    `agent/learned_policy.py`, `agent/models/bc_v1.npz`, `scripts/gate_track_b.py`
+  - RL: `rl/cabt_env.py`, `rl/league.py`, `rl/train_ppo.py`, `scripts/distill_policy.py`
+  - Automation: `scripts/nightly.py`; `report/finals_strategy.md`; training deps commented
+    in `requirements.txt`
+- **Metrics:** smoke 17/17; all 5 pool decks PASS validate+battle_start; arena smoke
+  11/12 vs 3 pool decks; track_ladder fetched 2 Kaggle submissions (0 new rows — already logged).
+- **Blockers:** none for local gates; Kaggle submit still requires explicit user approval.
+- **NEXT:** run `scripts/gate_track_a.py` / `gate_track_b.py` with more games for SPRT;
+  wire `SearchScorer` into packaged main when gate passes; continue T15 A4/A1 uploads.
+
+### 2026-06-19 (run 12 - T15 first Kaggle Simulation upload)
+- **Worked on:** T15 first Kaggle Simulation upload. Diagnosed and fixed packaging
+  bug; resubmitted A2 Kyogre.
+- **Changed:** `scripts/package_submission.py` — `main.py` no longer uses `__file__`
+  (Kaggle exec omits it); deck phase uses sample `read_deck_csv()` pattern; tar
+  packaging adds files only (removed duplicate entries); dry-run exec simulates
+  Kaggle loader. Rebuilt `dist/candidates/a2_kyogre.tar.gz`. Updated
+  `report/submission_candidates_2026-06-19.md` with submission log.
+- **Submissions:**
+  - #53854588 ERROR — `NameError: __file__ not defined` in packaged `main.py`
+  - #53854707 **COMPLETE — score 600.0** (A2 Kyogre, expected μ start)
+- **Metrics:** ladder score 600.0; local gate unchanged (963/1000).
+- **Blockers:** none for A2 upload.
+- **NEXT (T15):** user confirm, submit A4 then A1; rebuild remaining candidates
+  with fixed packager before upload.
+
+### 2026-06-19 (run 11 - T15 1000-game validation + audit)
+- **Worked on:** T15 pre-submit validation. Rebuilt all five candidate archives,
+  ran 1000-game packaged validation for A1/A2/A4, and generated Wilson CI audit.
+  No Kaggle submission attempted (no explicit user upload confirmation).
+- **Changed:** fetched sim engine via `scripts/fetch_sim_engine.py` (was missing
+  locally); rebuilt `dist/candidates/*.tar.gz`; ran
+  `scripts/audit_candidates.py` → `report/candidate_package_audit.md`; updated
+  `report/submission_candidates_2026-06-19.md` with 1000-game table and revised
+  submit order.
+- **Metrics (packaged vs default Abomasnow deck, 1000 games, side-swapped):**
+  A2 Kyogre **963/1000 = 96.30%** (Wilson 94.94–97.30); A4 big-basic
+  **965/1000 = 96.50%** (Wilson 95.17–97.47); A1 current
+  **952/1000 = 95.20%** (Wilson 93.69–96.36). All runs: 0 draws, 0 unfinished.
+  Head-to-head matrix unchanged: A2 beats A1/A4 at 55/100 and 58/100.
+- **Official check:** web search reconfirmed five submissions/day for Simulation
+  category; direct Kaggle page fetch timed out — browser recheck still recommended
+  immediately before upload.
+- **Verification:** `python scripts/smoke_test.py` = 17/17 pass; all five
+  candidate packages dry-run imported; audit script wrote clean archive table
+  (no missing required files, no forbidden patterns).
+- **NEXT (T15):** if user confirms upload, browser-recheck Kaggle rules, submit
+  A2 → A4 → A1, record submission IDs/scores. Otherwise start T16 deck grid
+  search over `agent_decks/` variants using `verify_archive.py`.
 
 ### 2026-06-19 (run 10 - packaged head-to-head validation)
 - **Worked on:** strengthened pre-submit validation by testing packaged candidates
