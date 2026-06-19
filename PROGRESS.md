@@ -6,6 +6,51 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 26 — Phase 2 setup: push to GitHub for Kaggle training)
+- **Worked on:** Prepared GPU machine + repo for Kaggle free compute training.
+- **Verified:** Local CUDA (RTX 4070 Ti SUPER, torch 2.11.0+cu128, CUDA available).
+- **Installed:** Training stack (torch, gymnasium, stable-baselines3, sb3-contrib).
+- **Pushed to GitHub:** `best_deck.csv`, `report/rl_deck_validation.md`, supporting files.
+- **NEXT:** Launch Kaggle notebook with `train_track_b_deck.py` pipeline:
+  ```
+  git clone https://github.com/TomBombadyl/kaggle_pokemon.git
+  cd kaggle_pokemon
+  pip install -q gymnasium>=0.29 stable-baselines3>=2.3 sb3-contrib>=2.3
+  python scripts/train_track_b_deck.py --deck report/rl_deck_campaign/best_deck.csv \
+    --slug rl_deck --timesteps 100000 --n-envs 6 --opponents benchmark \
+    --gate-games 40 --package --promote
+  # Download distilled model + metrics from /kaggle/working/
+  ```
+
+---
+
+### 2026-06-19 (run 25 — RL deck validated in-sandbox; Phase 2 training blocked by env)
+- **Executed in sandbox (real):** RL deck win-rate gate. `best_deck.csv` legality PASS
+  (`validate_deck.py`, engine `battle_start`). Win-rate vs 6 `pool_*` decks, rule-based pilot
+  both sides, 40g/opp seats-swapped: **209/240 = 87.1%** (95% CI [82.2, 90.7]), 0 draws/unfinished.
+  Confirms GA fitness 0.898 holds at scale. **Gate ≥60% → PASS.** Detail in
+  `report/rl_deck_validation.md`.
+- **Caveat:** pool is in-distribution (GA trained vs this exact suite). Vs high-performers only 54.2%
+  and **loses to Kyogre 11–19 = 36.7%**. Ladder μ is truth.
+- **Phase 2 training attempted in sandbox — BLOCKED (environment):**
+  (1) No GPU here (`/dev/nvidia*` absent, no `nvidia-smi`) → CUDA impossible.
+  (2) Commands hard-capped ~45s with no process persistence between calls (verified) → the 532 MB
+  torch wheel can't finish installing in one call, and a multi-minute MaskablePPO 100k run can't be
+  kept alive. Validated experimentally; not a config issue.
+- **Files changed:** `report/rl_deck_validation.md` (new), this entry.
+- **NEXT (must run on user's CUDA machine):**
+  `python scripts/train_track_b_deck.py --deck report/rl_deck_campaign/best_deck.csv --slug rl_deck
+  --timesteps 100000 --n-envs 6 --opponents benchmark --gate-games 40 --package --promote`
+  Then SPRT-gate, and upload only with explicit approval. Also: upload Kyogre Learned tarball when a
+  daily slot frees (cmd in `report/submission_pending_kyogre.md`). Keep Kyogre heuristic (633 μ) as
+  Slot-2 fallback if RL-deck Learned doesn't beat it on ladder.
+
+### 2026-06-19 (run 24 — deck RL resume crash fixed)
+- **Fixed:** `NameError: Counter` on deck GA resume; batched benchmark eval (1 process
+  pool per deck, ~0.4s/deck).
+- **Verified:** `--resume` reaches gen 4+ with progress lines; policy skips cleanly.
+- **NEXT:** `scripts\run_overnight_deck_rl.bat` — finish deck gens 4–19 (~70 min).
+
 ### 2026-06-19 (run 23 — Track B Kyogre pipeline + submit blocked)
 - **Worked on:** Full Track B per-deck pipeline (train → distill → gate → package); Kaggle upload attempted.
 - **Command:** `scripts/train_track_b_deck.py --deck a2_kyogre --timesteps 100k --n-envs 6 --gate-games 40 --package --promote`
