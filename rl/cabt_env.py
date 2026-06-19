@@ -66,6 +66,7 @@ if gym is not None:
             seed: int = 0,
             max_steps: int = 6000,
             shaped_reward: bool = True,
+            shaping_coef: float = 0.01,
         ) -> None:
             super().__init__()
             self._deck = _load_deck(Path(deck_path or ROOT / "agent" / "deck.csv"))
@@ -75,6 +76,9 @@ if gym is not None:
             self._seed = seed
             self._max_steps = max_steps
             self._shaped = shaped_reward
+            self._shaping_coef = shaping_coef
+            # Potential-based shaping baseline: board_value at our last decision.
+            self._phi = 0.0
             self._agent = build_agent(seed=seed)
             self._opp = build_agent(seed=seed + 9000)
             self._rng = __import__("random").Random(seed + 777)
@@ -104,6 +108,7 @@ if gym is not None:
             self._obs = obs
             self._lib = lib
             self._battle_ptr = Battle.battle_ptr
+            self._phi = board_value(obs) if self._shaped else 0.0
             flat, mask = flatten_obs(obs)
             info = {"action_mask": mask.astype(bool)}
             self._last_info = info
@@ -130,11 +135,6 @@ if gym is not None:
                 cur = self._obs.get("current")
                 if cur is not None and cur.get("result", -1) != -1:
                     terminated = True
-                    result = cur["result"]
-                    if result == 0:
-                        reward += 1.0
-                    elif result == 1:
-                        reward -= 1.0
                     break
                 if self._obs.get("select") is None:
                     truncated = True
@@ -155,12 +155,20 @@ if gym is not None:
             if not terminated and not truncated and self._obs.get("select") is not None:
                 player = self._select_player()
                 if player == 0:
+                    # Potential-based shaping: credit the net board change since
+                    # our LAST decision (captures the opponent's full response
+                    # between our turns, not just our own move). This telescopes
+                    # to phi(terminal) - phi(start), so it is policy-invariant and
+                    # cannot reward a losing game (unlike the old our-move-only delta).
+                    if self._shaped:
+                        phi_now = board_value(self._obs)
+                        reward += self._shaping_coef * (phi_now - self._phi)
+                        self._phi = phi_now
                     select = self._obs.get("select") or {}
                     opts = select.get("option") or []
                     n = len(opts)
                     if n:
                         choice = min(int(action) % MAX_OPTIONS, n - 1)
-                        prev_val = board_value(self._obs) if self._shaped else 0.0
                         try:
                             self._obs = game.battle_select([choice])
                         except (IndexError, ValueError):
@@ -168,8 +176,6 @@ if gym is not None:
                                 self._obs = game.battle_select(self._agent(self._obs))
                             except (IndexError, ValueError):
                                 truncated = True
-                        if self._shaped:
-                            reward += 0.01 * (board_value(self._obs) - prev_val)
 
             self._step_count += 1
             cur = self._obs.get("current")
@@ -177,6 +183,20 @@ if gym is not None:
                 terminated = True
             if self._step_count >= self._max_steps:
                 truncated = True
+
+            # Terminal reward: win/loss (±1) only. We do NOT add a terminal
+            # potential delta here: the game usually ends during the opponent's
+            # turn, where the obs perspective (current.yourIndex) is the OPPONENT's,
+            # so board_value(terminal) would be sign-flipped and reward losses.
+            # The per-decision shaping above (always evaluated at yourIndex==0) is
+            # correctly signed and already provides the dense telescoped signal.
+            if terminated:
+                cur = self._obs.get("current") or {}
+                result = cur.get("result", -1)
+                if result == 0:
+                    reward += 1.0
+                elif result == 1:
+                    reward -= 1.0
 
             flat, mask = flatten_obs(self._obs)
             info["action_mask"] = mask.astype(bool)

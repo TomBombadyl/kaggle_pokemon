@@ -23,20 +23,46 @@ def _load_deck_ids(path: Path) -> list[int]:
     return [int(x) for x in path.read_text().splitlines() if x.strip()]
 
 
-def load_opponent_decks(mode: OpponentMode = "benchmark") -> list[list[int]]:
-    """Return opponent deck lists for training rollouts."""
+def load_named_opponents(mode: OpponentMode = "benchmark") -> dict[str, list[int]]:
+    """Return {name: deck} opponent map (names allow holdout filtering)."""
     if mode == "benchmark":
         from rl.benchmark import load_suite
 
-        return [d.load() for d in load_suite()]
+        return {d.name: d.load() for d in load_suite()}
     if mode == "pool":
         from scripts.arena import pool_decks
 
-        decks = list(pool_decks().values())
+        decks = dict(pool_decks())
         if not decks:
             raise FileNotFoundError("no pool_*.csv opponents found under agent_decks/")
         return decks
     raise ValueError(f"unknown opponent mode: {mode}")
+
+
+def load_opponent_decks(
+    mode: OpponentMode = "benchmark",
+    exclude: set[str] | None = None,
+) -> list[list[int]]:
+    """Return opponent deck lists for training rollouts, minus any `exclude` names."""
+    named = load_named_opponents(mode)
+    exclude = exclude or set()
+    decks = [deck for name, deck in named.items() if name not in exclude]
+    if not decks:
+        raise FileNotFoundError(f"no opponents left after excluding {exclude} from {mode}")
+    return decks
+
+
+def load_named_deck(name_or_path: str, mode: OpponentMode = "benchmark") -> list[int]:
+    """Load one opponent deck by suite name (e.g. 'a2_kyogre') or by file path."""
+    named = load_named_opponents(mode)
+    if name_or_path in named:
+        return named[name_or_path]
+    path = Path(name_or_path)
+    if not path.is_absolute():
+        path = ROOT / path
+    if path.exists():
+        return _load_deck_ids(path)
+    raise FileNotFoundError(f"holdout deck not found by name or path: {name_or_path}")
 
 
 def make_masked_cabt_env(
@@ -44,15 +70,22 @@ def make_masked_cabt_env(
     *,
     opponents: OpponentMode = "benchmark",
     seed: int = 0,
+    exclude: set[str] | None = None,
+    opp_decks: list[list[int]] | None = None,
 ):
-    """Return ActionMasker-wrapped CabtEnv for MaskablePPO."""
+    """Return ActionMasker-wrapped CabtEnv for MaskablePPO.
+
+    `exclude` drops opponents by name (held-out generalization probes);
+    `opp_decks` overrides the opponent set entirely (e.g. eval vs one deck).
+    """
     import numpy as np
     from sb3_contrib.common.wrappers import ActionMasker
 
     from rl.cabt_env import CabtEnv
 
     deck = resolve_deck_path(deck_path)
-    opp_decks = load_opponent_decks(opponents)
+    if opp_decks is None:
+        opp_decks = load_opponent_decks(opponents, exclude=exclude)
 
     def mask_fn(env):
         info = getattr(env.unwrapped, "_last_info", {})
@@ -85,11 +118,12 @@ def make_env_thunk(
     *,
     opponents: OpponentMode = "benchmark",
     seed: int = 0,
+    exclude: set[str] | None = None,
 ) -> Callable[[], object]:
     """SubprocVecEnv factory: each worker gets a distinct seed offset."""
 
     def _thunk():
-        return make_masked_cabt_env(deck_path, opponents=opponents, seed=seed)
+        return make_masked_cabt_env(deck_path, opponents=opponents, seed=seed, exclude=exclude)
 
     return _thunk
 

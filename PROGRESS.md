@@ -6,6 +6,55 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-19 (run 28 — reward dialed in + validated; eval/holdout instrumentation; real assets found)
+- **Fixed the reward (2 bugs), verified it works.** `cabt_env.py` shaping was
+  (a) asymmetric — only credited our own move, never the opponent's between-turn
+  damage — and (b) a terminal Φ term computed on the opponent's perspective
+  (`yourIndex==1` at game end) that literally rewarded losing. New shaping is
+  per-decision potential delta (our-perspective, telescoping) + ±1 terminal only.
+  Same bad policy: mean reward **+9.3 → −2.06** (now correctly penalizes losing).
+- **Validated end-to-end (40k smoke):** policy LEARNS — train WR **18%→67%**, and
+  held-out **Kyogre 27%→60%** (generalizes, not memorizing). The matchup the
+  heuristic loses (37%) the RL policy now wins held-out.
+- **Instrumentation added:** `rl/eval_callback.py` (true-terminal-result win-rate
+  during training, never reward sign) + Kyogre holdout (excluded from train AND
+  gate; consistent generalization probe). `train_rl.py` gets `--holdout/--eval-*`.
+- **Fixed teardown crash:** eval callback `close()` → `battle_finish()` on a
+  finished battle native-crashed the engine (exit 116, blocked final save). Now
+  drops refs instead; clean EXIT_CODE=0, model saves.
+- **Real competition assets located (user-supplied):** official RL+MCTS sample
+  (`data/kaggle_ref/...ipynb` — AlphaZero MCTS + Transformer using the engine's
+  `search_begin/step/end` planning API; outcome-only value, no board shaping —
+  confirms our fix direction). Episodes-index dataset: daily real-ladder episodes
+  (~20GB/day, top avg score ~1327 vs our 633μ). Real deck field: Iono, Dragapult
+  ex, Mega Abomasnow ex, Mega Lucario ex (our suite uses pool_* proxies — overfit
+  risk). See [[real-competition-decks]], [[sim-rules-differences]].
+- **Files:** `rl/cabt_env.py`, `rl/env_factory.py`, `rl/train_rl.py`,
+  `rl/eval_callback.py` (new), `scripts/diag_{teacher,distill}.py` (new),
+  `report/track_b_rl_deck_diagnosis.md` (new).
+- **NEXT (user decision):** real run config — train the full 100k+ on (a) current
+  proxy suite now that reward works, or (b) integrate the 4 real decks first to
+  avoid overfitting. Then re-distill + gate. Reward+instrumentation are locked in.
+
+### 2026-06-19 (run 27 — gate-failure root cause: reward misspecification)
+- **Worked on:** Debugged why Track B Learned gate failed (23.8% vs 85.4% Search).
+- **Diagnosis (real, measured):** the MaskablePPO **teacher itself wins only 18%
+  (9/50)** vs benchmark. The student faithfully distilled a losing teacher.
+- **Root cause:** reward shaping `0.01*board_value_delta` (`cabt_env.py:172`)
+  dominates the ±1 terminal signal. Mean episode reward **+9.3 while losing 82%** —
+  agent learned to hoard board value, not win. Reward misspecification.
+- **Process note:** first pass mis-read teacher as 83% by classifying wins via
+  reward sign; shaping makes loss returns positive. `/code-review` caught the bug;
+  reading engine terminal `result` gives the true 18%. Diagnosis flipped from
+  "distillation problem" to "training problem."
+- **Files changed:** `scripts/diag_teacher.py` (new), `scripts/diag_distill.py`
+  (new), `report/track_b_rl_deck_diagnosis.md` (new), this entry.
+- **NEXT (user decision):** EITHER (a) rebalance reward (drop shaping to ~0.001 or
+  scale terminal to ±10/30), retrain 200k+, re-run `diag_teacher` before distill;
+  OR (b) skip Track B for this deck — SearchScorer already pilots `best_deck.csv`
+  to **85.4%**; ship it as a Track A (Search) pilot. Recommend (b) for speed, (a)
+  only if a Learned agent is specifically wanted.
+
 ### 2026-06-19 (run 26 — Phase 2 RL deck training: GATE FAILED)
 - **Executed:** Full Track B pipeline on best_deck.csv (RL + distill + SPRT gate @40g).
 - **Trained:** MaskablePPO 100k steps, 6 envs, 10 benchmark opponents, CUDA.
