@@ -18,6 +18,7 @@ import json
 import random
 import sys
 import time
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -47,6 +48,8 @@ from rl.gpu_config import (  # noqa: E402
 
 BEST_DECK = CAMPAIGN_DIR / "best_deck.csv"
 POP_DIR = CAMPAIGN_DIR / "population"
+LANE_ELITES_JSON = ROOT / "report" / "deck_rl" / "lane_elites.json"
+LANE_ELITES_MD = ROOT / "report" / "deck_rl" / "lane_elites.md"
 
 SEED_DECKS = [
     ROOT / "agent_decks" / "a2_kyogre_33_energy.csv",
@@ -140,7 +143,10 @@ def train_policy(
     already_done = policy_steps_for_cycle(campaign_state, cycle) if resume else 0
     remaining = max(0, timesteps - already_done)
     if remaining == 0 and can_resume and already_done >= timesteps:
-        print(f"policy cycle {cycle + 1} already at {already_done}/{timesteps} timesteps; skipping")
+        print(
+            f"policy cycle {cycle + 1} already at {already_done}/{timesteps} timesteps; skipping",
+            flush=True,
+        )
         return {
             "status": "ok",
             "timesteps": 0,
@@ -239,6 +245,178 @@ def train_policy(
         return {"status": "error", "reason": f"{type(exc).__name__}: {exc}"}
 
 
+def _backfill_genome_lanes(pop: list, registry) -> None:
+    from rl.deck_genome import DeckGenome
+
+    for g in pop:
+        if not isinstance(g, DeckGenome):
+            continue
+        if g.lane:
+            g._with_lane_meta()
+            continue
+        lane = registry.lane_for_label(g.label)
+        if lane:
+            g.lane = lane
+            g._with_lane_meta()
+
+
+def _lane_elites_for_generation(pop, gen: int, lanes: list[str]) -> list[dict]:
+    from rl.deck_genome import DeckGenome
+
+    elites: dict[str, DeckGenome] = {}
+    for g in pop:
+        if not isinstance(g, DeckGenome) or not g.lane:
+            continue
+        if g.lane not in lanes:
+            continue
+        if g.meta.get("illegal"):
+            continue
+        prev = elites.get(g.lane)
+        if prev is None or g.fitness > prev.fitness:
+            elites[g.lane] = g
+
+    rows: list[dict] = []
+    for lane in lanes:
+        g = elites.get(lane)
+        if g is None:
+            continue
+        rows.append(
+            {
+                "gen": gen,
+                "lane": lane,
+                "label": g.label,
+                "fitness": g.fitness,
+                "composition": g.meta.get("composition", {}),
+                "profile": g.meta.get("profile", ""),
+            }
+        )
+    return rows
+
+
+def _write_lane_elites(rows: list[dict], *, generation: int) -> None:
+    LANE_ELITES_JSON.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"generation": generation, "updated_at": _now(), "lanes": rows}
+    LANE_ELITES_JSON.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+    lines = [
+        "# Lane Elite Archive",
+        "",
+        f"Updated at generation {generation} (`{_now()}`).",
+        "",
+        "| Lane | Label | Fitness | Profile | E/P/T |",
+        "|---|---|---:|---|---:|",
+    ]
+    for row in rows:
+        comp = row.get("composition") or {}
+        ept = f"{comp.get('energy', '?')}/{comp.get('pokemon', '?')}/{comp.get('trainers', '?')}"
+        lines.append(
+            f"| {row['lane']} | {row['label']} | {row['fitness']:.3f} | "
+            f"{row.get('profile', '')} | {ept} |"
+        )
+    if not rows:
+        lines.append("| (none) | — | — | — | — |")
+    lines.append("")
+    LANE_ELITES_MD.write_text("\n".join(lines), encoding="utf-8")
+
+
+def _survivor_target(population: int, num_lanes: int) -> int:
+    base = max(2, population // 2)
+    return max(base, num_lanes)
+
+
+def _select_survivors_by_lane(pop, lanes: list[str], target: int, rng: random.Random):
+    from rl.deck_genome import DeckGenome
+
+    by_lane: dict[str, list] = {lane: [] for lane in lanes}
+    for g in pop:
+        if not isinstance(g, DeckGenome) or not g.lane or g.lane not in by_lane:
+            continue
+        if g.meta.get("illegal"):
+            continue
+        by_lane[g.lane].append(g)
+
+    min_per_lane = max(1, target // len(lanes)) if lanes else 1
+    survivors: list = []
+    seen_labels: set[str] = set()
+
+    for lane in lanes:
+        candidates = sorted(by_lane[lane], key=lambda x: x.fitness, reverse=True)
+        for g in candidates[:min_per_lane]:
+            if g.label not in seen_labels:
+                survivors.append(g)
+                seen_labels.add(g.label)
+
+    if len(survivors) < target:
+        rest = sorted(
+            [g for g in pop if g.label not in seen_labels and not g.meta.get("illegal")],
+            key=lambda x: x.fitness,
+            reverse=True,
+        )
+        for g in rest:
+            if len(survivors) >= target:
+                break
+            survivors.append(g)
+            seen_labels.add(g.label)
+
+    return survivors[:target]
+
+
+def _inject_lane_seed(registry, lane: str, rng: random.Random, pool, *, fallback_survivors=None):
+    from rl.deck_genome import DeckGenome
+
+    paths = registry.lane_to_paths.get(lane, [])
+    if paths:
+        return DeckGenome.from_seed_path(rng.choice(paths), lane=lane)
+    if fallback_survivors:
+        return rng.choice(fallback_survivors).mutate(rng, pool)
+    fallback = ROOT / "agent" / "deck.csv"
+    return DeckGenome.from_seed_path(fallback, lane=lane)
+
+
+def _ensure_lane_coverage(survivors, lanes: list[str], registry, rng: random.Random, pool):
+    covered = {g.lane for g in survivors if g.lane}
+    result = list(survivors)
+    for lane in lanes:
+        if lane not in covered:
+            result.append(_inject_lane_seed(registry, lane, rng, pool, fallback_survivors=survivors or None))
+            covered.add(lane)
+    return result
+
+
+def _breed_next_generation(
+    survivors,
+    population: int,
+    lanes: list[str],
+    rng: random.Random,
+    pool,
+    registry,
+):
+    from rl.deck_genome import DeckGenome
+
+    next_pop = list(survivors)
+    while len(next_pop) < population:
+        lane = lanes[len(next_pop) % len(lanes)]
+        lane_pool = [g for g in survivors if g.lane == lane]
+        if not lane_pool:
+            next_pop.append(_inject_lane_seed(registry, lane, rng, pool, fallback_survivors=survivors))
+            continue
+        if len(lane_pool) >= 2:
+            a, b = rng.sample(lane_pool, 2)
+        else:
+            a = lane_pool[0]
+            b = a
+        next_pop.append(DeckGenome.crossover(a, b, rng).mutate(rng, pool))
+    return next_pop[:population]
+
+
+def _lane_survivor_counts(survivors, lanes: list[str]) -> dict[str, int]:
+    counts = {lane: 0 for lane in lanes}
+    for g in survivors:
+        if g.lane in counts:
+            counts[g.lane] += 1
+    return counts
+
+
 def evolve_decks(
     generations: int,
     population: int,
@@ -249,16 +427,38 @@ def evolve_decks(
     resume: bool,
     campaign_state: dict,
     cycle: int = 0,
+    *,
+    registry_path: Path | None = None,
+    lanes: list[str] | None = None,
 ) -> dict:
     """Genetic deck search with per-generation checkpoint."""
     from rl.benchmark import evaluate_deck_vs_benchmark
-    from rl.deck_balance import balance_penalty, composition_of, infer_profile, summarize_deck
+    from rl.deck_balance import (
+        MATCHUP_COLLAPSE_FLOOR,
+        balance_penalty,
+        composition_of,
+        infer_profile,
+        matchup_collapse_penalty,
+        summarize_deck,
+    )
     from rl.deck_genome import DeckGenome
+    from rl.deck_lane_registry import CANONICAL_LANES, LaneRegistry
     from scripts.validate_deck import validate_deck
 
     pool = _load_pool_for_balance()
     rng = random.Random(rng_seed)
-    seeds = [p for p in SEED_DECKS if p.exists()] or [ROOT / "agent" / "deck.csv"]
+    active_lanes = list(lanes or CANONICAL_LANES)
+    fallback_seeds = [p for p in SEED_DECKS if p.exists()] or [ROOT / "agent" / "deck.csv"]
+    registry = LaneRegistry.load(
+        registry_path or (ROOT / "report" / "deck_rl" / "candidate_registry.csv"),
+        lanes=active_lanes,
+        fallback_paths=fallback_seeds,
+    )
+    if registry.is_empty():
+        print("lane registry empty; falling back to hardcoded SEED_DECKS", flush=True)
+    else:
+        counts = {lane: len(registry.lane_to_paths.get(lane, [])) for lane in active_lanes}
+        print(f"lane registry: {sum(counts.values())} seeds {counts}", flush=True)
 
     start_gen = 0
     pop: list[DeckGenome]
@@ -267,16 +467,17 @@ def evolve_decks(
         if ga and ga.get("cycle", 0) == cycle:
             start_gen = int(ga.get("generation", 0))
             pop = [genome_from_dict(row) for row in ga.get("population", [])]
+            _backfill_genome_lanes(pop, registry)
             pop = [g.repair(rng, pool, fallback=Counter(g.counts)) for g in pop]
             if len(pop) < population:
-                pop = DeckGenome.seed_population(seeds, population, rng)
-            print(f"resuming deck GA cycle {cycle + 1} from generation {start_gen}")
+                pop = DeckGenome.seed_population_balanced(registry, population, rng, lanes=active_lanes)
+            print(f"resuming deck GA cycle {cycle + 1} from generation {start_gen}", flush=True)
         else:
-            pop = DeckGenome.seed_population(seeds, population, rng)
+            pop = DeckGenome.seed_population_balanced(registry, population, rng, lanes=active_lanes)
             if ga and ga.get("cycle", 0) != cycle:
-                print(f"deck GA checkpoint is cycle {ga.get('cycle')}; starting fresh for cycle {cycle}")
+                print(f"deck GA checkpoint is cycle {ga.get('cycle')}; starting fresh for cycle {cycle}", flush=True)
     else:
-        pop = DeckGenome.seed_population(seeds, population, rng)
+        pop = DeckGenome.seed_population_balanced(registry, population, rng, lanes=active_lanes)
 
     best_fitness = float(campaign_state.get("best_fitness", -1.0))
     best_genome: DeckGenome | None = None
@@ -284,7 +485,23 @@ def evolve_decks(
 
     POP_DIR.mkdir(parents=True, exist_ok=True)
 
+    est_eval_s = max(1, games_eval) * 10 * 0.35  # ~0.35s per game observed on Windows
+    if population < 2 * len(active_lanes):
+        print(
+            f"warning: population={population} < 2*lanes={2 * len(active_lanes)}; "
+            "lane-balanced selection may be tight",
+            flush=True,
+        )
+    print(
+        f"deck GA: gens {start_gen}..{generations - 1}, pop={population}, "
+        f"lane selection=per-lane quotas, "
+        f"collapse floor={MATCHUP_COLLAPSE_FLOOR:.2f}, "
+        f"~{est_eval_s:.0f}s/deck, ~{est_eval_s * population / 60:.1f} min/gen",
+        flush=True,
+    )
+
     for gen in range(start_gen, generations):
+        print(f"\ngen {gen} evaluating {population} decks...", flush=True)
         for i, g in enumerate(pop):
             deck_list = g.to_list(rng)
             deck_file = POP_DIR / f"gen{gen:03d}_ind{i:02d}.csv"
@@ -294,15 +511,22 @@ def evolve_decks(
                 g.fitness = 0.0
                 g.meta = {
                     "gen": gen,
+                    "lane": g.lane,
                     "illegal": deck_errors[0],
                     "composition": composition_of(g.counts, pool).as_dict(),
                     "profile": infer_profile(g.counts, pool).name,
                 }
                 print(
                     f"  gen {gen} ind {i}: fitness=0.000 ILLEGAL — {deck_errors[0]} "
-                    f"({summarize_deck(g.counts, pool)})"
+                    f"({summarize_deck(g.counts, pool)})",
+                    flush=True,
                 )
                 continue
+            print(
+                f"  gen {gen} ind {i}: simulating vs benchmark...",
+                flush=True,
+            )
+            t_eval = time.time()
             result = evaluate_deck_vs_benchmark(
                 deck_list,
                 games_per_opponent=games_eval,
@@ -313,24 +537,42 @@ def evolve_decks(
             )
             profile = infer_profile(g.counts, pool)
             comp = composition_of(g.counts, pool)
-            penalty = balance_penalty(g.counts, pool, profile)
-            g.fitness = result["fitness"] * (1.0 - 0.15 * penalty)
+            balance_pen = balance_penalty(g.counts, pool, profile)
+            collapse_pen, min_wr = matchup_collapse_penalty(result["opponents"])
+            g.fitness = (
+                result["fitness"]
+                * (1.0 - 0.15 * balance_pen)
+                * (1.0 - 0.25 * collapse_pen)
+            )
             g.meta = {
                 "gen": gen,
+                "lane": g.lane,
                 "raw_fitness": result["fitness"],
-                "balance_penalty": penalty,
+                "balance_penalty": balance_pen,
+                "matchup_collapse_penalty": collapse_pen,
+                "min_benchmark_win_rate": min_wr,
                 "composition": comp.as_dict(),
                 "profile": profile.name,
             }
             print(
                 f"  gen {gen} ind {i}: fitness={g.fitness:.3f} raw={result['fitness']:.3f} "
-                f"{summarize_deck(g.counts, pool)}"
+                f"collapse={collapse_pen:.2f} min_wr={min_wr:.2f} lane={g.lane or '?'} "
+                f"({time.time() - t_eval:.1f}s) {summarize_deck(g.counts, pool)}",
+                flush=True,
             )
 
         pop.sort(key=lambda x: x.fitness, reverse=True)
         top = pop[0]
-        history.append({"gen": gen, "best_fitness": top.fitness, "label": top.label})
-        print(f"gen {gen} best fitness={top.fitness:.3f} ({top.label})")
+        history.append({"gen": gen, "best_fitness": top.fitness, "label": top.label, "lane": top.lane})
+        print(f"gen {gen} best fitness={top.fitness:.3f} ({top.label}, lane={top.lane or '?'})", flush=True)
+
+        lane_rows = _lane_elites_for_generation(pop, gen, active_lanes)
+        for row in lane_rows:
+            print(
+                f"  lane elite {row['lane']}: fitness={row['fitness']:.3f} ({row['label']})",
+                flush=True,
+            )
+        _write_lane_elites(lane_rows, generation=gen)
 
         if top.fitness > best_fitness:
             best_fitness = top.fitness
@@ -340,12 +582,16 @@ def evolve_decks(
             campaign_state["best_fitness"] = best_fitness
             campaign_state["best_label"] = top.label
 
-        survivors = pop[: max(2, population // 2)]
-        next_pop = survivors[:]
-        while len(next_pop) < population:
-            a, b = rng.sample(survivors, 2)
-            next_pop.append(DeckGenome.crossover(a, b, rng).mutate(rng, pool))
-        pop = next_pop
+        target = _survivor_target(population, len(active_lanes))
+        survivors = _select_survivors_by_lane(pop, active_lanes, target, rng)
+        survivors = _ensure_lane_coverage(survivors, active_lanes, registry, rng, pool)
+        lane_counts = _lane_survivor_counts(survivors, active_lanes)
+        print(
+            "  lane survivors: "
+            + " ".join(f"{lane}={lane_counts[lane]}" for lane in active_lanes),
+            flush=True,
+        )
+        pop = _breed_next_generation(survivors, population, active_lanes, rng, pool, registry)
 
         campaign_state["deck_generation_done"] = gen + 1
         campaign_state["deck_ga_updated_at"] = _now()
@@ -396,7 +642,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Ignore checkpoint cycle counters (still loads policy/deck GA weights if present)",
     )
     parser.add_argument("--checkpoint-freq", type=int, default=None, help="PPO save every N steps")
+    parser.add_argument(
+        "--registry",
+        default=str(ROOT / "report" / "deck_rl" / "candidate_registry.csv"),
+        help="Archetype lane seed registry CSV from build_card_registry.py",
+    )
+    parser.add_argument(
+        "--lanes",
+        default="",
+        help="Comma-separated search lanes (default: all four canonical lanes)",
+    )
     args = parser.parse_args(argv)
+    active_lanes = [s.strip() for s in args.lanes.split(",") if s.strip()] or None
 
     hw = detect_hardware()
     defaults = training_defaults(hw)
@@ -442,8 +699,10 @@ def main(argv: list[str] | None = None) -> int:
     total_cycles = args.cycles if args.phase == "full" else 1
 
     if args.phase in ("policy", "full"):
+        if policy_start >= total_cycles:
+            print(f"\npolicy: all {total_cycles} cycle(s) complete — skipping", flush=True)
         for c in range(policy_start, total_cycles):
-            print(f"\n--- policy cycle {c + 1}/{total_cycles} ---")
+            print(f"\n--- policy cycle {c + 1}/{total_cycles} ---", flush=True)
             deck_path = BEST_DECK if BEST_DECK.exists() else None
             r = train_policy(
                 args.timesteps,
@@ -470,7 +729,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.phase in ("deck", "full"):
         for c in range(deck_start, total_cycles):
-            print(f"\n--- deck evolution cycle {c + 1}/{total_cycles} ---")
+            print(f"\n--- deck evolution cycle {c + 1}/{total_cycles} ---", flush=True)
             r = evolve_decks(
                 args.generations,
                 args.population,
@@ -481,6 +740,8 @@ def main(argv: list[str] | None = None) -> int:
                 args.resume,
                 state,
                 cycle=c,
+                registry_path=Path(args.registry),
+                lanes=active_lanes,
             )
             results.append({"cycle": c, "deck": r})
             if r.get("status") == "ok":

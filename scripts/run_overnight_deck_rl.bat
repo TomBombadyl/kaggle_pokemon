@@ -1,6 +1,7 @@
 @echo off
 REM Overnight deck + policy RL (local only). Safe interrupt: re-run with same args + --resume
 cd /d "%~dp0.."
+set PYTHONUNBUFFERED=1
 
 echo === PTCG deck RL campaign (GPU policy + checkpoints) ===
 python -c "from rl.gpu_config import detect_hardware, training_defaults; import json; h=detect_hardware(); print(json.dumps({'hw':h,'defaults':training_defaults(h)}, indent=2))" 2>nul

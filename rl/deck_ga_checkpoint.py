@@ -15,6 +15,7 @@ def genome_to_dict(g: DeckGenome) -> dict:
     return {
         "counts": dict(g.counts),
         "label": g.label,
+        "lane": g.lane,
         "fitness": g.fitness,
         "meta": g.meta,
     }
@@ -24,9 +25,11 @@ def genome_from_dict(row: dict) -> DeckGenome:
     counts = Counter(
         {int(k): int(v) for k, v in row["counts"].items() if int(v) > 0}
     )
+    lane = row.get("lane") or row.get("meta", {}).get("lane", "")
     return DeckGenome(
         counts=counts,
         label=row.get("label", ""),
+        lane=lane,
         fitness=float(row.get("fitness", -1.0)),
         meta=row.get("meta", {}),
     )

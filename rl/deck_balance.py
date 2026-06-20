@@ -158,6 +158,35 @@ def balance_penalty(counts: Counter, pool, profile: ProfileBounds | None = None)
     return min(1.0, dist / 10.0)
 
 
+# Minimum expected win rate vs any high-weight benchmark opponent before collapse penalty.
+MATCHUP_COLLAPSE_FLOOR = 0.30
+# Only opponents at or above this suite weight count toward the min-rate check.
+MATCHUP_COLLAPSE_MIN_WEIGHT = 1.0
+
+
+def matchup_collapse_penalty(
+    per_opponent: dict[str, dict],
+    *,
+    floor: float = MATCHUP_COLLAPSE_FLOOR,
+    min_opponent_weight: float = MATCHUP_COLLAPSE_MIN_WEIGHT,
+) -> tuple[float, float]:
+    """Soft penalty [0, 1] when min win rate vs weighted opponents falls below floor.
+
+    Returns (penalty, min_win_rate). Penalty scales linearly from 0 at floor to 1 at 0%.
+    """
+    rates: list[float] = []
+    for row in per_opponent.values():
+        weight = float(row.get("weight", 1.0))
+        if weight >= min_opponent_weight:
+            rates.append(float(row["rate"]))
+    if not rates:
+        rates = [float(row["rate"]) for row in per_opponent.values()]
+    min_rate = min(rates) if rates else 0.0
+    if min_rate >= floor:
+        return 0.0, min_rate
+    return min(1.0, (floor - min_rate) / max(floor, 1e-9)), min_rate
+
+
 def _energy_ids(pool) -> set[int]:
     return {cid for cid, info in pool.items() if info.is_basic_energy}
 

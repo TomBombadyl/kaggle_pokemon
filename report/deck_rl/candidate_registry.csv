@@ -1,0 +1,18 @@
+path,archetype_lane,cards,unique_cards,energy,pokemon,trainers,basic_pokemon,primary_attack_types,top_attackers,has_ace_spec
+agent\deck.csv,anti-kyogre-baseline,60,9,35,11,14,6,"{""W"": 10}",4x Mega Abomasnow ex (723); 4x Snover (722); 2x Kyogre (721),True
+agent_decks\a2_basic_heavy_31_energy.csv,anti-kyogre-baseline,60,10,31,15,14,10,"{""W"": 12}",4x Kyogre (721); 4x Mega Abomasnow ex (723); 4x Snover (722); 2x Veluza (159),True
+agent_decks\a2_big_basic_29_energy.csv,anti-kyogre-baseline,60,10,29,17,14,12,"{""W"": 16}",4x Black Kyurem ex (179); 4x Kyogre (721); 4x Mega Abomasnow ex (723); 4x Snover (722),True
+agent_decks\a2_big_basic_31_energy.csv,anti-kyogre-baseline,60,10,31,15,14,10,"{""W"": 14}",4x Kyogre (721); 4x Mega Abomasnow ex (723); 4x Snover (722); 2x Black Kyurem ex (179),True
+agent_decks\a2_kyogre_33_energy.csv,anti-kyogre-baseline,60,9,33,13,14,8,"{""W"": 12}",4x Kyogre (721); 4x Mega Abomasnow ex (723); 4x Snover (722),True
+agent_decks\a3_starmie_spread_33_energy.csv,spread/control,60,9,33,13,14,8,"{""W"": 12}",4x Kyogre (721); 4x Mega Starmie ex (1031); 4x Staryu (1030),True
+agent_decks\a4_basic_water_33_energy.csv,anti-kyogre-baseline,60,9,33,17,10,16,"{""W"": 12}",4x Black Kyurem ex (179); 4x Chien-Pao (209); 4x Kyogre (721); 4x Veluza (159),True
+agent_decks\pool_alakazam_dudunsparce.csv,resilient-generalist,60,16,18,17,25,8,"{""P"": 10}",4x Abra (741); 4x Dunsparce (65); 3x Alakazam (245); 3x Dudunsparce (66); 3x Kadabra (742),False
+agent_decks\pool_bellibolt.csv,resilient-generalist,60,14,22,13,25,7,"{""L"": 7}",4x Iono’s Tadbulb (268); 3x Dudunsparce (66); 3x Dunsparce (65); 3x Iono’s Bellibolt ex (269),False
+agent_decks\pool_crustle.csv,resilient-generalist,60,14,19,15,26,8,"{""G"": 4}",4x Crustle (345); 4x Dunsparce (65); 4x Dwebble (344); 3x Dudunsparce (66),False
+agent_decks\pool_dragapult.csv,spread/control,60,17,19,14,27,6,"{""P"": 10, ""R"": 10}",4x Dreepy (119); 3x Dragapult ex (121); 3x Drakloak (120); 2x Dudunsparce (66); 2x Dunsparce (65),False
+agent_decks\pool_greninja.csv,spread/control,60,16,19,14,27,6,"{""W"": 10}",4x Froakie (33); 3x Frogadier (34); 3x Greninja ex (40); 2x Dudunsparce (66); 2x Dunsparce (65),False
+agent_decks\pool_mega_greninja.csv,spread/control,60,8,33,11,16,4,"{""W"": 11}",4x Froakie (33); 4x Frogadier (34); 3x Greninja ex (40),False
+agent_decks\real_dragapult_ex.csv,spread/control,60,22,9,17,34,10,"{""P"": 13, ""R"": 11}",4x Drakloak (120); 4x Dreepy (119); 3x Dragapult ex (121); 2x Budew (235); 2x Munkidori (112); 1x Fezandipiti ex (140),True
+agent_decks\real_iono.csv,resilient-generalist,60,15,22,15,23,9,"{""L"": 12}",3x Iono’s Bellibolt ex (269); 3x Iono’s Kilowattrel (271); 3x Iono’s Tadbulb (268); 3x Iono’s Voltorb (265); 3x Iono’s Wattrel (270),True
+agent_decks\real_mega_abomasnow_ex.csv,fast-basic,60,6,40,8,12,4,"{""W"": 8}",4x Mega Abomasnow ex (723); 4x Snover (722),False
+agent_decks\real_mega_lucario_ex.csv,resilient-generalist,60,17,13,17,30,10,"{""F"": 16}",4x Mega Lucario ex (678); 3x Riolu (677); 3x Solrock (676); 2x Hariyama (674); 2x Lunatone (675); 2x Makuhita (673),True
