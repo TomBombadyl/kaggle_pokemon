@@ -1,0 +1,16 @@
+{
+  "updated_at": "2026-06-20T17:51:20.963220+00:00",
+  "gen_done": 14,
+  "best_robust": 0.7567604855616054,
+  "best_label": "mut_x_mut_x_real_mega_abomasnow_ex_mut_x_real_mega_abomasnow_ex_a3_starmie_mut_x_pilot_abomasnow_a2_big_basic_31_energy",
+  "config": {
+    "generations": 30,
+    "population": 16,
+    "games_eval": 10,
+    "alpha": 0.5,
+    "cvar_q": 0.3,
+    "use_meta_solver": true,
+    "use_surrogate": true,
+    "seed": 42
+  }
+}

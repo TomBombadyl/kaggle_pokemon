@@ -31,3 +31,17 @@ report/az/
 # Large downloaded Kaggle reference (episodes/notebooks) — keep out of git
 data/kaggle_ref/episodes/
 data/kaggle_ref/*.ipynb
+
+# Local IDE / agent settings
+.claude/
+
+# Trained policy weights (reproducible from train scripts)
+agent/models/*.npz
+agent/models/rl_policy.zip
+agent/models/rl_policy_campaign.zip
+
+# Runtime eval / gate outputs (regenerated)
+report/public_gate/
+report/submission_stats/
+report/rl_deck_campaign/population/
+report/_model_backup_*/

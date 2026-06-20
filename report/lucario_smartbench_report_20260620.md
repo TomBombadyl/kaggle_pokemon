@@ -1,217 +1,245 @@
-# Mega Lucario ex — SmartBench + Meta Tactics Report
+# Mega Lucario ex — Best Approach (2026-06-20)
 
-Date: 2026-06-20  
 Deck: `agent_decks/real_mega_lucario_ex.csv`  
-Candidate tarball: `dist/candidates/track_c_lucario_rulecore_smartbench.tar.gz`  
-Scorer: `LucarioScorer` + `bench_guard` + `smart_bench`
+**Authoritative Lucario strategy doc** — SmartBench, hybrid search, loss modes, ship gates.
 
 ---
 
-## Executive summary
+## Executive summary (end of day)
 
-We rebuilt the Lucario ladder agent around three fixes: **(1)** never skip the first
-bench basic (empty-bench fast losses), **(2)** search/energy to find and feed Riolu
-→ Mega Lucario ex early, and **(3)** competitive meta lines from official Mega
-Lucario ex strategy (Solrock/Lunatone engine, Aura Jab accel, prize-aware
-Brave/Hariyama/Solrock).
+| Layer | Candidate | Scorer | μ / L1 | Verdict |
+|-------|-----------|--------|--------|---------|
+| **Production (Finals)** | `track_a_lucario_ex_search` | `SearchScorer` | **668 μ** (ref 53869254) | **Pin both Final slots** until beaten |
+| **SmartBench** | `track_c_lucario_rulecore_smartbench` | `LucarioScorer` | 600 μ; L1 **10%**, mirror **43%** | Fixes empty-bench; weak cross-archetype |
+| **Hybrid (new)** | `track_a_lucario_ex_search_v2` | `LucarioSearchScorer` | L1 **incomplete**; mirror **23%** (partial) | **Do not submit** — regressed mirror vs SmartBench |
+| **RL** | `track_d_lucario_rl_mcts_iter2` | MCTS | iter2 champion only | Blocked until iter ≥4 + L1 |
+| **Alakazam Learned 1M** | — | — | Kyogre holdout **0%** | **Retired** |
 
-**Result:** mirror matchups improved materially (**43.3%** vs the official Lucario
-sample at 30 games), but **overall L1 public gate remains ~10%** — strong Lucario
-setup, weak cross-archetype play without sim search. **Do not replace Search Lucario
-(668 μ, ref 53869254) on Finals** until a Search + Lucario hybrid beats it on L1
-and L4 episode stats.
+**One sentence:** Keep **Search Lucario (668 μ)** on Finals. The winning direction is **Search on promotion/setup + Lucario meta MAIN**, but today's naive merge (`LucarioSearchScorer`) hurt mirror play before L1 finished — next fix is **deck-out throttling** and **setup-bench search tuning**, not a blind upload.
 
 ---
 
-## Background: why we changed course
+## Current best approach (what we ship)
 
-| Ref | Scorer | μ | Problem |
-|-----|--------|---|---------|
-| **53869254** | SearchScorer | **668** | Best proven Lucario; generic heuristic MAIN + search on setup/switch |
-| **53886522** | LucarioScorer + SmartBench | **600** | Submitted to fix empty-bench losses; too few L4 episodes so far |
-| **53885445** | LucarioMCTSScorer (RL iter-0) | **324** | Retired — Yuki_Kaneko replay: Makuhita active, Riolu in hand, **0 bench** → `no_active` |
-
-μ alone hid the RL failure mode. Episode-level stats (win rate, avg turns,
-`fast_loss_pct`, loss reason) are required before trusting any Lucario upload.
-
----
-
-## Architecture (current SmartBench build)
+### Production agent — ref 53869254
 
 ```
 Agent.act
-  ├─ bench_critical? → LucarioScorer     (must bench first backup)
-  ├─ setup bench     → smart 1–2 depth   (not fill-all-3)
-  └─ else            → LucarioScorer     (MAIN, attack plan, trainers)
+  └─ bench_critical? → LucarioScorer (Lucario deck) / RuleCore (other decks)
+
+SearchScorer.choose
+  ├─ SEL_CARD + setup/switch/to-active → cg search_* (200 ms)
+  └─ else → HeuristicScorer (generic MAIN)
 ```
 
-**Key modules**
+- Package: `--scorer search --deck agent_decks/real_mega_lucario_ex.csv`
+- L4: 48.5% WR (33 ep), avg turns 13.4, fast_loss 58.8%
+- Weakness: generic heuristic MAIN misses Lucario-specific Jab/Brave/Gong lines
+
+### Target architecture — `LucarioSearchScorer` (implemented, not promoted)
+
+```
+Agent.act
+  └─ bench_critical? → LucarioScorer (unchanged)
+
+LucarioSearchScorer.choose
+  ├─ SEL_CARD + setup/switch/to-active → cg search_* (200 ms)
+  └─ else → LucarioScorer (meta MAIN, smart bench scoring)
+```
 
 | File | Role |
 |------|------|
-| `agent/lucario_policy.py` | Official sample attack plan + meta tactics (below) |
-| `agent/bench_guard.py` | Route empty-bench / setup-bench to Lucario |
-| `agent/smart_bench.py` | Min 1, max 2 voluntary bench basics |
-| `agent/agent.py` | Never-crash wrapper; bench routing for all scorers |
+| `agent/search_policy.py` | `_CgSearchMixin`, `SearchScorer`, **`LucarioSearchScorer`** |
+| `agent/lucario_policy.py` | Official sample attack plan + meta + smart bench |
+| `agent/bench_guard.py` | Empty-bench / setup-bench → Lucario (never skip first basic) |
+| `agent/smart_bench.py` | Max 2 voluntary bench basics |
+| `agent/agent.py` | Never-crash wrapper |
+
+Package hybrid:
+
+```bash
+python scripts/package_submission.py \
+  --name track_a_lucario_ex_search_v2 \
+  --scorer lucario_search \
+  --deck agent_decks/real_mega_lucario_ex.csv
+```
+
+**Ship gate:** L1 @ 30 games vs public field; must beat v1 Search Lucario on suite mean **and** hold mirror ≥40%. Pin Finals only if L1 + L4 improve over 53869254.
 
 ---
 
-## Meta tactics incorporated (sources)
+## Background: agent lineage
 
-Grounded in [Pokemon.com Mega Lucario ex deck strategy](https://www.pokemon.com/us/strategy/pokemon-tcg-deck-list-and-strategy-building-a-mega-lucario-ex-deck) and League Battle Deck guidance.
+| Ref | Scorer | μ | Problem / strength |
+|-----|--------|---|---------------------|
+| **53869254** | SearchScorer | **668** | Best proven; search on setup/switch; generic MAIN |
+| **53886522** | LucarioScorer + SmartBench | **600** | Mirror +43%; empty-bench fixed; no search layer |
+| **53885445** | LucarioMCTSScorer (RL iter-0) | **324** | Retired — empty bench → `no_active` |
+| iter2 RL | LucarioMCTSScorer | — | Packaged; not ladder until iter ≥4 + L1 |
 
-### Early game — engine + line
+μ alone hid RL failure modes. Always check episode stats: win rate, avg turns, `fast_loss_pct`, **`result_reason`**.
 
-- **Solrock + Lunatone** — prioritize completing the pair on bench/setup; Lunatone
-  ability boosted when Solrock is in play and discard is thin (fuel for Aura Jab).
-- **Search trainers** — Dusk Ball / Poké Pad when no Riolu line; Fighting Gong /
-  Premium Power Pro when line needs energy; Lillie early when engine missing.
-- **Riolu line** — bench Riolu first backup; attach to 2 energy; evolve to Mega
-  Lucario ex before over-committing to wall lines.
+---
 
-### Mid game — prize trade (competitive pattern)
+## Meta tactics (LucarioScorer MAIN)
 
-- **Solrock Cosmic Beam (70)** — prefer vs low-HP, single-prize targets.
-- **Aura Jab (982)** — 130 damage + discard-to-bench accel; favored when discard
-  has Fighting energy and bench needs power (Hariyama second attacker).
-- **Mega Brave (983)** — 270 damage; plan only on **2+ prize** KOs; skip Brave on
-  1-prize targets above 130 HP.
-- **Hariyama** — evolve Makuhita when gust target exists (Heave-Ho); 210 damage
-  line for ex prizes; energy from Jab accel.
-- **Premium Power Pro** — high priority on planned KO / Brave turns (stacks in sim).
-- **Gravity Mountain** — play when opponent has Stage 2 in play (−30 HP in sim).
-- **Mega Brave cooldown** — retreat + Switch scored up when Brave unavailable but
-  another Brave turn is planned later.
+Grounded in [Pokemon.com Mega Lucario ex deck strategy](https://www.pokemon.com/us/strategy/pokemon-tcg-deck-list-and-strategy-building-a-mega-lucario-ex-deck).
+
+### Early game
+
+- **Solrock + Lunatone** — complete pair early; Lunatone ability when discard has Fighting energy (Aura Jab fuel).
+- **Search trainers** — Dusk Ball / Poké Pad when Riolu line missing; Fighting Gong / PPP when line needs energy; Lillie when engine missing.
+- **Riolu line** — bench first backup; 2 energy; evolve Mega Lucario ex before over-committing to wall lines.
+
+### Mid game (prize-aware)
+
+- **Solrock Cosmic Beam (70)** — low-HP, single-prize targets.
+- **Aura Jab (982)** — 130 + discard-to-bench accel when discard has Fighting energy.
+- **Mega Brave (983)** — 270 on **2+ prize** KOs only; skip on 1-prize targets above 130 HP.
+- **Hariyama** — Makuhita → Hariyama for gust targets and ex prizes; Jab feeds energy.
+- **Gravity Mountain** — when opponent has Stage 2 in play (−30 HP in sim).
+- **Brave cooldown** — retreat + Switch when Brave unavailable but another Brave turn planned.
 
 ### Deliberately not done
 
-- **Blanket END-over-ATTACK** when bench empty and no PLAY — rejected; END does not
-  fix empty bench and stalls tempo. Guard only forces **PLAY when legal**.
+- Blanket END-over-ATTACK when bench empty — END does not fix empty bench; guard only forces **PLAY when legal**.
+
+---
+
+## Loss modes (simulator ground truth)
+
+All three cost **one full loss** on μ — no turn-margin bonus ([`data/COMPETITION_SCORING.md`](../data/COMPETITION_SCORING.md)).
+
+| `result_reason` | When | Lucario relevance |
+|-----------------|------|-------------------|
+| `prize` | Opponent takes all prizes | Normal win/loss |
+| **`deck_out`** | Loser's **`deckCount` ≤ 0** and must draw | **High** — Lucario thins with search/draw |
+| `no_active` | No Pokémon to promote | **Fixed** by bench_guard + smart bench |
+| `card_effect` | Card-specific | Rare |
+
+**Deck-out insight (2026-06-20):** Running out of cards to draw **ends the episode as a loss**. Lucario is a thinning deck (Dusk Ball, Poké Pad, Lillie, Carmine, Lunatone, Jab accel). Long wall/spread games deck out if we keep searching.
+
+**Existing guards in `LucarioScorer`:**
+
+- `deck_count <= 10` → block **Dusk Ball** and **Poke Pad** (`return -1.0`).
+
+**Gaps (next levers):**
+
+- **Carmine / Lillie** still score positively at low deck — should throttle like search cards.
+- **Lunatone ability** can keep thinning late in long games.
+- **Crustle/wall matchups** — slow games + thinning = `deck_out` losses (0% vs crustle-bot in L1).
+- **`RuleCoreScorer`** already penalizes draw/search more aggressively (`low_deck`, deck ≤35 in wall mode) — pattern to port into Lucario MAIN.
 
 ---
 
 ## Measurement results
 
-### L0 (legal + bench golden tests)
+### L0
 
 ```bash
 python scripts/smoke_test.py      # 17/17
-python scripts/smoke_replay.py    # 12/12
+python scripts/smoke_replay.py    # 13/13 (incl. lucario_search_scorer_instantiates)
 ```
 
-### L1 public gate (`gate_vs_public.py`)
+### L1 public gate @ 30 games
 
-Candidate: `track_c_lucario_rulecore_smartbench.tar.gz`
+**SmartBench** (`track_c_lucario_rulecore_smartbench`, `LucarioScorer`):
 
-| Games/opponent | Suite mean | vs Lucario sample | Notes |
-|----------------|------------|-------------------|-------|
-| 12 | 9.7–11.1% | 25–42% | High variance |
-| **30** | **10.0%** (36/360) | **43.3%** (13/30) | Mirror gain holds |
+| Metric | Value |
+|--------|-------|
+| Suite mean | **10.0%** (36/360) |
+| vs Lucario sample | **43.3%** (13/30) |
 
-**30-game per-matchup snapshot**
+**Hybrid v2** (`track_a_lucario_ex_search_v2`, `LucarioSearchScorer`) — **partial run** (gate interrupted; 7/12 opponents logged):
 
-| WR | Opponent |
-|----|----------|
-| **43.3%** | `a-sample-rule-based-agent-mega-lucario-ex-deck` |
-| 23.3% | Dragapult ex sample |
-| 13.3% | Abomasnow sample, Dragapult tempo |
-| 6.7% | Lucario **search** baseline, Alakazam |
-| 0–3.3% | Iono, Crustle bot, anti-wall, 1084 baseline, public-scores-915 |
+| Opponent | WR |
+|----------|-----|
+| Lucario sample | **23.3%** (↓ from 43%) |
+| Dragapult / Iono / Abomasnow samples | 10.0% |
+| 1084 baseline | 6.7% |
+| Crustle bot | 0.0% |
+| anti-wall | 3.3% |
 
-### Local self-play (sanity only, not ladder truth)
+**Interpretation:** Naive search-on-setup overlay **regressed mirror** (search may over-bench or pick non-Lucario setup lines vs SmartBench's capped 1–2 bench). Cross-archetype WR flat ~10%. **Re-run full L1** before any decision; consider excluding `SETUP_BENCH_POKEMON` from search while keeping switch/to-active/setup-active.
 
-| Matchup | n | Win rate | Avg turns |
-|---------|---|----------|-----------|
-| Lucario vs heuristic | 24 | 54–62% | ~13 |
+**v1 Search baseline** (53869254): ~20% suite in prior `report/public_gate/results.md`; 6.7% vs Lucario search in SmartBench table.
 
-### L4 (Kaggle episodes — prior refs)
+### L4 (Kaggle episodes)
 
 | Ref | win_rate | avg_turns | fast_loss_pct |
 |-----|----------|-----------|---------------|
 | 53869254 (Search) | 48.5% (33 ep) | 13.4 | 58.8% |
 | 53886522 (SmartBench) | 50% (2 ep) | 10.5 | 100% |
 
-Re-run after next upload: `python scripts/analyze_submission.py --ref <ref>`
+---
+
+## Why mirror was 43% but overall ~10%
+
+**Mirror (~43% SmartBench):** Meta tactics fix Lucario-specific openings — Riolu, energy, Solrock/Lunatone, Jab → Hariyama/Brave.
+
+**Overall (~10%):** Public field wins on **lookahead** (promotion, switch, gust) vs diverse decks. SearchScorer (668 μ) has search but generic MAIN. SmartBench has Lucario MAIN but no search. **Hybrid must combine both without breaking smart bench or deck clock.**
 
 ---
 
-## Why mirror is ~43% but overall is ~10%
+## Portfolio & blockers
 
-**Mirror (~43%):** SmartBench + meta tactics fix Lucario-specific openings and
-prize sequencing against a similar deck — find Riolu, feed energy, Solrock/Lunatone,
-Jab → Hariyama/Brave lines.
-
-**Overall (~10%):** Public field agents win on **lookahead and cross-deck
-decisions** — promotion, switch, gust timing, tempo vs spread/walls. Our **668 μ**
-agent uses **`SearchScorer`** (sim search on setup/switch) with a **generic heuristic
-MAIN**. SmartBench uses **`LucarioScorer` only** — better MAIN for Lucario, no
-search layer. We improved half the stack; the other half carried ladder rating.
-
-**One sentence:** setup and mirror play got better; whole-game skill vs diverse
-opponents did not, because search-backed promotion/switch is still missing.
-
----
-
-## Recommended combined stack (next build)
-
-Target: **`LucarioSearchScorer`** — merge 668 μ search with SmartBench Lucario MAIN.
-
-```
-Agent.act          → bench_guard (unchanged)
-Card contexts      → cg search_* (200 ms budget) — setup, switch, to active
-MAIN               → LucarioScorer — meta, Jab/Brave, Gong, PPP, evolve
-```
-
-**Ship gate:** L1 @ 30 games vs public field; must beat Search Lucario local benchmark
-(~29% note on 53869254) before replacing Finals slot.
-
-**Portfolio (unchanged):**
-
-- **Final 1:** 53869254 (Search Lucario, 668 μ) until hybrid proves better.
-- **Experimental upload:** SmartBench or hybrid only with user OK; 5 uploads/day.
-- **Lucario RL:** blocked until notebook iter ≥ 4; see `report/handoffs/lucario_rl_reimport_status.md`.
+| Track | Status |
+|-------|--------|
+| **Finals** | **53869254 ×2** ([`report/FINALS_PIN.md`](FINALS_PIN.md)) |
+| **Hybrid upload** | Blocked — partial L1 shows mirror regression |
+| **SmartBench upload** | ref 53886522 live; too few L4 episodes to replace Finals |
+| **Lucario RL** | iter2 packaged; iter3 not promoted; notebook iter ≥4 |
+| **Alakazam Learned 1M** | Retired — see [`report/handoffs/alakazam_track_b_1m_status.md`](handoffs/alakazam_track_b_1m_status.md) |
+| **Kaggle Simulation** | **No upload without explicit user OK** (5/day limit) |
 
 ---
 
 ## Commands reference
 
 ```bash
-# Package + L0/L1 gate (12 games default)
+# SmartBench
 python scripts/package_submission.py \
   --name track_c_lucario_rulecore_smartbench \
   --scorer lucario \
-  --deck agent_decks/real_mega_lucario_ex.csv \
-  --gate
+  --deck agent_decks/real_mega_lucario_ex.csv
 
-# Stable L1 (30 games per opponent)
+# Hybrid (current best code path — not yet ship-worthy)
+python scripts/package_submission.py \
+  --name track_a_lucario_ex_search_v2 \
+  --scorer lucario_search \
+  --deck agent_decks/real_mega_lucario_ex.csv
+
+# L1 @ 30 (complete interrupted run)
 python scripts/gate_vs_public.py \
-  --agent dist/candidates/track_c_lucario_rulecore_smartbench.tar.gz \
+  --agent dist/candidates/track_a_lucario_ex_search_v2.tar.gz \
   --games 30
 
-# Local replay + stats
-python scripts/record_local_battle.py \
-  --agent-a lucario --agent-b search \
-  --deck-a agent_decks/real_mega_lucario_ex.csv \
-  --games 24 --seed 42
+# Compare v1 Search baseline
+python scripts/gate_vs_public.py \
+  --agent dist/candidates/track_a_lucario_ex_search.tar.gz \
+  --games 30
 
-# Post-upload episode analysis
+# Post-upload
 python scripts/analyze_submission.py --ref <submission_ref>
 ```
 
 ---
 
-## Files changed (this Lucario pass)
+## Exact next actions
 
-- `agent/lucario_policy.py` — search/energy trainers, meta attack plan, Jab/Brave IDs
-- `agent/bench_guard.py`, `agent/smart_bench.py`, `agent/agent.py`
-- `scripts/smoke_replay.py` — 12 golden tests
-- `report/submission_log.csv`, `report/FINALS_PIN.md`
-- `data/KAGGLE_SIMULATION_CLI.md` §8–9, `data/EVAL_PROTOCOL.md`
+1. **Complete L1 @ 30** for `track_a_lucario_ex_search_v2` vs v1 Search tarball.
+2. **Deck-out pass** — throttle Carmine/Lillie/Lunatone when `deck_count <= 10–15`; consider opponent prize count / turn clock.
+3. **Hybrid tuning** — if mirror stays <40%, drop `SETUP_BENCH_POKEMON` from search contexts; keep switch/to-active/setup-active only.
+4. **Re-gate**; upload only with user OK if suite mean beats 53869254 local benchmark **and** L4 stats improve.
 
 ---
 
-## Exact next action
+## Files changed (2026-06-20 Lucario pass)
 
-Implement **`LucarioSearchScorer`** (Search fallback = LucarioScorer on Lucario
-deck), package `track_a_lucario_ex_search_v2`, run **L1 @ 30 games**, compare to
-53869254 baseline; pin Finals only if L1 and L4 improve.
+- `agent/search_policy.py` — `_CgSearchMixin`, **`LucarioSearchScorer`**
+- `agent/lucario_policy.py` — meta trainers, Jab/Brave, energy/evolve priority
+- `agent/bench_guard.py`, `agent/smart_bench.py`, `agent/agent.py`
+- `scripts/package_submission.py` — `--scorer lucario_search`
+- `scripts/smoke_replay.py` — golden tests incl. hybrid instantiate
+- `report/submission_log.csv`, `report/FINALS_PIN.md`
+- `data/KAGGLE_SIMULATION_CLI.md` §8–9, `data/EVAL_PROTOCOL.md`

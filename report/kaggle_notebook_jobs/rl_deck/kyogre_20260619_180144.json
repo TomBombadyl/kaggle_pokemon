@@ -1,0 +1,12 @@
+{
+  "started": "2026-06-19T18:01:44.032603+00:00",
+  "deck": "Z:\\kaggle\\pokemon\\agent_decks\\a2_kyogre_33_energy.csv",
+  "slug": "kyogre",
+  "opponents": "benchmark",
+  "timesteps": 100000,
+  "distilled": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_kyogre_v1.npz",
+  "package_name": "track_b_learned_kyogre",
+  "status": "error",
+  "error": "RL train failed (exit 120)",
+  "finished": "2026-06-19T18:03:33.943866+00:00"
+}

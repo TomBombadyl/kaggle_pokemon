@@ -1,0 +1,16 @@
+{
+  "updated_at": "2026-06-20T17:51:10.210972+00:00",
+  "gen_done": 1,
+  "best_robust": 0.00022805089589407533,
+  "best_label": "pool_crustle",
+  "config": {
+    "generations": 1,
+    "population": 4,
+    "games_eval": 2,
+    "alpha": 0.5,
+    "cvar_q": 0.3,
+    "use_meta_solver": true,
+    "use_surrogate": false,
+    "seed": 42
+  }
+}

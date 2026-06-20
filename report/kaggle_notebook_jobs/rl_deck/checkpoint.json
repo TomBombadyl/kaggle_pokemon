@@ -1,0 +1,15 @@
+{
+  "status": "ok",
+  "timesteps": 100000,
+  "model": "/kaggle/working/kaggle_pokemon/agent/models/rl_policy.zip",
+  "device": "cuda",
+  "deck": "/kaggle/working/kaggle_pokemon/report/rl_deck_campaign/best_deck.csv",
+  "deck_slug": "best-deck",
+  "opponents": "benchmark",
+  "n_envs": 4,
+  "n_opponents": 9,
+  "holdout": [
+    "a2_kyogre"
+  ],
+  "eval_log": "/kaggle/working/kaggle_pokemon/report/rl_train/eval_best-deck.json"
+}

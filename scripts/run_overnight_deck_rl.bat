@@ -11,9 +11,11 @@ if errorlevel 1 (
 )
 
 REM RTX 4070 Ti SUPER: policy on CUDA, 6 CPU sim envs, checkpoint every 10k steps
+REM --cycles 4 extends past the existing checkpoint (was at 2 cycles done); --resume
+REM keeps all prior policy + deck-GA progress and runs only the new cycles 3-4.
 python rl\train_deck_campaign.py ^
   --phase full ^
-  --cycles 2 ^
+  --cycles 4 ^
   --timesteps 100000 ^
   --device auto ^
   --resume ^

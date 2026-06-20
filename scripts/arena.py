@@ -317,19 +317,22 @@ def play_matchup(
         else:
             jobs.append((deck_b, deck_a, seed0, seed1, path_b, path_a,
                          max_steps, scorer_b, scorer_a, model_path_b, model_path_a, "a1"))
-    with ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
-        futs = {pool.submit(_play_game_scored, j[:11]): j[11] for j in jobs}
-        for fut, tag in futs.items():
-            winner, _ = fut.result()
-            a_is_seat0 = tag == "a0"
-            if winner == 2:
-                draws += 1
-            elif winner == -1:
-                unfinished += 1
-            elif (winner == 0) == a_is_seat0:
-                a_wins += 1
-            else:
-                b_wins += 1
+    if workers <= 1:
+        results = [(_play_game_scored(j[:11]), j[11]) for j in jobs]
+    else:
+        with ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
+            futs = {pool.submit(_play_game_scored, j[:11]): j[11] for j in jobs}
+            results = [(fut.result(), tag) for fut, tag in futs.items()]
+    for (winner, _), tag in results:
+        a_is_seat0 = tag == "a0"
+        if winner == 2:
+            draws += 1
+        elif winner == -1:
+            unfinished += 1
+        elif (winner == 0) == a_is_seat0:
+            a_wins += 1
+        else:
+            b_wins += 1
     return {"a_wins": a_wins, "b_wins": b_wins, "draws": draws, "unfinished": unfinished}
 
 

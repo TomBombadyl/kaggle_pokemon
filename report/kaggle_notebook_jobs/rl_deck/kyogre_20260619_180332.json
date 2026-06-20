@@ -1,0 +1,25 @@
+{
+  "started": "2026-06-19T18:03:32.405355+00:00",
+  "deck": "Z:\\kaggle\\pokemon\\agent_decks\\a2_kyogre_33_energy.csv",
+  "slug": "kyogre",
+  "opponents": "benchmark",
+  "timesteps": 100000,
+  "distilled": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_kyogre_v1.npz",
+  "package_name": "track_b_learned_kyogre",
+  "train": {
+    "status": "ok",
+    "timesteps": 100000,
+    "model": "Z:\\kaggle\\pokemon\\agent\\models\\rl_policy.zip",
+    "device": "cuda",
+    "deck": "Z:\\kaggle\\pokemon\\agent_decks\\a2_kyogre_33_energy.csv",
+    "deck_slug": "kyogre-33-energy",
+    "opponents": "benchmark",
+    "n_envs": 6,
+    "n_opponents": 10
+  },
+  "promoted": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_v1.npz",
+  "gate_passed": true,
+  "gate_report": "Z:\\kaggle\\pokemon\\report\\track_b_gates\\track_b_learned_kyogre_gate.md",
+  "status": "ok",
+  "finished": "2026-06-19T18:06:30.208467+00:00"
+}

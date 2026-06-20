@@ -21,6 +21,7 @@ python scripts/analyze_submission.py --ref 53886522   # SmartBench Lucario 600
 | Candidate | Ref | μ | Pin as Final if… |
 |-----------|-----|---|------------------|
 | track_a_lucario_ex_search | 53869254 | 668 | Always Final 1 (best proven μ) |
+| track_a_lucario_ex_search_v2 | — | — | L1 incomplete; partial mirror 23% — **do not pin** until beats 53869254 |
 | track_c_lucario_rulecore_smartbench | 53886522 | 600+ | `avg_turns > 15`, `fast_loss_pct < 20%`, top loss ≠ `no_active` |
 | a2_kyogre | 53854707 | 633 | Portfolio backup if Lucario slots filled |
 

@@ -1,0 +1,97 @@
+[
+  {
+    "timesteps": 20000,
+    "train": {
+      "win": 14,
+      "loss": 6,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.7
+    },
+    "holdout:a2_kyogre": {
+      "win": 8,
+      "loss": 12,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.4
+    }
+  },
+  {
+    "timesteps": 40000,
+    "train": {
+      "win": 15,
+      "loss": 5,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.75
+    },
+    "holdout:a2_kyogre": {
+      "win": 10,
+      "loss": 10,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.5
+    }
+  },
+  {
+    "timesteps": 60000,
+    "train": {
+      "win": 14,
+      "loss": 6,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.7
+    },
+    "holdout:a2_kyogre": {
+      "win": 12,
+      "loss": 8,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.6
+    }
+  },
+  {
+    "timesteps": 80000,
+    "train": {
+      "win": 14,
+      "loss": 6,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.7
+    },
+    "holdout:a2_kyogre": {
+      "win": 10,
+      "loss": 10,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.5
+    }
+  },
+  {
+    "timesteps": 100000,
+    "train": {
+      "win": 15,
+      "loss": 5,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.75
+    },
+    "holdout:a2_kyogre": {
+      "win": 9,
+      "loss": 11,
+      "draw": 0,
+      "unfinished": 0,
+      "decided": 20,
+      "win_rate": 0.45
+    }
+  }
+]

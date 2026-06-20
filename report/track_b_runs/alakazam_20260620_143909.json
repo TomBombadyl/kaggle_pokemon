@@ -1,0 +1,29 @@
+{
+  "started": "2026-06-20T14:39:09.215217+00:00",
+  "deck": "Z:\\kaggle\\pokemon\\agent_decks\\pool_alakazam_dudunsparce.csv",
+  "slug": "alakazam",
+  "opponents": "benchmark",
+  "timesteps": 200000,
+  "distilled": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_alakazam_v1.npz",
+  "package_name": "track_b_learned_alakazam",
+  "train": {
+    "status": "ok",
+    "timesteps": 200000,
+    "model": "Z:\\kaggle\\pokemon\\agent\\models\\rl_policy.zip",
+    "device": "cpu",
+    "deck": "Z:\\kaggle\\pokemon\\agent_decks\\pool_alakazam_dudunsparce.csv",
+    "deck_slug": "alakazam-dudunsparce",
+    "opponents": "benchmark",
+    "n_envs": 2,
+    "n_opponents": 9,
+    "holdout": [
+      "a2_kyogre"
+    ],
+    "eval_log": "Z:\\kaggle\\pokemon\\report\\rl_train\\eval_alakazam-dudunsparce.json"
+  },
+  "promoted": "Z:\\kaggle\\pokemon\\agent\\models\\distilled_v1.npz",
+  "gate_passed": false,
+  "gate_report": "Z:\\kaggle\\pokemon\\report\\track_b_gates\\track_b_learned_alakazam_gate.md",
+  "status": "ok",
+  "finished": "2026-06-20T17:26:53.430900+00:00"
+}

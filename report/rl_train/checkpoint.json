@@ -1,11 +1,15 @@
 {
   "status": "ok",
-  "timesteps": 100000,
+  "timesteps": 1000000,
   "model": "Z:\\kaggle\\pokemon\\agent\\models\\rl_policy.zip",
   "device": "cuda",
-  "deck": "Z:\\kaggle\\pokemon\\agent_decks\\a2_kyogre_33_energy.csv",
-  "deck_slug": "kyogre-33-energy",
+  "deck": "Z:\\kaggle\\pokemon\\agent_decks\\pool_alakazam_dudunsparce.csv",
+  "deck_slug": "alakazam-dudunsparce",
   "opponents": "benchmark",
   "n_envs": 6,
-  "n_opponents": 10
+  "n_opponents": 9,
+  "holdout": [
+    "a2_kyogre"
+  ],
+  "eval_log": "Z:\\kaggle\\pokemon\\report\\rl_train\\eval_alakazam-dudunsparce.json"
 }

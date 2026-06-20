@@ -1,0 +1,13 @@
+{
+  "id": "tobin/ptcg-lucario-rl-mcts",
+  "title": "PTCG Mega Lucario ex RL+MCTS",
+  "code_file": "lucario_rl_mcts.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "competition_sources": ["pokemon-tcg-ai-battle-challenge-strategy"]
+}
