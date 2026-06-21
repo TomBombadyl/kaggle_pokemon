@@ -60,6 +60,26 @@ win consistently vs a strong field. There is no hidden per-game point system.
    `report/winner_analysis_<DATE>.md`. Track how the triangle / tempo / hardening shift.
 3. (optional) `python scripts/extract_gauntlet_from_replays.py --min-score 1 --max-decks 60`
    to refresh real decks — but remember decks ≠ the win (pilot is).
+4. **DELETE the raw dump** (`rm -rf report/replays/*.json`) once steps 2–3 are done. See policy below.
+
+### Replay-data lifecycle / storage policy
+
+**Raw replays are TRANSIENT and disposable — re-downloadable any day from the episodes-index.**
+One day's dump = ~20 GB / ~5,500 JSON files. Z: has ~1.6 TB free, so disk isn't urgent, but
+~20 GB/day creeps (~600 GB/month) — don't hoard.
+
+- **Keep at most 1–2 days of raw replays** in `report/replays/` at once; delete after extracting.
+  (`report/replays/*.json` is gitignored — never committed.)
+- **The value is the small DERIVED artifacts, which we keep permanently & commit:**
+  - `report/winner_analysis_<DATE>.md` (the daily field map — tiny)
+  - `report/deck_rl/mined_decks/` (~72 KB) — refreshed each mining; overwrites in place
+  - `report/deck_rl/episode_dataset_manifest.csv` (the index; lets us re-pull any day)
+- **Current state:** the 06-19 dump (21 GB) is still on disk. The next task (Lucario-mirror
+  pilot work) may want to mine mirror-match play from it, so **keep it until that's done, then
+  delete**. Everything else has already been extracted from it.
+- **Optional future enhancement:** append one row per day to a `winner_analysis_history.csv`
+  (median turns, win-condition mix, top-archetype WRs, mirror %) so we track meta drift over
+  time *without* keeping any raw data.
 
 ---
 
