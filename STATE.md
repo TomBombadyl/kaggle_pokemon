@@ -28,6 +28,22 @@ a README describing its contract).
 - **HeuristicScorer × Kyogre ≈ 633 μ** (simple, stable).
 - Field scale: top ~1350, mid-pack ~1100+. **We are well below mid-pack — the climb is the point.**
 
+### Ladder candidates (non-Lucario) — as of 2026-06-22
+Lucario is already on the ladder and doing well; the user wants a *different* second archetype.
+Evidence-ranked from the scoreboard (RULINGS Part 1), among current decks:
+- **Retire now:** MCTS/transformer Alakazam (`model4.pth`) — **~185 μ** (user-reported), worst on
+  record. Brain problem, not deck (RULINGS row 13).
+- **Best non-Lucario play = Alakazam piloted by RULES/SEARCH, not a trained policy** — the same deck
+  scored **659 μ** with the imported rule-based "best5" pilot
+  (`notebooks/ryotasueyoshi_rule_based_alakazam_best5/`). Path: re-submit that proven agent, and/or
+  gate our `SearchScorer` on `agent_decks/top_mined_alakazam.csv` on the real field.
+- **Backup / most-distinct archetype:** Trevenant control + `SearchScorer` = **615.6 μ** (confirmed,
+  our own agent; `agent_decks/top_mined_trevenant.csv`).
+- **Reframe "train different decks":** every trained/RL/MCTS agent we shipped lost to plain
+  rules/search (the 185 is the latest proof — Ruling R3). Correct sequence: build `eval/` (F2),
+  gate the rules pilot across our real decks, ship the best; introduce trained policies only after
+  they beat that floor on the real-field gate.
+
 ### Open blocker (unchanged, now correctly scoped)
 - Kaggle API has **no egress from the sandbox**. The episode pull (`episodes/pull.py`, seeded by
   `scripts/update_from_kaggle.py`) must run **on the user's machine**. This is *the* thing gating

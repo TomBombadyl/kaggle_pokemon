@@ -40,6 +40,18 @@ have shipped sits at **~490–668 μ — well below mid-pack.**
 | 10 | LearnedScorer × Alakazam (shared-distill bug) | 490.4 | Distill trained on wrong deck. |
 | 11 | LearnedScorer × Dragapult | 468.9 | |
 | 12 | LucarioMCTSScorer (RL+MCTS, early iter) × Lucario | 324.6 | Empty-bench losses; retired. |
+| 13 | **MCTS/transformer policy × Alakazam** (`top_mined_alakazam`, `model4.pth`) | **~185** (user-reported, 2026-06-22) | **WORST result on record. Retired.** See note below. |
+
+**Note on row 13 (the MCTS Alakazam, recorded 2026-06-22):** A small MCTS/transformer policy
+(d_model 128, 2 heads, 1+1 layers, search count 12; `run_meta.json` recoverable from commit
+`cc34059`) was trained with the **sample MCTS notebook** on the `top_mined_alakazam` deck. Per that
+sample's design it learned against a **fixed Snorlax/`sample_deck` opponent + mirror self-play** —
+the exact narrow-opponent flaw RULINGS already flags (2A, AZ row). Submitted to the ladder, it sits
+at **~185 μ** (user-reported; not verifiable from the sandbox — no Kaggle egress). 185 ≪ the 600
+starting μ ⇒ it loses nearly every ladder game, exactly as an overfit-to-Snorlax policy should. The
+Alakazam *deck* is strong (659 μ with a rule-based pilot, row 2); the **~185 is the MCTS brain, not
+the deck** — a clean 470-point demonstration of Rulings R3 (rules beat our RL) and R4 (pilot
+dominates deck). **Action: retire this submission.**
 
 **The one-sentence summary of 43 sessions:** *every reinforcement-learning, distillation, and
 MCTS approach we built underperformed simple hand-tuned rules and search — and the single best
