@@ -10,7 +10,7 @@ ranking). The project was reset on 2026-06-22 (Session 44) — see `RULINGS.md` 
 | # | File | What it is |
 |---|------|-----------|
 | 1 | **`STATE.md`** | Current state + the single next action. The one handoff. |
-| 2 | **`RULINGS.md`** | Everything tried, the measured outcomes, why, and the standing rulings. |
+| 2 | **`RULINGS.md`** | **Part 0 = our operating mindset — read it first.** Then: everything tried, measured outcomes, why, and the standing rulings. |
 | 3 | **`ARCHITECTURE.md`** | The rebuilt system: all 5 pillars on one shared foundation. |
 | 4 | **`AGENTS.md`** | Operating contract for anyone (human or agent) working here. |
 

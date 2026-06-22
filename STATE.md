@@ -2,7 +2,8 @@
 
 > This is the **one** handoff file. It replaces the ~15 `*_HANDOFF_*` / `*_INSTRUCTIONS_*` /
 > `ACTION_REQUIRED_*` files that used to litter the root (Ruling R10). Newest state on top.
-> For *why* anything is the way it is, read `RULINGS.md`. For *what we're building*, `ARCHITECTURE.md`.
+> **Before acting, read `RULINGS.md` Part 0 — the operating mindset.** For *why* anything is the way
+> it is, read the rest of `RULINGS.md`. For *what we're building*, `ARCHITECTURE.md`.
 
 ---
 

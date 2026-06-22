@@ -4,6 +4,17 @@ The single operating contract for this repo (human or AI). Reset 2026-06-22 (Ses
 *why* read `RULINGS.md`; for the *plan* read `ARCHITECTURE.md`; for *current state + next action*
 read `STATE.md`.
 
+## Mindset (this governs everything — full version: `RULINGS.md` Part 0)
+The errors that stalled 43 sessions were mindset errors, not bad luck. Hold these always:
+1. **Measure; never assume** — verify load-bearing facts against the real engine/field/repeat reading.
+2. **Simplicity wins; earn complexity** — every RL/MCTS/GA we built lost to plain rules/search.
+3. **Pilot before deck; measure what we have before training something new.**
+4. **The real field is the only judge** — never proxies, random, or mirror-only self-play.
+5. **Ship nothing ungated**, and **finish/verify one thing before starting the next.**
+6. **Ground decisions in math and the actual game** (imperfect-info POMDP on a TrueSkill ladder).
+
+> If a plan violates one of these, stop and fix the plan — it outranks enthusiasm for any deck or model.
+
 ## Start every session by reading, in order
 1. `STATE.md` — current state and the single next action.
 2. `RULINGS.md` — the standing rulings (R1–R10) and the record of what failed. **Do not re-run a

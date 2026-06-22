@@ -20,6 +20,41 @@ Snapshot of the pre-reset repo: branch `graveyard/pre-reset-20260622`, commit `5
 
 ---
 
+## Part 0 — Operating mindset (read this first, every time)
+
+These are not deck notes. They are the **recurring mistakes behind 43 sessions of stalled
+progress**, distilled into the mindset that must govern *all* future work — agents, decks, RL,
+research, everything. Each one cost us real μ. The specific failures in Parts 1–2 are just symptoms
+of these.
+
+1. **Measure; never assume.** Our biggest losses came from unverified beliefs: "we can see the
+   opponent's cards" (false — imperfect info), "local pool win-rate predicts μ" (false), "this one
+   μ reading is real" (false — it drifted 734→500). *Rule:* every load-bearing fact is verified
+   against the real engine / real field / repeated reading before we build on it.
+2. **Simplicity wins here — earn every bit of complexity.** Every complex method we built (PPO,
+   distill, deck-GA, MCTS, AlphaZero) *lost to plain rules/search* on the ladder. Our best agent was
+   an imported rule-based notebook. *Rule:* start from the simplest thing that wins; add complexity
+   only when it beats the simple floor on the real-field gate (R3).
+3. **Pilot before deck; measure what we have before training something new.** The same deck swung
+   474 μ on pilot quality alone (659 vs ~185). *Rule:* when tempted to "train a new deck," first
+   find which deck the *proven pilot* wins with — that's an eval question, not a training project.
+4. **The real field is the only judge.** Proxy opponents (`pool_*`), random, and mirror-only
+   self-play repeatedly misled us into shipping agents that collapsed on the ladder. *Rule:* gate on
+   mined real decks + public agents, always (R2).
+5. **Ship nothing ungated.** The ~185 agent was uploaded without clearing the gate. *Rule:* L0–L2 on
+   the real field, then a ≥2-reading ladder probe, *before* a submission counts (R1, R3).
+6. **Finish and verify one thing before starting the next.** The "disjointed, segmented" feeling
+   came from spawning new tracks before validating the last. *Rule:* sequential, gated work; one
+   source of truth per concern (R10); no parallel half-finished experiments.
+7. **Ground decisions in math and the actual game.** It is an imperfect-information POMDP on a
+   TrueSkill ladder. Use the right tools for that (belief/determinized search, best-arm
+   identification, Wilson/SPRT) — not vibes (R5, R9).
+
+> If a plan violates one of these, stop and fix the plan. These supersede enthusiasm for any
+> particular deck, model, or idea.
+
+---
+
 ## Part 1 — The honest scoreboard (measured ladder μ)
 
 Source: `report/submission_log.csv`, `report/ladder_history.csv` (as of 2026-06-22).
@@ -130,9 +165,15 @@ Real-meta lists (mined from competition episodes) — these are the field, keep 
   imported public agents*, never `pool_*` proxies or random/mirror self-play. (Evidence: 2D.)
 - **R3 — Rules/search is the proven floor; an ML method must beat it on the ladder to ship.**
   Nothing learned has beaten hand-tuned rules yet. New ML ships only after it clears the
-  best rule-based μ on the *real-field gate* AND a ≥2-reading ladder probe. (Evidence: Part 1.)
-- **R4 — Pilot dominates deck.** The same archetype swings 300+ μ on pilot quality (Alakazam
-  490→659). Invest in the decision policy before chasing exotic decks. (Evidence: 2B.)
+  best rule-based μ on the *real-field gate* AND a ≥2-reading ladder probe. **Concrete cost of
+  ignoring this:** the MCTS/transformer Alakazam was trained vs a Snorlax/sample opponent and
+  shipped without clearing the gate → **~185 μ** on the ladder (row 13), our worst result ever.
+  Every RL/MCTS/distill agent we have shipped has lost to plain rules/search. (Evidence: Part 1, row 13.)
+- **R4 — Pilot dominates deck; fix the pilot before chasing decks.** The *same* Alakazam deck
+  scored **659 μ** with a rule-based pilot and **~185 μ** with a trained MCTS pilot — a **474-point
+  swing from the brain alone** (rows 2 vs 13). So "let's train a different deck" is usually the wrong
+  instinct: first find which real deck the *proven pilot* wins with (build `eval/`, gate across our
+  decks), then improve the pilot. Exotic decks and fresh RL training come after. (Evidence: 2B, Part 1.)
 - **R5 — This is an imperfect-information game.** Opponent hand/deck/prizes are hidden (Part 4).
   Use determinized / information-set search + belief modeling, never naïve perfect-info minimax.
 - **R6 — No in-game online learning.** Kaggle calls `agent(obs)` once per decision under a
