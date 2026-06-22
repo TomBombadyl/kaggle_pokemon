@@ -1,0 +1,12 @@
+{
+  "config": {
+    "LUC_D_MODEL": 128,
+    "LUC_HEADS": 2,
+    "LUC_D_FF": 256,
+    "LUC_ENC_LAYERS": 1,
+    "LUC_DEC_LAYERS": 1,
+    "LUC_SEARCH_COUNT": 12
+  },
+  "source_checkpoint": "rl_mcts_basic/alakazam_basic/model4.pth",
+  "deck": "top_mined_alakazam"
+}
