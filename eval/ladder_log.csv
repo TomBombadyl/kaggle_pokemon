@@ -1,0 +1,2 @@
+recorded_at,name,ref,status,mu_reading_1,mu_reading_2,deck,agent,git_commit,local_gate_overall_pct,notes
+2026-06-22,dragapult_ex_sample,,PACKAGED_NOT_YET_SUBMITTED,,,dragapult_ex_sample.csv,dragapult_agent (official sample + never-crash wrapper),pending,88.3,"Crispin variant. LOCAL gate 78.3% vs heuristic / 88.3% vs search. Record ref + >=2 mu readings (R1) after upload; then pull episodes for this ref and eval."
