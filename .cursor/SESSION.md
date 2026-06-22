@@ -2,50 +2,43 @@
 
 ## Current focus
 
-**Goal:** Climb ladder μ (leaders ~1310); keep **Search Lucario 668 μ** as Final until beaten.
-**Today's submissions (2026-06-21, both COMPLETE):** Alakazam best5 **636.8** (exceeded forecast),
-Trevenant **597.7** (weak, as 15% gate predicted). **2/5 slots used → HOLD the other 3.**
-**Primary handoff:** [`report/handoffs/deck_rl_continuation_20260621.md`](../report/handoffs/deck_rl_continuation_20260621.md).
-**THE pivot this session — field map (`scripts/analyze_winners.py`, 5,584 games):** the meta is a
-rock-paper-scissors triangle **Lucario → Bellibolt → Alakazam → Lucario**; Lucario is ~53% of decks;
-the **Lucario mirror is ~30% of all games, 50/50 on deck → decided by PILOT.** Field is aggressive
-(KO race 72% @ ~13 turns, board-wipe 21% @ ~9 turns, deck-out only 7.5%). Report:
-[`report/winner_analysis_20260621.md`](../report/winner_analysis_20260621.md).
-**Proven dead end:** robust deck search with a generic brain (L1 3.8–12.5%). Pilot >> deck.
-**Next (highest leverage):** improve our Search Lucario **mirror** play (prize-trade sequencing,
-KO tempo) — it's the biggest score lever. Then shore up Alakazam's Bellibolt/Iono hole. No uploads w/o user OK.
+**Goal:** Improve RL+MCTS beyond the basic Kaggle sample using mined field opponents; ladder-probe only after field eval + stable μ.
+**Status (2026-06-22):** Basic d128 RL+MCTS submitted and COMPLETE — Lucario ex ref **53946742** read **899.6 μ**, Alakazam ref **53946148** read **185.4 μ** (treat Lucario as early/unstable per Ruling R1 until a second reading ≥40 min apart). Field-opponent trainer built at `notebooks/rl_mcts_field_train/` (5 cycles × 10 mined decks, Fix #2/3) but **not yet committed or run on Kaggle**. **Next:** run field training on Kaggle with `--resume` from model4; commit the notebook folder; re-fetch Lucario μ before any Final pin.
 
 ## Key context
 
 - **Repo:** `Z:\kaggle\pokemon` | **Branch:** `main` (ahead, not pushed)
-- **Uploads 2026-06-21:** 2/5 used (Alakazam 636.8, Trevenant 597.7) — **3 remain, HOLD** — [`data/SUBMISSION_PLAYBOOK.md`](data/SUBMISSION_PLAYBOOK.md)
-- **Live ladder top (ours):** 668 Search Lucario (Final) > 660.5 lucario_ex_search > **636.8 Alakazam** > 633.0 Kyogre > 626 Kyogre-probe1 > 597.7 Trevenant
-- **⚠️ Double-submit trap:** a stale autonomous doc (Session 38) says "submit Trevenant Slot 3" — Trevenant is ALREADY done. See PROGRESS Session 39 correction. Do NOT re-submit Alakazam or Trevenant.
-- **Field analysis is now the daily routine:** download dump (slugs in `report/deck_rl/episode_dataset_manifest.csv`, refreshed from `kaggle/pokemon-tcg-ai-battle-episodes-index`) → `python scripts/analyze_winners.py --replays report/replays` → dated `report/winner_analysis_<DATE>.md`.
-- **Field is hardening:** median agent score 628→1064 over 06-16→06-20 (~+110/day); top plateaus ~1320. Static agent loses rank daily → pilot work is time-sensitive.
-- **Robust deck search:** validated method, DEAD END with generic brain (heuristic deck L1 12.5%, search deck L1 3.8% — 78% gauntlet was a same-brain mirror illusion). Subsystem in `rl/robust_*`, `rl/gauntlet.py`; outputs `report/robust_deck_rl/` (+ `_search/`). Don't re-run for ladder gains.
-- **Scoring model:** per-game reward is binary ±1; the 600–1300 score is TrueSkill μ; compounds by beating strong (=Lucario) opponents. No hidden per-game points.
-- **Code health:** `scripts/analyze_winners.py` reviewed + simplified (dropped an unreliable prize-count metric). `scripts/gate_track_b.py` opponent-tuple fix verified.
+- **Latest commit:** `cc34059` — `rl_mcts_basic/*/run_meta.json`; field trainer is **untracked** under `notebooks/rl_mcts_field_train/`
+- **Ladder (basic MCTS probes):** Lucario **899.6** ref 53946742; Alakazam **185.4** ref 53946148 — verify stability before trusting
+- **Protected baselines:** Search Lucario **668 μ**, imported Alakazam **659**, Kyogre heuristic **633**
+- **Packaging:** `scripts/package_submission.py --scorer lucario_mcts --model <pth> --meta <run_meta.json>` — `run_meta.config` must be nested or model silently falls back to RuleCore
+- **Field trainer:** `notebooks/rl_mcts_field_train/run_field_train.py` + `decks/` (10 `real_*`/`top_mined_*` CSVs) + `rl_mcts_field_train.ipynb`
+- **Resume checkpoints (gitignored):** `rl_mcts_basic/lucarioex_basic/model4 (1).pth`, `rl_mcts_basic/alakazam_basic/model4.pth`
+- **Prior failures:** basic sample/mirror-only → 324–500 μ; AZ Fix #2 → 9.7% L1; `pool_*` proxies mispredict μ (RULINGS R2)
+- **Monitor:** `kaggle competitions submissions pokemon-tcg-ai-battle -v`; `python scripts/track_ladder.py`
+- **Upload policy:** user OK; 5/day; manually pick 2 Finals on Kaggle
 - **GPU:** `C:\Users\tobin\AppData\Local\Programs\Python\Python313\python.exe` (cu128)
-- **Upload:** user OK required; protect the 668 Final
 
 ## Continue prompt
 
 ```text
-Continue PTCG ladder work. Read first: @.cursor/SESSION.md, @report/handoffs/deck_rl_continuation_20260621.md, @report/winner_analysis_20260621.md, @data/SUBMISSION_PLAYBOOK.md, @PROGRESS.md (top).
+Continue field-opponent RL+MCTS training. Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @.cursor/SESSION.md, @notebooks/rl_mcts_field_train/README.md, @notebooks/rl_mcts_field_train/run_field_train.py, @RULINGS.md
 
-Goal: climb μ; protect the 668 Search Lucario Final; upload only with explicit user OK.
-Status (2026-06-21): 2/5 slots used — Alakazam best5 636.8, Trevenant 597.7 (both COMPLETE). HOLD remaining 3 slots; neither beats 668. Do NOT re-submit Alakazam/Trevenant (a stale Session 38 doc wrongly says "submit Trevenant Slot 3" — it's done).
-Key finding: field is a RPS triangle (Lucario→Bellibolt→Alakazam→Lucario); Lucario = 53% of decks; the Lucario MIRROR is ~30% of games, 50/50 on deck, decided by PILOT. Robust deck search is a proven dead end with a generic brain — pilot >> deck.
-Next (highest leverage): improve Search Lucario MIRROR play (prize-trade sequencing, KO tempo; field is aggressive ~12 turns). Baseline with `gate_vs_public.py --only lucario --games 30`. Then fix Alakazam's Bellibolt/Iono hole. Run `scripts/analyze_winners.py` on each new daily dump.
+Goal: run 5-cycle field training on Kaggle (mined opponents), resume from model4, then package/gate any winner.
+Status: basic MCTS probes COMPLETE — Lucario 899.6 (53946742), Alakazam 185.4 (53946148); field trainer built but uncommitted/unrun.
+Next: commit notebooks/rl_mcts_field_train/, run rl_mcts_field_train.ipynb on Kaggle GPU with --resume model4; re-fetch Lucario μ before Final decision.
 
-Branch: main (ahead) | Env: Python313 cu128 | Upload only with user OK
+Branch: main | Env: Python313 cu128 | Upload only with user OK
 ```
 
 ## Timeline
 
+- **2026-06-22T18:00:00Z** | handoff by user | conv `5c4c9d5d`
+- **2026-06-22** | Built field-opponent trainer `notebooks/rl_mcts_field_train/`; basic MCTS ladder reads Lucario 899.6 / Alakazam 185.4
+- **2026-06-22T12:59:00Z** | handoff by user | conv `5c4c9d5d`
+- **2026-06-22** | Submitted basic RL+MCTS Alakazam (53946148) + Lucario ex (53946742); fixed run_meta packaging bug
 - **2026-06-21** | Submitted Alakazam best5 (636.8) + Trevenant (597.7); HOLD remaining slots
-- **2026-06-21** | Built `analyze_winners.py` field analysis → RPS triangle + Lucario-mirror lever; downloaded episodes-index; code-review + simplify of the analyzer
+- **2026-06-21** | Built `analyze_winners.py` field analysis → RPS triangle + Lucario-mirror lever
 - **2026-06-21** | Robust deck search proven dead-end (Search-pilot L1 3.8%); pivot to pilot/mirror work
 - **2026-06-20T17:05:00Z** | handoff by user | conv `lucario-top-performer-v1`
 - **2026-06-20T20:30:00Z** | handoff by user | conv `lucario-hybrid-v2`

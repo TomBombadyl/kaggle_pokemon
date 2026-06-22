@@ -1,2 +1,0 @@
-gen,best_robust,best_mean,best_maximin,best_worst,holdout_robust,holdout_maximin,n_opponents,games_simulated,games_predicted,elapsed_s
-0,0.0002,0.3331,0.0,"('058_alakazam__w1.00', 0.0)",0.1214,0.0,59,256,0,71.8

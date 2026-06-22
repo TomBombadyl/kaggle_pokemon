@@ -1,76 +1,51 @@
-# PTCG AI Battle Challenge — Strategy Category
+# PTCG AI Battle Challenge — project workspace
 
-Autonomous project workspace for the Kaggle competition
-**[The Pokémon Company – PTCG AI Battle Challenge Strategy](https://www.kaggle.com/competitions/pokemon-tcg-ai-battle-challenge-strategy)** (comp #131772).
+Workspace for the Kaggle **[PTCG AI Battle Challenge](https://www.kaggle.com/competitions/pokemon-tcg-ai-battle-challenge-strategy)**
+(Strategy track, ends 2026-09-14) and its sibling **Simulation** ladder
+([pokemon-tcg-ai-battle](https://www.kaggle.com/competitions/pokemon-tcg-ai-battle), the live μ
+ranking). The project was reset on 2026-06-22 (Session 44) — see `RULINGS.md` for why.
 
----
+## Read in this order (the only 4 canonical docs)
 
-## What this is
+| # | File | What it is |
+|---|------|-----------|
+| 1 | **`STATE.md`** | Current state + the single next action. The one handoff. |
+| 2 | **`RULINGS.md`** | Everything tried, the measured outcomes, why, and the standing rulings. |
+| 3 | **`ARCHITECTURE.md`** | The rebuilt system: all 5 pillars on one shared foundation. |
+| 4 | **`AGENTS.md`** | Operating contract for anyone (human or agent) working here. |
 
-A self-managing project folder. A scheduled "bot" runs **every night at 9pm** and
-picks up the next unfinished item in `TASKS.md`, works through tasks in order until
-the run ends, then logs what it did to `PROGRESS.md` and leaves a clean handoff.
+`TASKS.md` is the build-order backlog. `data/` holds official rules/card CSVs (source citations).
+There are no other top-level handoff/instruction files by design (Ruling R10).
 
-**State lives in this folder** — not in any single chat. That is what makes the
-nightly runs continuous.
+## The one-paragraph situation
 
----
+The game is an **imperfect-information** card game (opponent hand/deck/prizes are hidden —
+`RULINGS.md` Part 4), scored by a TrueSkill-style μ on a live ladder. After 43 sessions, our best
+agent is hand-tuned **search/rules at ~668 μ**; every RL/MCTS/deck-GA experiment underperformed it,
+so they were pruned. The rebuild keeps the rules spine as the proven floor and grows capability on
+top of it — a strong decision policy (determinized/information-set search + belief priors from
+episode data), a daily meta tracker, and scoped deck discovery — all measured against the **real
+field**, never proxy decks.
 
-## Competition facts (verified June 2026)
+## Repository map
 
-- **Category:** Strategy (this comp). Runs **June 16 – Sep 14, 2026**.
-- **Sibling comp:** Simulation Category (ends Aug 17) — the agent battles.
-- **Provided by The Pokémon Company:** official rules, environment, a **simulator**
-  for training/evaluation, and a **2,000-card Standard-format database**.
-- **Agent interface:** each turn the agent receives an *observation* (game logs,
-  board state, list of legal options) and returns the **indices of chosen options**.
-- **Strategy ranking factors:** agent stability, deck design concepts, and
-  performance in the simulation phase, plus a written strategy report.
-- **Prizes:** top 8 advance ($30k each) to a Sep 2026 live tournament in Japan
-  ($50k winner / $30k runner-up).
-
-> Exact simulator API, observation schema, and submission format must be confirmed
-> from the competition's own docs — that is **Task 1** in `TASKS.md`.
-
----
+```
+STATE.md RULINGS.md ARCHITECTURE.md AGENTS.md TASKS.md   # canon
+core/        # card/rules/engine/obs model            (scaffold — build first)
+field/       # real-field decks + public agents       (scaffold)
+episodes/    # Kaggle episode pull/parse/store         (scaffold)
+eval/        # the one eval harness + gates            (scaffold)
+meta/        # daily meta map                          (scaffold)
+discovery/   # scoped deck search                      (scaffold)
+agent/       # SHIPPED spine: Heuristic + Search       (live — do not break)
+scripts/     # package/gate/mine/fetch helpers         (live)
+agent_decks/ # real_* + top_mined_* + benchmark/       (live)
+data/        # official rules + card CSVs + engine     (live)
+dist/        # packaged submissions                    (live)
+tests/       # legality/rules/harness tests            (to populate)
+```
 
 ## You must provide
-
-1. **Kaggle API token** — download `kaggle.json` from your Kaggle account
-   (Settings → API → "Create New Token") and place it at:
-   `Z:\kaggle\pokemon\.kaggle\kaggle.json`
-   The bot uses this to fetch the data, simulator, and (later) submit.
-2. **Keep this folder connected** when the 9pm run fires (see `PROGRESS.md` notes).
-
-Without the token, the bot will still work on offline tasks (code, report drafting)
-and log a note that download/submission is blocked.
-
----
-
-## Layout
-
-```
-pokemon/
-├─ README.md          ← this file
-├─ PROJECT_RULES.md   ← durable operating rules for future Codex runs
-├─ TASKS.md           ← sequential backlog (the bot's to-do list)
-├─ PROGRESS.md        ← append-only run log
-├─ requirements.txt   ← Python deps (re-installed each run)
-├─ .gitignore
-├─ agent/
-│  └─ agent.py        ← agent skeleton (choose_action interface)
-├─ scripts/
-│  └─ setup_env.sh    ← bootstrap: deps + Kaggle auth + data download
-├─ data/              ← downloaded card DB / simulator assets (git-ignored)
-└─ report/            ← strategy report drafts
-```
-
----
-
-## Testing & submission
-
-| Doc | Purpose |
-|-----|---------|
-| [`data/EVAL_PROTOCOL.md`](data/EVAL_PROTOCOL.md) | **How to test** — three optimization loops (Search / Policy RL / Deck RL), L0–L4 pyramid, brain×deck matrix |
-| [`data/SUBMISSION_PLAYBOOK.md`](data/SUBMISSION_PLAYBOOK.md) | Kaggle upload rules (5/day, 2 Finals) |
-| [`report/ladder_history.csv`](report/ladder_history.csv) | Ladder μ history |
+- **Kaggle API token** at `.kaggle/` (gitignored) — used to fetch data and pull episodes.
+- **A machine with Python ≥3.11** for the engine and the episode pull (this sandbox is 3.10 and has
+  no Kaggle egress).

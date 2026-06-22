@@ -1,143 +1,57 @@
-﻿# TASKS â€” sequential backlog
+# TASKS — build-order backlog
 
-The nightly bot works **top to bottom**. It does the next unchecked `[ ]` task,
-checks it `[x]` when done, and logs details in `PROGRESS.md`. Sub-steps can be added
-under any task. Do not skip ahead unless a task is blocked (mark `[blocked]` + reason).
+Work top to bottom. Each step ends with **something measurable**; nothing speculative ships
+(Ruling R3). Check `[x]` when done and log it in `STATE.md`. The full rationale for this order is
+`ARCHITECTURE.md` § Build order. The old 43-session backlog is in `graveyard/pre-reset-20260622`.
 
 ---
 
-## Phase 0 â€” Setup
-- [x] **T1. Confirm competition rules & interfaces.** DONE 2026-06-19. Confirmed from
-  official cabt Engine 0.1.0 docs; full schema in `data/CABT_API.md`; `agent/agent.py`
-  rewritten to the real `agent(obs_dict)->list[int]` interface.
-- [x] **T2. Configure environment.** DONE 2026-06-19. Deps install OK; `KGAT_` token
-  stored at `.kaggle/access_token` (works via kagglehub). Data fetch automated in
-  `scripts/fetch_card_data.{py,bat}`; card CSVs downloaded into `data/`. NOTE: sandbox
-  has no kaggle.com egress (download runs on user's machine); ladder harness needs
-  Python>=3.11 (sandbox 3.10; user machine has 3.11/3.13).
-- [x] **T3. Load & sanity-check the card database.** DONE 2026-06-19.
-  `scripts/summarize_cards.py` â†’ `data/CARDS_SUMMARY.md` (2,022 cards, 17 cols).
+## Foundation (must come first — every pillar depends on it)
 
-## Phase 1 â€” Baseline agent
-- [x] **T4. Wire the agent to the simulator.** DONE 2026-06-19. Engine fetched via
-  `scripts/fetch_sim_engine.py` â†’ `data/sim/sample_submission/cg/` (libcg.so + cg.dll).
-  `scripts/selfplay.py` drives `cg.game.battle_start/battle_select` directly (no
-  kaggle_environments; runs on Python 3.10). Full games complete with no errors.
-- [x] **T5. Legal-move random baseline + win-rate.** DONE 2026-06-19. Over 160 games
-  (sides swapped): random-vs-random **48.1%** (fair-harness sanity check). Heuristic
-  v0 vs random **7.5%** â€” the naive "attack-first" priority is WORSE than random.
-- [x] **T6. Study the sample rule-based agents** and document reusable patterns. DONE
-  2026-06-19 â†’ `data/META_NOTES.md` (also summarized in `PROGRESS.md`).
+- [ ] **F1. `core/` model + prove the foundation.**
+  - [ ] `core/cards.py` — typed registry from `data/EN_Card_Data.csv`.
+  - [ ] `core/engine.py` — wrapper over local `cg` engine (`data/sim/sample_submission/cg/`).
+  - [ ] `core/obs.py` + `tests/test_information_model.py` — **empirically verify** opponent hand =
+        count only, deck = count only, prizes face-down (RULINGS Part 4). *Needs Python ≥3.11.*
+  - [ ] `core/rules_notes.md` — consolidated verified rules digest.
+- [ ] **F2. `eval/` harness + `field/` registry.**
+  - [ ] Move `agent_decks/{real_*,top_mined_*}` → `field/decks/`; build `field/registry.json`.
+  - [ ] `eval/harness.py` (seeded, side-swapped, Wilson CI) + `eval/gates.py` (L0–L3, real-field only).
+  - [ ] **Re-measure the current spine on the real field** — establish the true ~668 floor with metadata.
+- [ ] **F3. Migrate + freeze the spine.** Move `agent/` → `agents/`, fix imports + packager, and
+      **confirm the smoke test passes** (Python ≥3.11) so we reproduce ~633–668. This is the
+      shippable baseline. *(Until F3, the spine stays in `agent/` — Ruling R7.)*
 
-## Phase 2 â€” Strategy & iteration
-- [x] **T7. Build a rule-based strategy v1** (priority: setup energy, develop board,
-  knockouts, prize trade). DONE 2026-06-19. `agent/agent.py` now develops before
-  attacking, benches optional setup Basics, picks max draw counts, and handles
-  common yes/no prompts. Measured heuristic-vs-random **78.0% over 200 games**.
-- [x] **T8. Deck design pass.** DONE 2026-06-19. Current Water Mega Abomasnow
-  concept recorded in `report/deck_concept_v1.md`; mirrored `deck.csv` into
-  `agent/deck.csv` for deck-selection mode.
-- [x] **T9. Iterate the agent.** DONE 2026-06-19 for this pass. Added
-  card-data-aware `CARD` context scoring: optional `TO_HAND`/`ATTACH_TO` choices
-  now take useful visible cards/energy, and visible cards are ranked by current
-  Water Mega Abomasnow deck roles. Measured heuristic-vs-random **86.3% over 300
-  games**, then **88.7% over a second 300-game verification run**, beating the
-  previous 78.0% best.
+## Episode data → meta (the golden ticket; runs on user's machine)
 
-## Phase 3 â€” Report & submission
-- [x] **T10. Draft the strategy report** in `report/` (logic, deck concept, stability).
-  DONE 2026-06-19 -> `report/strategy_report_draft.md`.
-- [x] **T11. Dry-run a submission** to confirm format; fix any packaging issues.
-  DONE 2026-06-19. Added `scripts/package_submission.py`; built
-  `dist/submission.tar.gz` locally, verified archive import/deck selection, and
-  ran one full cabt game from the unpacked archive. No Kaggle submission attempted.
-- [x] **T12. Polish report + finalize-agent planning checkpoint.** DONE 2026-06-19.
-  - [x] 2026-06-19: Saved research-backed next-phase plan in
-    `report/research_and_submission_plan.md`; updated stale strategy-draft metric
-    from 86.3% to latest 88.7%.
-  - [x] Freeze current v2 safety baseline as the first no-regression submission
-    candidate.
-  - [x] Build local evaluation matrix for multiple agents/decks before using the
-    five daily Simulation slots.
-  - Final Strategy report polish is now tracked as T17 so the next worker can
-    continue research/measurement first.
+- [ ] **D1. `episodes/pull.py`** (from `scripts/update_from_kaggle.py`): leaderboard, our
+      submissions, new replays. **User runs this — sandbox has no Kaggle egress.**
+- [ ] **D2. `episodes/parse.py` + `store/`** — replays → per-game records (one schema).
+- [ ] **D3. `meta/build_map.py` + `whatbeatswhat.py`** — archetype × archetype win matrix, field
+      shares, expected-WR-vs-mixture ranking. First dated `meta/reports/meta_YYYYMMDD.md`.
 
-## Phase 4 â€” Higher-ceiling agent research
-- [x] **T13. Build a multi-agent/deck evaluation matrix.** DONE 2026-06-19.
-  Added `agent_snapshots/v2_safety.py` and `scripts/eval_matrix.py`; supports
-  frozen snapshots, random baseline, side swapping, deck overrides, and CSV/Markdown
-  summaries under `report/eval/`.
-- [x] **T14. Add game telemetry.** DONE 2026-06-19. `scripts/eval_matrix.py`
-  now writes `report/eval/telemetry_<games>.csv` and `.md` unless
-  `--no-telemetry` is passed. It logs first/second, turns/steps, result reason
-  (`prize`, `deck_out`, `no_active`, `card_effect`), prize/deck counts, attackers,
-  first attack/evolution turns, evolution counts, missed attachment turns, and
-  decision context/type counts.
-- [ ] **T15. Create first five Simulation submission candidates.** A0 current safety
-  baseline; A1 state-aware attack/targeting; A2 reduced-energy Water list; A3
-  Water spread variant; A4 anti-ex/single-prize variant. Re-open official Strategy
-  and Simulation Kaggle pages before upload; reconfirm submission limits, package
-  format, final-submission rules, report requirements, and deadlines. Dry-run all
-  packages; submit only after explicit user confirmation.
-  - [x] 2026-06-19: Implemented initial A1 attack/targeting upgrade in
-    `agent/agent.py` while preserving `agent_snapshots/v2_safety.py`: lazy attack
-    metadata scoring, KO-aware attack choice, powered-attacker promotion, healing
-    target scoring, and opponent KO/damage target scoring. Verified on the
-    requested 20-game matrix; keep testing before packaging as a submission.
-  - [x] 2026-06-19: Rebuilt all five `dist/candidates/*.tar.gz` archives; ran
-    1000-game packaged validation for A1/A2/A4 vs default Abomasnow deck (0
-    draws, 0 unfinished). Audit + Wilson CI in
-    `report/candidate_package_audit.md`. Submit order: A2 â†’ A4 â†’ A1 pending
-    explicit user upload confirmation.
-  - [x] 2026-06-20: Prepared ranked 2026-06-21 five-agent upload slate in
-    `report/tomorrow_5_agent_slate_20260621.md`; packaged/gated LucarioSearch,
-    gen19 Search, Trevenant Search, gen19 Track B, and Kyogre Search backup.
-    RL iter5 imported but rejected for upload after 8/144 public gate.
-  - [x] 2026-06-20: Imported Ryotasueyoshi public rule-based Alakazam baseline
-    from Kaggle into `dist/candidates/ryotasueyoshi_alakazam_best5.tar.gz` via
-    `scripts/import_notebook_candidate.py`; archive random check passed 15/20
-    with no unfinished games; lightweight public gate was 40/71 = 56.3%.
-  - [blocked] 2026-06-21: Background deep validation — robust search completed
-    (gen 30/30 done, best_robust=0.4536 peaked gen2), but deep slate validation
-    stalled after starting `robust_pool_g24_search` (no output files produced).
-    Robust deck gates L1 = 12.5% (fails bar). 2026-06-21 slate remains valid
-    without validation; proceed with user-approved upload when ready.
-  - [x] 2026-06-21 (Session 37b): **SUBMITTED Alakazam best5** @ 12:45 UTC. μ=636.8 (exceeds forecast).
-  - [blocked] 2026-06-21 (Session 38): **HOLD Slot 2–4 pending +12h metrics check.** 
-    - Next: Pull Alakazam μ, σ², episodes from Kaggle (human action). If stable >630 → Slot 3 Trevenant; if <620 → Kyogre contingency.
-  - [blocked] 2026-06-22 (Session 43): **KAGGLE API BLOCKER: Sandbox has no API egress.** Prepared `scripts/update_from_kaggle.py` for user to run on their machine. See `report/handoffs/session_43_kaggle_update_action.md` for critical next-step action list.
-- [ ] **T16. Research-backed search/RL prototype.** Phase 0â€“3 foundation implemented
-  2026-06-19 (run 13): validate_deck + pool, arena/SPRT, OptionScorer refactor,
-  search/BC/RL pipelines, nightly orchestrator. Remaining: SPRT-passing gates and
-  ladder-confirmed probes.
-  - [x] 2026-06-19: `scripts/validate_deck.py` + 5 pool decks
-  - [x] 2026-06-19: `scripts/arena.py`, `scripts/stats_utils.py`, eval_matrix deck agents
-  - [x] 2026-06-19: `scripts/track_ladder.py`, pluggable `OptionScorer` in agent.py
-  - [x] 2026-06-19: Track A â€” evalfn, search_policy, deck_search, gate_track_a
-  - [x] 2026-06-19: Track B â€” features, collect_traces, train_bc, learned_policy, gate_track_b
-  - [x] 2026-06-19: RL â€” `rl/cabt_env.py`, `rl/league.py`, `rl/train_rl.py`, `scripts/distill_policy.py`
-  - [x] 2026-06-19: `scripts/nightly.py`, `report/finals_strategy.md`, `report/ladder_history.csv`
-  - [x] 2026-06-19 (run 33): SPRT gates complete; new RL deck validated at 90.67%, gate PASS; ladder analysis & readiness report prepared
-  - [x] 2026-06-20: Added `scripts/sweep_track_b_checkpoints.py` plus Kaggle wrapper to checkpoint, distill, gate, and package the best intermediate Track B PPO policy instead of final-only packaging.
-  - [x] 2026-06-20: Added `report/deck_rl_system_plan_20260620.md`, a concrete plan for archetype-aware card registry, legal deck genome, benchmark fitness, deck GA, per-deck Track B training, checkpoint sweeping, and ladder-probe discipline.
-  - [x] 2026-06-20: Added `data/SIMULATOR_RESOURCE_NOTES.md` and updated the deck-RL plan with user-provided simulator quirks, card metadata usage, and Kaggle episode replay/log mining guidance for BC/RL/IL.
-  - [x] 2026-06-20: Implemented Deck RL Phase 1 registry outputs with `scripts/build_card_registry.py`, generating `report/deck_rl/registry.json`, `report/deck_rl/candidate_registry.csv`, and `report/deck_rl/archetype_seed_notes.md`; added offline `scripts/mine_episode_replays.py` and generated empty schema-valid replay/mined-archetype indexes pending downloaded replay JSON.
-  - [x] 2026-06-20: Wired lane-aware deck GA from `report/deck_rl/candidate_registry.csv`: `rl/deck_lane_registry.py`, balanced lane seeding, same-lane crossover/mutation, and per-lane elite archive (`report/deck_rl/lane_elites.json`).
-  - [x] 2026-06-20: Deck RL Phase 2c â€” registry-backed `support_role_swap` + `chain_tune` in `rl/deck_genome.py` via `rl/deck_card_registry.py`; `tests/test_deck_genome_mutations.py`; 10-gen GA gen9 best 0.825, all 4 lanes alive (run 45).
-  - [x] 2026-06-20: Deck RL Phase 2d â€” `matchup_collapse_penalty` in deck GA fitness (`rl/deck_balance.py`, `rl/benchmark.py`, `rl/train_deck_campaign.py`); `tests/test_deck_collapse_penalty.py`; 20-gen GA gen19 best 0.753, all 4 lanes alive (run 47).
-  - [x] 2026-06-20: Deck RL Phase 2b â€” per-lane survivor quotas + round-robin same-lane breeding in `rl/train_deck_campaign.py`; `tests/test_deck_lane_selection.py`; smoke GA confirms all 4 lanes persist every generation (run 44).
-  - [x] 2026-06-20: Added first real RuleCore deck-tech layer (`agent/deck_tech.py`), `--scorer rulecore` packaging, and `scripts/trace_public_matchup.py`; packaged/gated `track_c_rulecore_tech_lucario`. Result: basic Crustle moved off 0% in targeted smoke, but full public gate was only 12.0%, so candidate is explicitly not submission-worthy.
-  - [x] 2026-06-20: RuleCore Crustle follow-up stayed in the wall-matchup lane: added search-card throttling, conservative setup benching, stronger Crustle `ATTACH_FROM` routing, and card IDs in traces. Best targeted kept sample was 15.0% Crustle-only; final retest 9.5%, so still not submission-worthy.
-  - [x] 2026-06-20: Added Lucario RL+MCTS post-run submission path: `agent/lucario_mcts_policy.py`, copied notebook runtime into `agent/lucario_mcts_runtime.py`, added `--scorer lucario_mcts` packaging with compact fp16 checkpoint copy, and `scripts/import_lucario_rl_outputs.py` to import/downloaded Kaggle outputs, package, and optionally public-gate before any upload.
-  - [x] 2026-06-20: Reconciled Lucario v2 handoff artifacts: added 3 Alakazam + 2 Trevenant leader benchmark decks, expanded `suite.json`, patched `gate_track_a.py` for `--agents lucario_search --output`, gated `lucario_search` at 313/450 (69.6%) vs expanded suite, and wrote `report/LUCARIO_V2_GATE.md` plus `report/search_audit_20260620.md`.
-  - [x] 2026-06-20: Ran robust deck-direction work against the 79-opponent mined gauntlet: added `scripts/evaluate_robust_deck_pool.py`, verified Python313 CUDA surrogate path, confirmed blind robust mutation search is still collapse-prone, and selected `agent_decks/deck_rl/gen19_fast_basic.csv` as the next deck-RL target over `top_mined_trevenant.csv` in a 12-game/opponent robust screen.
-  - [blocked] 2026-06-20: Alakazam Track B **1M GPU** train on `pool_alakazam_dudunsparce` â€” train complete, **not submission-worthy** (Kyogre holdout collapse, prior gate 32/110). See `report/handoffs/alakazam_track_b_1m_status.md`. Do not distill/gate/submit.
-- [ ] **T17. Final Strategy report polish.** Turn
-  `report/strategy_report_draft.md` into the final Strategy submission after the
-  next measured agent/deck pass and after official report requirements are
-  rechecked.
+## Decision policy (Pillar 3 — the ceiling; each stage gated vs the spine)
+
+- [ ] **P1. Pilot spine** consolidated/clean in `agents/` (the floor). *(= F3.)*
+- [ ] **P2. Bounded our-side lookahead** via engine `search_*` under a strong `board_value`.
+- [ ] **P3. Determinized opponent search (PIMC)** — sample K opponent hands/decks consistent with
+      public info + meta prior; average the lookahead.
+- [ ] **P4. ISMCTS** — only if PIMC's known weaknesses cost measurable μ.
+- [ ] **P5. Learned belief/opponent prior** from `episodes/store` (the only ML role Ruling R3
+      currently endorses, because search gates it).
+
+## Deck discovery (Pillar 4 — after the pilot floor ships)
+
+- [ ] **K1. Objective + scoping** — maximize `E[win vs field mixture]` for a fixed pilot, within a
+      type-coherent shell. Best-arm identification (successive halving / SPRT), not blind GA.
+
+## Orchestration (Pillar 5)
+
+- [ ] **O1. Daily loop**: pull → parse → meta → refresh field/prior → re-gate champion + contenders
+      → surface the single best next submission. `/schedule` once trusted.
 
 ---
 
 ## Done log
-_(bot moves completed top-level tasks here with a date)_
+_(move completed top-level steps here with a date)_
+- 2026-06-22 (S44): repo reset — RULINGS/ARCHITECTURE/STATE written, 532→~100 files, spine preserved.

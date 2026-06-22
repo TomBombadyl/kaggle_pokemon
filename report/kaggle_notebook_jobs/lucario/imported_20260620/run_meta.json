@@ -1,9 +1,0 @@
-{
-  "config": {
-    "D_MODEL": 256,
-    "NUM_HEADS": 4,
-    "D_FF": 512,
-    "ENC_LAYERS": 2,
-    "DEC_LAYERS": 2
-  }
-}

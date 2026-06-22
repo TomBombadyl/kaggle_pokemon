@@ -259,10 +259,7 @@ def _play_game_scored(job: tuple) -> tuple[int, int]:
         if scorer_name == "rulecore":
             from agent.rule_core import RuleCoreScorer
             return Agent(seed=seed, deck_path=path, scorer=RuleCoreScorer(deck_path=path))
-        if scorer_name == "learned":
-            from agent.learned_policy import LearnedScorer
-            kwargs = {"model_path": model_path} if model_path else {}
-            return Agent(seed=seed, deck_path=path, scorer=LearnedScorer(**kwargs))
+        # 'learned' scorer retired in the Session-44 reset (see RULINGS.md R3).
         return Agent(seed=seed, deck_path=path)
 
     pol0 = _agent(seed0, path0, scorer0, model0)

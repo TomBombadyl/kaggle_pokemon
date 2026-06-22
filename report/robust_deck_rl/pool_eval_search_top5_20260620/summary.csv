@@ -1,6 +1,0 @@
-deck,deck_path,robust_score,mean,cvar,maximin,worst,n_opponents,total_games
-top_mined_trevenant,agent_decks\top_mined_trevenant.csv,0.5557633693543917,0.6886949293433083,0.42283180936547515,0.0,"('a2_big_basic', 0.0)",79,474
-gen19_fast_basic,agent_decks\deck_rl\gen19_fast_basic.csv,0.5439179828207259,0.7090606816292602,0.3787752840121917,0.16666666666666666,"('033_lucario__w1.00', 0.167)",79,474
-robust_deck_rl/best_deck,report\robust_deck_rl\best_deck.csv,0.5290246605707952,0.669576059850374,0.3884732612912164,0.0,"('a2_basic_heavy_31_energy', 0.0)",79,474
-a2_kyogre_33_energy,agent_decks\a2_kyogre_33_energy.csv,0.5211623718481574,0.6760182876142976,0.36630645608201723,0.0,"('a2_kyogre', 0.0)",79,474
-gen19_spread_control,agent_decks\deck_rl\gen19_spread_control.csv,0.4879121640343586,0.6323773898586866,0.3434469382100306,0.0,"('a2_kyogre', 0.0)",79,474

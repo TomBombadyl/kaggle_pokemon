@@ -1,3 +1,0 @@
-agent_a,agent_b,games,a_wins,b_wins,draws,unfinished,a_win_rate_decided,avg_steps
-current,random,300,289,11,0,0,96.33,25.7
-random,current,300,11,289,0,0,3.67,25.9

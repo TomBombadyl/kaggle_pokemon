@@ -4,7 +4,8 @@ GPU / Kaggle notebook jobs for this repo.
 
 | Job | Path | Purpose |
 |-----|------|---------|
-| **Lucario RL+MCTS** | [`lucario/lucario_rl_mcts.ipynb`](lucario/lucario_rl_mcts.ipynb) | Track D: 40-iter MCTS self-play on Mega Lucario deck |
+| **Field RL+MCTS** | [`rl_mcts_field_train/`](rl_mcts_field_train/) | 5-cycle training vs mined `real_*` / `top_mined_*` opponent decks (Fix #2/#3) |
+| **Lucario RL+MCTS** | [`lucario/lucario_rl_mcts.ipynb`](lucario/lucario_rl_mcts.ipynb) | Track D: 40-iter MCTS self-play on Mega Lucario deck (retired) |
 | Lucario runtime (synced) | [`../agent/lucario_mcts_runtime.py`](../agent/lucario_mcts_runtime.py) | Mechanical copy of notebook training loop for local import |
 | Lucario import script | [`../scripts/import_lucario_rl_outputs.py`](../scripts/import_lucario_rl_outputs.py) | Package downloaded `model_best.pth` → `track_d_lucario_rl_mcts.tar.gz` |
 | Alakazam deep Track B | [`../report/kaggle_notebook_jobs/alakazam_deep_track_b.md`](../report/kaggle_notebook_jobs/alakazam_deep_track_b.md) | 1M GPU Learned spec (Python 3.13 + cu128) |

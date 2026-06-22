@@ -1,3 +1,0 @@
-deck,deck_path,robust_score,mean,cvar,maximin,worst,n_opponents,total_games
-gen19_fast_basic,agent_decks\deck_rl\gen19_fast_basic.csv,0.6095525076198394,0.7275561097256857,0.49154890551399305,0.3333333333333333,"('a2_kyogre', 0.333)",79,948
-top_mined_trevenant,agent_decks\top_mined_trevenant.csv,0.5735456182775385,0.6941264263583465,0.4529648101967305,0.25,"('a2_kyogre', 0.25)",79,945
