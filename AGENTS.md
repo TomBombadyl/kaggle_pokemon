@@ -18,7 +18,7 @@ The errors that stalled 43 sessions were mindset errors, not bad luck. Hold thes
 ## Start every session by reading, in order
 1. `STATE.md` — current state and the single next action.
 2. `.cursor/SESSION.md` — ephemeral session focus (Cursor hook; training PIDs, continue prompt).
-3. `RULINGS.md` — the standing rulings (R1–R10) and the record of what failed. **Do not re-run a
+3. `RULINGS.md` — the standing rulings (R1–R11) and the record of what failed. **Do not re-run a
    ruled-out experiment.**
 4. `ARCHITECTURE.md` — the pillar you're working on and its interface contract.
 5. `TASKS.md` — the build-order backlog; do the next unchecked item.
@@ -50,6 +50,8 @@ The errors that stalled 43 sessions were mindset errors, not bad luck. Hold thes
   handoff/instruction files.
 - Improve one concrete behavior at a time, re-measure, keep only what improves the gate or fixes
   legality/stability.
+- **Rules before mixture (R11):** global deck rules → per-opponent levers → then field-mixture
+  weighting for gates/training. See `TASKS.md` R1–R3.
 
 ## Before any Kaggle upload
 - Read `data/SUBMISSION_PLAYBOOK.md`: **5 uploads/day**, **2 Final Submissions** (select manually).

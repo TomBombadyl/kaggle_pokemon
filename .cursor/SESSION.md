@@ -1,43 +1,42 @@
 ﻿# Session state — PTCG AI Battle Challenge
 
-> Ephemeral handoff for Cursor. **Canonical state:** `STATE.md`. **Decisions/evidence:** `RULINGS.md`.
+> Ephemeral handoff for Cursor. **Canonical state:** `STATE.md`. **Decisions:** `RULINGS.md` (R11).
 
 ## Current focus
 
-Fresh local Lucario field RL+MCTS (CPU, d128) is the reference per-deck ML stack. Runtime rebuilt
-from the official RL sample with opponent-deck `search_begin`, draw=0 labels, and LucarioScorer
-fallback. **5-cycle training running in background** — cycle 2+ when last checked; **do not kill**
-the `train_lucario_field_mcts.py` process. When training finishes: package `model_best.pth` +
-`run_meta.json`, `gate_vs_public.py`, compare to SearchScorer 668 μ; upload only with user OK.
+**Standing build order (Session 44d):** (1) global best rules per deck → (2) per-opponent matchup
+levers → (3) field-mixture weighting. Meta tracker is phase-3 only — do not weight training or
+upload picks by distribution until phases 1–2 pass L1 gates. Lucario field RL train may still be
+running (check `metrics.csv`); RL does not replace missing global rules or levers (Abomasnow 0%).
 
 ## Key context
 
-- **Repo:** `Z:\kaggle\pokemon` | **Branch:** `main` | **Last commit:** `251da2b` (Lucario stack)
+- **Repo:** `Z:\kaggle\pokemon` | **Branch:** `main`
+- **Plan:** `ARCHITECTURE.md` § Per-deck template phases 1–3 | **Backlog:** `TASKS.md` R1–R3
+- **Ruling R11:** rules before mixture (`RULINGS.md` Part 3)
+- **Phase 1 next:** gate Lucario global rules (`lucario_policy.py`) vs real field — baseline WR
+- **Phase 2 first lever:** Lucario vs Abomasnow spread (0% in train eval)
+- **Phase 3 draft:** `report/OPPONENT_DECK_DISTRIBUTION.md`, `scripts/update_opponent_tracker.py`
+- **Lucario RL:** `rl_mcts_field/lucarioex_v1/metrics.csv` — cycle 3+; gate when done, R3 floor 668 μ
+- **Dragapult:** ladder ref `53950246` SUBMITTED_PENDING — wait for μ before Slot 2 decision
 - **Python:** `C:\Users\tobin\AppData\Local\Programs\Python\Python313\python.exe`
-- **Train:** `python scripts/train_lucario_field_mcts.py --device cpu --cycles 5 --time-budget-sec 21600`
-- **Log:** `rl_mcts_field/lucarioex_v1/train.log` | **Metrics:** `metrics.csv`
-- **Runtime:** `agent/lucario_mcts_runtime.py` (regen: `scripts/bootstrap_lucario_mcts_runtime.py`)
-- **Wrapper:** `agent/lucario_mcts_policy.py` | **Trainer:** `scripts/train_lucario_field_mcts.py`
-- **Engine:** `data/sim/sample_submission/cg/cg.dll`
-- **Docs updated:** `STATE.md`, `RULINGS.md`, `ARCHITECTURE.md`, `data/{EVAL_PROTOCOL,PROJECT_PRIORITIES}.md`
-- **Dragapult baseline:** `agent/dragapult_agent.py` — local gate only, ladder probe pending
-- **Floor:** SearchScorer **668 μ** | **Smoke gate (pre-train):** 6.7% public suite
-- **Retired:** `rl_mcts_basic/`, Kaggle notebook Lucario path, Track B/C loops
+- **Upload:** user OK only; ≥2 stable μ readings (R1)
 
 ## Continue prompt
 
 ```text
-Continue Lucario field RL+MCTS. Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @STATE.md, @.cursor/SESSION.md, @scripts/train_lucario_field_mcts.py
+Continue pilot rules build (phases 1–3). Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @.cursor/SESSION.md, @STATE.md, @ARCHITECTURE.md, @TASKS.md
 
-Goal: Finish 5-cycle CPU train and gate champion vs public opponents.
-Status: Background train — check rl_mcts_field/lucarioex_v1/train.log and metrics.csv.
-Next: When all 5 cycles done, package model_best + run_meta, gate_vs_public (30+ games), compare to 668 μ.
+Goal: Global rules per deck, then matchup levers, then mixture weighting — not the reverse.
+Status: R11 solidified; Lucario RL train cycle 3+; opponent tracker is phase-3 draft.
+Next: Gate Lucario global rules baseline (gate_vs_public rules-only), then add abomasnow_spread lever.
 
-Branch: main | Env: Python313 | Do not stop background training | Upload only with user OK
+Branch: main | Env: Python313 | Defer meta-weighted training until R1+R2 pass
 ```
 
 ## Timeline
 
-- **2026-06-22T14:28Z** | 5-cycle CPU train started
-- **2026-06-22T15:40Z** | handoff by user | conv `093ff243`
-- **2026-06-22T16:30Z** | full doc/state sync (STATE, RULINGS, EVAL_PROTOCOL, PROJECT_PRIORITIES, READMEs)
+- **2026-06-22T14:28Z** | 5-cycle CPU Lucario train started
+- **2026-06-22T15:40Z** | handoff | conv `093ff243`
+- **2026-06-22T16:30Z** | full doc sync (Session 44c)
+- **2026-06-22T17:15Z** | R11 rules-before-mixture + opponent tracker | handoff by user

@@ -8,6 +8,31 @@
 
 ---
 
+## As of 2026-06-22 (Session 44d — pilot rules before mixture weighting)
+
+**Standing build order (user decision, solidified):**
+
+1. **Global best rules** per deck — how our 60 plays by default (official sample + `deck_tech` + bench guard).
+2. **Per-opponent best rules** — matchup levers from visible board; one archetype at a time, gated.
+3. **Then** field-mixture weighting — opponent tracker, weighted gates, weighted RL sampling.
+
+Do **not** optimize training or upload priority by meta distribution until (1) and (2) pass L1 gates
+for each deck we're shipping. See `ARCHITECTURE.md` § Per-deck agent template (phases 1–3).
+
+**Meta tracker (phase 3 input, draft):** `report/OPPONENT_DECK_DISTRIBUTION.md`,
+`scripts/update_opponent_tracker.py` — refresh after `scripts/update_from_kaggle.py` on user machine.
+
+**Parallel (do not block phases 1–2):** Lucario field RL train — cycle 3+ per `metrics.csv`; gate when
+done but **RL does not replace weak global rules or missing levers** (Abomasnow still 0% at cycle 3).
+
+### THE SINGLE NEXT ACTION
+**Phase 1 for Lucario:** confirm `lucario_policy.py` global rules are the gated baseline — run
+`gate_vs_public.py` with SearchScorer/LucarioScorer rules-only, record per-opponent WR. Then
+**Phase 2:** add first matchup lever for `abomasnow_spread` (0% matchup) in `rule_core` / policy;
+re-gate that opponent only before moving to mixture weighting.
+
+---
+
 ## As of 2026-06-22 (Session 44c — Lucario field RL+MCTS, local fresh start)
 
 **Reference per-deck ML stack** built per `ARCHITECTURE.md` § Per-deck agent template. Fresh start —
@@ -33,8 +58,7 @@ python scripts/train_lucario_field_mcts.py --device cpu --cycles 5 --time-budget
 ```
 - **Log:** `rl_mcts_field/lucarioex_v1/train.log`
 - **Metrics:** `rl_mcts_field/lucarioex_v1/metrics.csv`
-- **Progress when docs updated:** cycle 2 eval in flight; cycle 1 promoted (`mean_eval_wr=41%`, loss 0.164).
-- **Known weak matchup:** Mega Abomasnow ex (0% through cycle 2 eval so far).
+- **Progress when docs updated:** cycle 3 eval complete in `metrics.csv`; Abomasnow still 0%; train may still be running cycles 4–5.
 - **Smoke checkpoint public gate:** 6.7% suite mean (expected pre-train; not shippable).
 
 ### THE SINGLE NEXT ACTION (when train finishes)

@@ -2,7 +2,30 @@
 
 Work top to bottom. Each step ends with **something measurable**; nothing speculative ships
 (Ruling R3). Check `[x]` when done and log it in `STATE.md`. The full rationale for this order is
-`ARCHITECTURE.md` § Build order. The old 43-session backlog is in `graveyard/pre-reset-20260622`.
+`ARCHITECTURE.md` § Build order and § Per-deck agent template (phases 1–3). The old 43-session backlog is in `graveyard/pre-reset-20260622`.
+
+---
+
+## Pilot rules — before mixture weighting (standing decision Session 44d)
+
+Work **per deck** (Lucario first, then Dragapult, Alakazam, …). Each sub-step is gated; one change at a time.
+
+- [ ] **R1. Global rules (phase 1).** For each deck: official sample → `agent/<archetype>_policy.py` +
+      `deck_tech` entry; L0 smoke + L1 `gate_vs_public.py` / deck-specific gate — record per-opponent WR baseline.
+  - [ ] Lucario: `lucario_policy.py` + `LUCARIO_TECH` — baseline gate vs 10 real-field decks.
+  - [ ] Dragapult: `dragapult_agent.py` — baseline gate (`gate_dragapult.py`); await ladder μ ref 53950246.
+  - [ ] Alakazam: port or re-gate imported best5 pilot on `top_mined_alakazam.csv`.
+- [ ] **R2. Matchup levers (phase 2).** Extend `rule_core.py` / policies: `detect_opponent_archetype()` tags
+      (`crustle_wall` exists; add `abomasnow_spread`, `iono_disrupt`, `lucario_mirror`, …). One lever per PR;
+      re-gate weak matchups; no regression on strong ones.
+  - [ ] Lucario vs Abomasnow (0% in RL eval) — first lever target.
+  - [ ] Alakazam vs Iono — first lever when Alakazam is in scope.
+- [ ] **R3. Field mixture (phase 3).** Only after R1+R2 floor stable:
+  - [ ] `scripts/update_from_kaggle.py` → leaderboard snapshot on user machine.
+  - [ ] Harden `scripts/update_opponent_tracker.py` → `report/OPPONENT_DECK_DISTRIBUTION.md`.
+  - [ ] Weighted gate: `E[win] = Σ share(a)·WR(ours,a)`; optional weighted opponent sampling in field RL.
+
+**Deferred until R1–R2 pass:** weighting Lucario field RL cycles by meta share; upload Slot 2/3 picks from mixture alone.
 
 ---
 
@@ -54,6 +77,7 @@ Work top to bottom. Each step ends with **something measurable**; nothing specul
 
 ## Done log
 _(move completed top-level steps here with a date)_
-- 2026-06-22 (S44c): **Lucario field RL+MCTS stack** — `lucario_mcts_runtime.py`, `train_lucario_field_mcts.py`, `lucario_mcts_policy.py`, bootstrap/smoke/cleanup scripts; sim docs; `ARCHITECTURE.md` per-deck template; committed `251da2b`, pushed `main`. 5-cycle CPU train **in progress** → `rl_mcts_field/lucarioex_v1/`.
+- 2026-06-22 (S44d): **R11 rules-before-mixture** — phases 1–3 in ARCHITECTURE/TASKS/RULINGS; opponent tracker draft; next: Lucario global gate + Abomasnow lever.
+- 2026-06-22 (S44c): **Lucario field RL+MCTS stack** — runtime, trainer, policy wrapper; committed `251da2b`; 5-cycle CPU train → `rl_mcts_field/lucarioex_v1/`.
 - 2026-06-22 (S44b): **Dragapult ex baseline** — `agent/dragapult_agent.py`, `agent_decks/dragapult_ex_sample.csv`, `scripts/gate_dragapult.py`; local gate 78–88% vs pilot brains (filter only).
 - 2026-06-22 (S44): repo reset — RULINGS/ARCHITECTURE/STATE written, 532→~100 files, spine preserved.

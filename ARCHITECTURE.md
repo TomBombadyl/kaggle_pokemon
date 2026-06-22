@@ -189,16 +189,32 @@ Every future Pokémon/deck we train (Lucario, Alakazam, Dragapult, …) follows 
 | **4. Optional search** | `SearchScorer` / shallow `search_*` on high-value contexts | Only after rules are stable; must beat rules-only on L1 gate |
 | **5. Optional RL+MCTS** | Official RL+MCTS sample + **field** training (`scripts/train_*_field_mcts.py`) | Real opponent deck in `search_begin`; train vs `field/decks/`; champion gate; **LucarioScorer fallback** at inference |
 
-**Bootstrap order for a new deck:**
-1. Pull/import the organizer's rule-based sample notebook for that deck (if it exists).
-2. Port to `agent/<archetype>_policy.py` + `deck_tech` entry + validate deck CSV.
-3. Gate L0–L1 vs real-field registry before any ML.
-4. Add matchup levers one archetype at a time (measure each change).
-5. Only then: field RL+MCTS warm-start from rules, not from Snorlax/sample-deck training.
+**Bootstrap order for a new deck (standing decision — Session 44d):**
 
-**Explicitly retired:** separate agents per opponent; `pool_*` proxies; mirror-only or random-only training/eval; shipping ML without beating the rule+search floor for *that* deck.
+> **Do not weight training or optimize for field mixture until layers 1–3 are gated.**
 
-Lucario is the reference implementation: `lucario_policy.py` + `LUCARIO_TECH` + `train_lucario_field_mcts.py`.
+| Phase | What | Gate | Blocks |
+|-------|------|------|--------|
+| **1 — Global rules** | Official sample → `<archetype>_policy.py` + `deck_tech` entry; never-crash; bench guard; how *our* 60 plays by default | L0 + L1 vs **all** real-field decks (equal weight) | Everything below |
+| **2 — Matchup levers** | `detect_opponent_archetype()` from visible board → thin score deltas per tag (Boss timing, wall line, race vs control) in `rule_core` / policy; **one lever at a time** | L1 re-gate: that archetype WR must improve; no regression elsewhere | Search, RL, mixture weighting |
+| **3 — Field mixture** | `report/OPPONENT_DECK_DISTRIBUTION.md` + episode meta → weighted eval `E[win]=Σ share·WR`; opponent sampling weights in field RL | Only after phase 1–2 floor is stable per deck | Deck discovery, upload priority |
+
+**Per-deck checklist (repeat for Lucario, Dragapult, Alakazam, …):**
+1. Import organizer rule sample → `agent/<archetype>_policy.py` + `deck_tech` + validate CSV.
+2. **Phase 1:** Gate global rules vs real-field registry (30g/opp) — establish deck baseline WR.
+3. **Phase 2:** Add levers for weakest matchups first (e.g. Lucario vs Abomasnow 0%, Alakazam vs Iono); measure each change.
+4. **Phase 3:** Pull leaderboard/episodes → update opponent tracker → weighted gates + optional RL opponent sampling.
+5. **Only then:** search (layer 4) or field RL+MCTS (layer 5) — must still beat rules+search floor (R3).
+
+**Current code map:**
+- Global rules: `lucario_policy.py`, `dragapult_agent.py`, `deck_tech.py` (`LUCARIO_TECH`, `ALAKAZAM_TECH`)
+- Matchup levers (partial): `rule_core.py` (`crustle_wall`, `water` tags) — extend to `iono`, `lucario_mirror`, `abomasnow_spread`, …
+- Meta / mixture (phase 3, draft): `report/OPPONENT_DECK_DISTRIBUTION.md`, `scripts/update_opponent_tracker.py`
+
+**Explicitly retired / deferred:** separate agents per opponent; `pool_*` proxies; mirror-only training;
+shipping ML before rules floor; **weighting field RL or gates by meta share before phases 1–2 pass**.
+
+Lucario reference: `lucario_policy.py` + `LUCARIO_TECH` + (phase 5) `train_lucario_field_mcts.py`.
 
 ---
 

@@ -190,6 +190,9 @@ Real-meta lists (mined from competition episodes) — these are the field, keep 
 - **R10 — One source of truth per concern.** Decisions → this file. Current state/next action →
   `STATE.md`. System design → `ARCHITECTURE.md`. Game/API facts → `data/` canon. No new
   top-level handoff/instruction files. (This ruling exists to prevent the sprawl we just cleaned.)
+- **R11 — Rules before mixture.** For each deck: (1) gate global rules on the real field, (2) add
+  matchup levers one archetype at a time with measured improvement, (3) only then weight eval/training
+  by field distribution. Meta tracker informs phase 3; it does not skip phases 1–2. (Decision: Session 44d.)
 
 ---
 

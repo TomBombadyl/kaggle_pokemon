@@ -9,15 +9,16 @@ git show graveyard/pre-reset-20260622:PROGRESS.md   # full historical run log
 
 Going forward there is **one** handoff/state file — [`STATE.md`](STATE.md) — not two parallel logs
 (Ruling R10). The consolidated record of what every past session tried and why it failed now lives
-in [`RULINGS.md`](RULINGS.md), which is far more useful than the chronological log it replaces.
+in [`RULINGS.md`](RULINGS.md).
 
 **Where things went:**
 - *What's true now + next action* → `STATE.md`
 - *Ephemeral Cursor session* → `.cursor/SESSION.md`
-- *What we tried + why (the 43-session synthesis)* → `RULINGS.md`
-- *What we're building* → `ARCHITECTURE.md`
-- *How to work here* → `AGENTS.md`
+- *What we tried + why* → `RULINGS.md`
+- *What we're building* → `ARCHITECTURE.md` (§ Per-deck template phases 1–3)
+- *Build backlog* → `TASKS.md` (R1–R3 pilot rules)
 
-**Latest (2026-06-22, Session 44c):** Local Lucario field RL+MCTS stack committed (`251da2b`);
-5-cycle CPU training running → `rl_mcts_field/lucarioex_v1/`. Next: finish train → package →
-`gate_vs_public` → compare to SearchScorer 668 μ before any upload.
+**Latest (2026-06-22, Session 44d):** Standing order solidified — **(1) global rules per deck →
+(2) per-opponent matchup levers → (3) field-mixture weighting**. Meta tracker is phase-3 input.
+Lucario field RL train cycle 3+ in `metrics.csv`. Next: gate Lucario global rules baseline, then
+first Abomasnow lever.
