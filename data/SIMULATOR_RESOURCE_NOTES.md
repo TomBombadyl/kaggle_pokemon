@@ -70,6 +70,26 @@ Implication:
 - Tactical logic should not rely on official simultaneous Prize semantics.
 - RL reward shaping should treat simulator result as authoritative, especially
   in spread/self-damage archetypes where simultaneous KOs are more likely.
+- **Training:** terminal value **0.0 for draws** (`result == 2`); do not backprop
+  win/loss labels on simultaneous final-prize draws.
+
+### Setup phase forced benching
+
+During initial setup, the simulator may **require** placing additional Basic
+Pokémon on the bench when they are in the opening hand (`minCount` on setup
+selects). There is no manual "skip benching" toggle.
+
+Implication:
+
+- Do not assume the agent can hoard setup Basics for later turns.
+- `agent/lucario_policy.py` scores `SETUP_BENCH_POKEMON` via `setup_bench_target_count`.
+- RL self-play only sees **legal** setup options from the mask — no special case needed.
+
+### Inference time budget (10 minutes per player)
+
+Kaggle forfeits on cumulative decision-time overrun. Keep `SEARCH_COUNT` modest
+at inference (default 12 via `LUC_SUBMIT_SEARCH_COUNT`). Training uses the same
+count; bottleneck is simulator rollouts, not GPU.
 
 ## Episode Replay Dataset And BC/RL/IL Use
 

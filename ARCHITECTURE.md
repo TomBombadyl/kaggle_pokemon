@@ -175,6 +175,33 @@ nightly: episodes/pull → parse → meta/build_map → refresh field registry &
 
 ---
 
+## Per-deck agent template (standard for every archetype)
+
+**Invariant:** one deck, one brain, matchup **levers** — never a separate full agent per opponent.
+
+Every future Pokémon/deck we train (Lucario, Alakazam, Dragapult, …) follows the same stack:
+
+| Layer | Start from | Role |
+|-------|------------|------|
+| **1. Rule pilot** | Official Kaggle sample for that archetype (e.g. kiyotah Lucario notebook → `agent/lucario_policy.py`) | Legal, never-crash spine; encodes how *this* deck is meant to be played |
+| **2. Deck tech** | `agent/deck_tech.py` — gust/draw/search/stadium/setup priorities for *our* 60 | Small card-ID tables; not a second brain |
+| **3. Matchup levers** | Opponent archetype detected from **visible** board (active/bench IDs) → tag | Thin score deltas (Boss timing, bench depth, race vs control, wall-breaker line) — not RuleCore-style per-opponent agents |
+| **4. Optional search** | `SearchScorer` / shallow `search_*` on high-value contexts | Only after rules are stable; must beat rules-only on L1 gate |
+| **5. Optional RL+MCTS** | Official RL+MCTS sample + **field** training (`scripts/train_*_field_mcts.py`) | Real opponent deck in `search_begin`; train vs `field/decks/`; champion gate; **LucarioScorer fallback** at inference |
+
+**Bootstrap order for a new deck:**
+1. Pull/import the organizer's rule-based sample notebook for that deck (if it exists).
+2. Port to `agent/<archetype>_policy.py` + `deck_tech` entry + validate deck CSV.
+3. Gate L0–L1 vs real-field registry before any ML.
+4. Add matchup levers one archetype at a time (measure each change).
+5. Only then: field RL+MCTS warm-start from rules, not from Snorlax/sample-deck training.
+
+**Explicitly retired:** separate agents per opponent; `pool_*` proxies; mirror-only or random-only training/eval; shipping ML without beating the rule+search floor for *that* deck.
+
+Lucario is the reference implementation: `lucario_policy.py` + `LUCARIO_TECH` + `train_lucario_field_mcts.py`.
+
+---
+
 ## How the pillars interlock (the anti-sprawl invariant)
 
 ```

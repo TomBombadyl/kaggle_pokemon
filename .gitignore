@@ -41,6 +41,9 @@ agent/models/*.npz
 agent/models/rl_policy.zip
 agent/models/rl_policy_campaign.zip
 
+# Local RL+MCTS training outputs (regenerated)
+rl_mcts_field/
+
 # Runtime eval / gate outputs (regenerated)
 report/public_gate/
 report/submission_stats/

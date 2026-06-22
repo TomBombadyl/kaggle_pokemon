@@ -27,13 +27,15 @@ def _resolve_deck_path() -> str:
     if env and os.path.exists(env):
         return env
     here = os.path.dirname(os.path.abspath(__file__))
+    packaged = os.path.join(here, "deck.csv")          # tarball layout (deck.csv beside module)
+    if os.path.exists(packaged):
+        return packaged
     repo_default = os.path.join(here, "..", "agent_decks", "dragapult_ex_sample.csv")
     if os.path.exists(repo_default):
         return repo_default
-    local = "deck.csv"
-    if os.path.exists(local):
-        return local
-    return "/kaggle_simulations/agent/deck.csv"
+    if os.path.exists("deck.csv"):                     # cwd
+        return "deck.csv"
+    return "/kaggle_simulations/agent/deck.csv"        # Kaggle runtime
 
 
 with open(_resolve_deck_path(), "r") as file:
@@ -906,13 +908,33 @@ def _is_legal(out, obs_dict: dict) -> bool:
     return min_c <= len(out) <= max_c
 
 
+_LOG = os.environ.get("DRAGAPULT_LOG") == "1"   # env-gated decision trace (off by default)
+
+
+def _trace(obs_dict: dict, out: list[int], fellback: bool) -> None:
+    """Compact one-line decision trace to stdout. Kaggle captures agent stdout per
+    step (fetchable via scripts/fetch_agent_logs.py), so this is extractable for
+    later eval. Never raises. Off unless DRAGAPULT_LOG=1."""
+    try:
+        cur = obs_dict.get("current") or {}
+        sel = obs_dict.get("select") or {}
+        print(f"DRG turn={cur.get('turn','?')} ctx={sel.get('context','?')} "
+              f"n={len(sel.get('option', []))} pick={out}{' FALLBACK' if fellback else ''}",
+              flush=True)
+    except Exception:
+        pass
+
+
 def agent(obs_dict: dict) -> list[int]:
     """Public entry point: runs the sample logic but never crashes and never
     returns an illegal selection (falls back to a legal default on any problem)."""
+    out, fellback = None, False
     try:
         out = _agent_impl(obs_dict)
-        if _is_legal(out, obs_dict):
-            return out
+        if not _is_legal(out, obs_dict):
+            out, fellback = _legal_fallback(obs_dict), True
     except Exception:
-        pass
-    return _legal_fallback(obs_dict)
+        out, fellback = _legal_fallback(obs_dict), True
+    if _LOG:
+        _trace(obs_dict, out, fellback)
+    return out
