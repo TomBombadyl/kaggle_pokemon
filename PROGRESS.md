@@ -6,6 +6,67 @@ step** so the following run can resume instantly.
 
 ---
 
+### 2026-06-22 (Session 42 — RL training fixed+optimized; strongest-strategy analysis)
+- **Strongest-strategy analysis** (`scripts/analyze_strategies.py`, full 5,584-game dump + our 36
+  games → `report/strategy_analysis_20260622.md`): winning = **aggressive KO-race on a hub deck,
+  closed ~turn 12**; control/deck-out underperforms. **Pilot decides** — top teams 66–75% over
+  90–135 games vs the 52.5% Lucario deck baseline. **Our gaps:** Lucario mirror 50%, vs-Alakazam
+  **25%**, and we lose close KO races (13 ko_race / 2 deck_out / 1 board_wipe of 16 losses).
+- **Scoring (from official rules):** per-game reward is binary ±1; ladder score is TrueSkill
+  N(μ,σ²) Bayes-updated per episode, weighted by opponent strength; σ shrinks with games. No
+  per-game points. (`data/OFFICIAL_OVERVIEW_SIMULATION_20260621.md`.)
+- **RL training fixed+optimized (`rl/az_train.py`):** had the sample notebook's 3 flaws (eval vs
+  random, mirror-only self-play, Snorlax opponent in MCTS).
+  - **Fix #1 (verified):** ladder-relevant eval — MCTS vs a real brain (`--eval-opponent
+    heuristic|search|lucario`) on real decks (`--eval-opp-decks`), per-matchup WR in history.json.
+    Fixed seat-alternation for asymmetric decks + missing `sys.path` for `agent`.
+  - **Fix #2 (verified):** matchup data collection — `--opponent-decks/--opponent-brain/
+    --opponent-games` collect our-side AZ samples vs a real opponent (learn the Alakazam hole).
+  - Deduped sample labeling into `_label_samples`. Fix #3 (MCTS Snorlax opponent prior) deferred.
+- **Code review + fixes:** caught/fixed `analyze_strategies.py` loss-classification arg-swap bug
+  (revealed real deck-out/board-wipe losses); reverted Session 41's untested `lucario_policy.py`
+  tuning edits (unvalidated, on our best agent).
+- **Ladder (no changes this session):** Lucario v2 **734.6** (new best, +66 over 668), Alakazam
+  659, Trevenant 615.6, gen19 576.4. NOT pinned (μ still firming; user wants more data first).
+- **Launched:** real AZ training run `report/az/lucario_az_v1` (8 rounds, search opponent, mirror
+  + Alakazam) — per-round mirror/Alakazam WR curve. Targets: mirror 50→60%, Alakazam 25→45%.
+- **NEXT (single exact action):** read `report/az/lucario_az_v1/history.json` WR curve when done;
+  if mirror/Alakazam WR climb, package the trained model (`--scorer lucario_mcts`) and L1-gate;
+  else add Fix #3 (realistic MCTS opponent prior). No uploads w/o user OK; protect 734.6/668.
+
+---
+
+### 2026-06-22 (Session 41 — autonomous: Lucario mirror tuning attempt — INCONCLUSIVE)
+- **Worked on:** Autonomous run per DAILY_RUNBOOK. Attempted to improve Search Lucario mirror play via policy tuning.
+- **Episode data mining:** SKIPPED (sandbox API egress blocker; documented constraint)
+- **Finding:** Baseline package uses wrong scorer
+  - Original: `SearchScorer` (generic) @ 14.4% vs lucario opponents
+  - Root cause: Should use `LucarioSearchScorer` (Lucario-specific)
+  - Fixed and rebuilt: `track_a_lucario_search_tuned.tar.gz`
+- **Policy tuning implemented:**
+  - Endgame penalty: `-500 → +200` (reward aggressive close-out in tempo-driven meta)
+  - Early KO bonus: `300 → 500` (boost reward for finishing weakened targets)
+  - Rationale: Field is 71.7% KO/prize race, median 12 turns; aggressive meta punishes turtling
+- **Result: NO IMPROVEMENT**
+  - Tuned version @ 12.4% vs lucario opponents (slightly worse than 14.4% baseline)
+  - Worst matchup unchanged: 3.3% vs public-915-lucario-search-baseline (1-29)
+  - Conclusion: Simple weight tuning insufficient; issue is deeper (strategy/architecture, not just parameters)
+- **Root cause analysis:** 
+  - Requires game replay analysis of mirror matchups to identify strategic gaps
+  - Estimated effort: 2–4h focused investigation (outside this session budget)
+  - Not a quick fix; likely needs search depth, eval function, or early-turn strategy changes
+- **Next candidates:** 
+  - Option A: Deep Lucario mirror investigation (later, dedicated session)
+  - Option B: Pivot to Alakazam anti-disruption (Priority #2, faster ROI; target Iono ≥40%)
+- **Deliverables:** `report/lucario_mirror_analysis_20260622.md`, `.cursor/SESSION_20260622_AUTONOMOUS.md`
+- **NEXT (single exact action):** 
+  1. **Human decision:** Pivot to Alakazam (easier fix) or continue Lucario investigation?
+  2. **If Alakazam:** Gate via `gate_vs_public.py --only iono --games 30` (target ≥40% WR)
+  3. **If Lucario:** Schedule dedicated replay-analysis + arch-review session
+- **Blockers:** Episode data mining (sandbox API), Lucario root-cause (time-intensive)
+
+---
+
 ### 2026-06-21 (Session 40 — FIELD MAP: why winners win + Lucario-mirror pivot)
 - **Worked on:** Understand *why* the winning agents win (user: "that's what we should care about
   every day"), build a repeatable daily analyzer, and reset strategy around the evidence.

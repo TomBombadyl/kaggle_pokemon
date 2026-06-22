@@ -36,6 +36,8 @@ import torch.nn.functional
 import torch.optim
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))  # make the repo `agent`/`scripts` packages importable
 
 
 def _bootstrap_engine() -> None:
@@ -513,6 +515,70 @@ def random_agent(obs_dict):
     return random.sample(list(range(len(obs.select.option))), obs.select.maxCount)
 
 
+def make_opponent(kind: str, deck_path: str):
+    """A competent eval opponent: obs_dict -> selection.
+
+    The sample/old code evaluated vs ``random_agent``, which does not predict
+    ladder skill at all. This lets eval measure win rate vs a real brain on a
+    real deck (e.g. the Lucario mirror, or the Alakazam counter) — the metrics
+    that actually move our TrueSkill mu. See report/strategy_analysis_*.md.
+    """
+    if kind == "random":
+        return random_agent
+    from agent.agent import build_agent
+    scorer = None  # Agent default == HeuristicScorer
+    if kind == "search":
+        from agent.search_policy import SearchScorer
+        scorer = SearchScorer()
+    elif kind == "lucario":
+        from agent.search_policy import LucarioSearchScorer
+        scorer = LucarioSearchScorer(deck_path=deck_path)
+    elif kind != "heuristic":
+        raise ValueError(f"unknown eval opponent: {kind}")
+    ag = build_agent(deck_path=deck_path, scorer=scorer)
+    return lambda obs_dict: ag.act(obs_dict)
+
+
+VALUE_LAMBDA = 0.9  # TD(lambda) blend of game result and bootstrapped value
+
+
+def _label_samples(samples, won, sink):
+    """Backprop the terminal result through one side's MCTS samples into `sink`."""
+    value = 1.0 if won else -1.0
+    for sample in reversed(samples):
+        sample.value = (value + sample.value) * 0.5
+        value = value * VALUE_LAMBDA + sample.value * (1.0 - VALUE_LAMBDA)
+        sink.append(sample)
+
+
+def collect_vs_opponent(deck, opp_deck, opp_move, model, search_count, n_games):
+    """Collect AZ training samples from OUR MCTS playing a real opponent deck+brain.
+
+    Self-play (deck vs itself) only teaches the mirror. To learn a specific
+    matchup (e.g. the Alakazam counter, our 25%% hole), we play our MCTS against
+    a competent opponent on its real deck and label only OUR side's moves by the
+    game result. Seats alternate so our deck is always on the MCTS seat.
+    """
+    out: list[LearnSample] = []
+    for g in range(n_games):
+        your_index = g % 2
+        decks = (deck, opp_deck) if your_index == 0 else (opp_deck, deck)
+        obs, start_data = battle_start(*decks)
+        if start_data.errorPlayer >= 0:
+            raise ValueError(f"deck error type={start_data.errorType} (opponent collection)")
+        mine: list[LearnSample] = []
+        while obs["current"]["result"] < 0:
+            if obs["current"]["yourIndex"] == your_index:
+                selected, sample = mcts_agent(obs, deck, model, search_count)
+                mine.append(sample)
+            else:
+                selected = opp_move(obs)
+            obs = battle_select(selected)
+        battle_finish()
+        _label_samples(mine, won=(obs["current"]["result"] == your_index), sink=out)
+    return out
+
+
 # ===================== deck loading =====================
 def load_deck(path: str) -> list[int]:
     p = Path(path)
@@ -533,6 +599,22 @@ def main(argv=None) -> int:
     ap.add_argument("--eval-games", type=int, default=50)
     ap.add_argument("--selfplay-games", type=int, default=100)
     ap.add_argument("--search-count", type=int, default=10)
+    ap.add_argument("--eval-opponent", default="heuristic",
+                    choices=("random", "heuristic", "search", "lucario"),
+                    help="brain the eval opponent uses ('random' = old, non-predictive behavior)")
+    ap.add_argument("--eval-opp-decks", default="",
+                    help="comma-separated opponent deck CSVs for eval matchups; "
+                         "blank = mirror (train deck vs itself). e.g. the Lucario mirror "
+                         "and agent_decks/real_alakazam*.csv (our 25%% hole)")
+    ap.add_argument("--opponent-decks", default="",
+                    help="comma-separated opponent deck CSVs to ALSO collect training data "
+                         "against (our MCTS vs a real brain on these decks; teaches specific "
+                         "matchups, e.g. the Alakazam counter). Blank = pure mirror self-play.")
+    ap.add_argument("--opponent-brain", default="heuristic",
+                    choices=("heuristic", "search", "lucario"),
+                    help="brain the data-collection opponent uses")
+    ap.add_argument("--opponent-games", type=int, default=0,
+                    help="games per opponent deck per round for matchup data collection")
     ap.add_argument("--d-model", type=int, default=128)
     ap.add_argument("--out-dir", default=None)
     args = ap.parse_args(argv)
@@ -558,32 +640,45 @@ def main(argv=None) -> int:
         sample_list: list[LearnSample] = []
         model.eval()
         move_times: list[float] = []
+        # Ladder-relevant eval: our MCTS policy vs a competent opponent on real
+        # decks. Each matchup reports its own win rate; the seat alternates so the
+        # MCTS side ALWAYS holds our deck even when the opponent deck differs.
+        matchups = ([("mirror", args.deck, deck)] if not args.eval_opp_decks.strip()
+                    else [(Path(p.strip()).stem, p.strip(), load_deck(p.strip()))
+                          for p in args.eval_opp_decks.split(",") if p.strip()])
+        eval_wrs = {}
         with torch.inference_mode():
-            results = [0, 0, 0]
-            for i in range(args.eval_games):
-                obs, start_data = battle_start(deck, deck)
-                if start_data.errorPlayer >= 0:
-                    raise ValueError(f"deck error type={start_data.errorType}")
-                your_index = i % 2
-                while obs["current"]["result"] < 0:
-                    if obs["current"]["yourIndex"] == your_index:
-                        mt = time.time()
-                        selected, _ = mcts_agent(obs, deck, model, args.search_count)
-                        move_times.append(time.time() - mt)
+            for label, opp_path, opp_deck in matchups:
+                opp_move = make_opponent(args.eval_opponent, opp_path)
+                results = [0, 0, 0]
+                for i in range(args.eval_games):
+                    your_index = i % 2
+                    # put our deck on the seat the MCTS plays
+                    decks = (deck, opp_deck) if your_index == 0 else (opp_deck, deck)
+                    obs, start_data = battle_start(*decks)
+                    if start_data.errorPlayer >= 0:
+                        raise ValueError(f"deck error type={start_data.errorType} ({label})")
+                    while obs["current"]["result"] < 0:
+                        if obs["current"]["yourIndex"] == your_index:
+                            mt = time.time()
+                            selected, _ = mcts_agent(obs, deck, model, args.search_count)
+                            move_times.append(time.time() - mt)
+                        else:
+                            selected = opp_move(obs)
+                        obs = battle_select(selected)
+                    battle_finish()
+                    r = obs["current"]["result"]
+                    if r == 2:
+                        results[2] += 1
+                    elif r == your_index:
+                        results[0] += 1
                     else:
-                        selected = random_agent(obs)
-                    obs = battle_select(selected)
-                battle_finish()
-                r = obs["current"]["result"]
-                if r == 2:
-                    results[2] += 1
-                elif r == your_index:
-                    results[0] += 1
-                else:
-                    results[1] += 1
-            wr = 100 * results[0] // max(1, results[0] + results[1])
-            print(f"[round {counter}] eval WR {wr}% (W{results[0]}/L{results[1]}/D{results[2]}) "
-                  f"avg_move {sum(move_times)/max(1,len(move_times)):.3f}s "
+                        results[1] += 1
+                wr = 100 * results[0] // max(1, results[0] + results[1])
+                eval_wrs[label] = wr
+                print(f"[round {counter}] {label} WR {wr}% vs {args.eval_opponent} "
+                      f"(W{results[0]}/L{results[1]}/D{results[2]})", flush=True)
+            print(f"[round {counter}] avg_move {sum(move_times)/max(1,len(move_times)):.3f}s "
                   f"max_move {max(move_times) if move_times else 0:.3f}s", flush=True)
 
             for _ in range(args.selfplay_games):
@@ -595,13 +690,18 @@ def main(argv=None) -> int:
                     obs = battle_select(selected)
                 battle_finish()
                 for i in range(2):
-                    LAMBDA = 0.9
-                    value = 1.0 if i == obs["current"]["result"] else -1.0
-                    for sample in reversed(samples[i]):
-                        label = (value + sample.value) * 0.5
-                        value = value * LAMBDA + sample.value * (1.0 - LAMBDA)
-                        sample.value = label
-                        sample_list.append(sample)
+                    _label_samples(samples[i], won=(i == obs["current"]["result"]),
+                                   sink=sample_list)
+
+            # Fix #2: matchup-specific data — our MCTS vs real opponent deck+brain.
+            if args.opponent_decks.strip() and args.opponent_games > 0:
+                for op in (p.strip() for p in args.opponent_decks.split(",") if p.strip()):
+                    opp_move = make_opponent(args.opponent_brain, op)
+                    got = collect_vs_opponent(deck, load_deck(op), opp_move, model,
+                                              args.search_count, args.opponent_games)
+                    sample_list.extend(got)
+                    print(f"[round {counter}] +{len(got)} matchup samples vs "
+                          f"{Path(op).stem} ({args.opponent_brain})", flush=True)
 
         model.train()
         random.shuffle(sample_list)
@@ -636,7 +736,7 @@ def main(argv=None) -> int:
             loss = loss_fn_enc(oe, lte) + (loss_fn_dec(od, ltd) * mt).sum() / float(BATCH)
             loss.backward()
             optimizer.step()
-        history.append({"round": counter, "eval_wr": wr, "samples": len(sample_list),
+        history.append({"round": counter, "eval_wr": eval_wrs, "samples": len(sample_list),
                         "elapsed_min": round((time.time() - t0) / 60, 1)})
         (out_dir / "history.json").write_text(json.dumps(history, indent=2))
 
