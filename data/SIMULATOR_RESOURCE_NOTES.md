@@ -1,6 +1,6 @@
 # Simulator Resource Notes
 
-Date: 2026-06-20 (updated with organizer dataset + rules text)
+Date: 2026-06-22 (updated: setup forced-bench, draw labels, local field RL)
 
 **Authority:** In this competition, **simulator behavior is correct behavior.** If official
 Pokémon TCG rules disagree, follow the simulator and the legal option mask from `cg`.

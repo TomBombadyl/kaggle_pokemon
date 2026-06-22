@@ -21,28 +21,37 @@ There are no other top-level handoff/instruction files by design (Ruling R10).
 
 The game is an **imperfect-information** card game (opponent hand/deck/prizes are hidden —
 `RULINGS.md` Part 4), scored by a TrueSkill-style μ on a live ladder. After 43 sessions, our best
-agent is hand-tuned **search/rules at ~668 μ**; every RL/MCTS/deck-GA experiment underperformed it,
-so they were pruned. The rebuild keeps the rules spine as the proven floor and grows capability on
-top of it — a strong decision policy (determinized/information-set search + belief priors from
-episode data), a daily meta tracker, and scoped deck discovery — all measured against the **real
-field**, never proxy decks.
+agent is hand-tuned **search/rules at ~668 μ**; every prior RL/MCTS/deck-GA experiment underperformed
+it and was pruned. The rebuild keeps the rules spine as the proven floor and grows capability on
+top of it — determinized/information-set search + belief priors from episode data, daily meta, and
+scoped deck discovery — all measured against the **real field**, never proxy decks.
+
+**Active experiment (Session 44c):** a **fresh** local Lucario field RL+MCTS stack
+(`scripts/train_lucario_field_mcts.py`, 5-cycle CPU train in progress). It must clear Ruling R3
+(real-field gate + ladder) before it replaces SearchScorer; see `STATE.md`.
 
 ## Repository map
 
 ```
 STATE.md RULINGS.md ARCHITECTURE.md AGENTS.md TASKS.md   # canon
+.cursor/SESSION.md                                      # ephemeral session (Cursor hook)
 core/        # card/rules/engine/obs model            (scaffold — build first)
 field/       # real-field decks + public agents       (scaffold)
 episodes/    # Kaggle episode pull/parse/store         (scaffold)
 eval/        # the one eval harness + gates            (scaffold)
 meta/        # daily meta map                          (scaffold)
 discovery/   # scoped deck search                      (scaffold)
-agent/       # SHIPPED spine: Heuristic + Search       (live — do not break)
-scripts/     # package/gate/mine/fetch helpers         (live)
-agent_decks/ # real_* + top_mined_* + benchmark/       (live)
+agent/       # SHIPPED spine + per-deck agents         (live — do not break)
+  lucario_policy.py, lucario_mcts_{runtime,policy}.py, dragapult_agent.py, …
+scripts/     # package, gate, train, fetch helpers     (live)
+agent_decks/ # real_* + top_mined_* + benchmark/       (live → migrate to field/decks/)
+rl_mcts_field/  # local Lucario train outputs (gitignored)
 data/        # official rules + card CSVs + engine     (live)
 dist/        # packaged submissions                    (live)
 tests/       # legality/rules/harness tests            (to populate)
+# Reference notebooks at repo root (not under notebooks/):
+reinforcement-learning-and-mcts-sample-code.ipynb
+a-sample-rule-based-agent-mega-lucario-ex-deck.ipynb
 ```
 
 ## You must provide

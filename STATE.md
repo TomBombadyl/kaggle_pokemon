@@ -4,10 +4,48 @@
 > `ACTION_REQUIRED_*` files that used to litter the root (Ruling R10). Newest state on top.
 > **Before acting, read `RULINGS.md` Part 0 — the operating mindset.** For *why* anything is the way
 > it is, read the rest of `RULINGS.md`. For *what we're building*, `ARCHITECTURE.md`.
+> Ephemeral session detail also lives in `.cursor/SESSION.md` (Cursor hook loads it).
 
 ---
 
-## As of 2026-06-22 (Session 44b — Dragapult ex baseline)
+## As of 2026-06-22 (Session 44c — Lucario field RL+MCTS, local fresh start)
+
+**Reference per-deck ML stack** built per `ARCHITECTURE.md` § Per-deck agent template. Fresh start —
+no Snorlax-era, `rl_mcts_basic/`, or Kaggle-notebook checkpoints.
+
+### What shipped (commit `251da2b`, pushed `main`)
+| Piece | Path |
+|-------|------|
+| Runtime (d128, opp deck in `search_begin`, draw=0 labels) | `agent/lucario_mcts_runtime.py` |
+| Regen from official RL sample | `scripts/bootstrap_lucario_mcts_runtime.py` |
+| Local field trainer (5 cycles × 10 real decks) | `scripts/train_lucario_field_mcts.py` |
+| Submission wrapper + LucarioScorer fallback | `agent/lucario_mcts_policy.py` |
+| Engine smoke | `scripts/smoke_cg_engine.py` |
+| Stale artifact cleanup | `scripts/cleanup_old_rl_artifacts.py` |
+| Reference notebooks | repo root: `reinforcement-learning-and-mcts-sample-code.ipynb`, `a-sample-rule-based-agent-mega-lucario-ex-deck.ipynb` |
+| Sim quirks (setup forced-bench, draw labels) | `data/SIMULATOR_RESOURCE_NOTES.md` |
+| Train outputs (gitignored) | `rl_mcts_field/lucarioex_v1/` |
+
+### Training status (IN PROGRESS — do not kill)
+```powershell
+# Running in background (Python 3.13, CPU):
+python scripts/train_lucario_field_mcts.py --device cpu --cycles 5 --time-budget-sec 21600
+```
+- **Log:** `rl_mcts_field/lucarioex_v1/train.log`
+- **Metrics:** `rl_mcts_field/lucarioex_v1/metrics.csv`
+- **Progress when docs updated:** cycle 2 eval in flight; cycle 1 promoted (`mean_eval_wr=41%`, loss 0.164).
+- **Known weak matchup:** Mega Abomasnow ex (0% through cycle 2 eval so far).
+- **Smoke checkpoint public gate:** 6.7% suite mean (expected pre-train; not shippable).
+
+### THE SINGLE NEXT ACTION (when train finishes)
+1. Confirm all 5 cycles complete in `train.log` / `metrics.csv`.
+2. Package champion: `scripts/package_submission.py --name track_d_lucarioex_field_v1 --scorer lucario_mcts --deck agent_decks/real_mega_lucario_ex.csv --model rl_mcts_field/lucarioex_v1/model_best.pth --meta rl_mcts_field/lucarioex_v1/run_meta.json`
+3. `python scripts/extract_public_agents.py` (if needed) then `python scripts/gate_vs_public.py` — 30+ games/opp, Wilson CI.
+4. Compare to **SearchScorer × real Mega Lucario ex ≈ 668 μ** floor (Ruling R3). **Upload only with explicit user OK** + ≥2 stable μ readings (Ruling R1).
+
+Until train completes: **leave the background process running**; offline work can continue on foundation (`core/`, `eval/`) without touching `agent/lucario_mcts_*` or killing PID.
+
+---
 
 **First agent built on the rebuilt foundation.** Took the official Kaggle "Rule-Based Agent for
 Dragapult ex" (Crispin aggressive variant) as the baseline and stood it up against our local engine
@@ -75,7 +113,7 @@ Evidence-ranked from the scoreboard (RULINGS Part 1), among current decks:
   `scripts/update_from_kaggle.py`) must run **on the user's machine**. This is *the* thing gating
   the meta tracker and belief priors — the highest-value unblock.
 
-### THE SINGLE NEXT ACTION
+### THE SINGLE NEXT ACTION (foundation — after Lucario train gates or in parallel)
 **Build-order step 1: stand up `core/` and prove the foundation.**
 1. `core/cards.py` — load `data/EN_Card_Data.csv` into a typed registry.
 2. `core/engine.py` — wrap the local `cg` engine (`data/sim/sample_submission/cg/`).

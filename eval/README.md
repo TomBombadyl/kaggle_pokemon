@@ -1,21 +1,27 @@
 # eval/ — the one evaluation harness (Foundation 0.4)
 
 The single way we measure anything (Rulings R1, R2, R8). If a number didn't come through here
-against the `field/` registry, it doesn't count. See `ARCHITECTURE.md` § Pillar 0.4.
+against the **real field**, it doesn't count. See `ARCHITECTURE.md` § Pillar 0.4.
 
-## Planned modules
-- `harness.py` — run brain×deck vs the `field/` registry, seeded, side-swapped; emit a result row
-  with full metadata (games, opponents, seeds, deck, brain, Wilson CI).
-- `gates.py` — the real-field-only gate pyramid:
-  - **L0** legality/smoke (never crash; always legal; bench guard).
-  - **L1** vs real-field decks + public agents, N≈30/opp, Wilson CI.
-  - **L2** SPRT vs the current shipped champion (does it beat the floor?).
-  - **L3** ladder probe — **≥2 μ readings ≥40 min apart** (Ruling R1).
-- `ladder_log.csv` — one append-only log (absorbs `../report/{ladder_history,submission_log}.csv`).
+## Interim (live scripts — use until `eval/harness.py` lands)
 
-## Seeds already present
-- `../scripts/{arena,gate_vs_public,stats_utils,track_ladder,verify_archive,smoke_test,validate_deck}.py`
-  — consolidate the useful logic here.
+| Script | Purpose |
+|--------|---------|
+| `scripts/gate_vs_public.py` | Spine + packaged candidates vs real decks + public agents |
+| `scripts/gate_dragapult.py` | Dragapult ex vs real-field set, seat-swapped, Wilson CI |
+| `scripts/arena.py` | Seeded matchups, metadata rows |
+| `scripts/smoke_test.py` | L0 legality / never-crash contract |
+| `scripts/smoke_cg_engine.py` | L0 engine `battle_start` smoke |
+| `scripts/stats_utils.py` | Wilson CI helpers |
+| `scripts/track_ladder.py` | Ladder μ sync + log fetch |
+| `scripts/verify_archive.py` | Post-package tarball smoke |
 
-**Definition of "validated":** passed L0–L2 on the real field, then L3 with two stable μ readings.
-Nothing ships otherwise.
+Full protocol: [`data/EVAL_PROTOCOL.md`](../data/EVAL_PROTOCOL.md).
+
+## Planned modules (TASKS F2)
+- `harness.py` — brain×deck vs `field/registry.json`, seeded, side-swapped.
+- `gates.py` — L0–L3 pyramid (real field only).
+- `ladder_log.csv` — append-only (absorbs `report/{ladder_history,submission_log}.csv`).
+
+**Definition of "validated":** L0–L2 on the real field, then L3 with **≥2 stable μ readings**
+≥40 min apart. Nothing ships otherwise.

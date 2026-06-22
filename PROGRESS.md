@@ -13,6 +13,11 @@ in [`RULINGS.md`](RULINGS.md), which is far more useful than the chronological l
 
 **Where things went:**
 - *What's true now + next action* → `STATE.md`
+- *Ephemeral Cursor session* → `.cursor/SESSION.md`
 - *What we tried + why (the 43-session synthesis)* → `RULINGS.md`
 - *What we're building* → `ARCHITECTURE.md`
 - *How to work here* → `AGENTS.md`
+
+**Latest (2026-06-22, Session 44c):** Local Lucario field RL+MCTS stack committed (`251da2b`);
+5-cycle CPU training running → `rl_mcts_field/lucarioex_v1/`. Next: finish train → package →
+`gate_vs_public` → compare to SearchScorer 668 μ before any upload.

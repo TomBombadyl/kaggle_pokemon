@@ -17,10 +17,11 @@ The errors that stalled 43 sessions were mindset errors, not bad luck. Hold thes
 
 ## Start every session by reading, in order
 1. `STATE.md` — current state and the single next action.
-2. `RULINGS.md` — the standing rulings (R1–R10) and the record of what failed. **Do not re-run a
+2. `.cursor/SESSION.md` — ephemeral session focus (Cursor hook; training PIDs, continue prompt).
+3. `RULINGS.md` — the standing rulings (R1–R10) and the record of what failed. **Do not re-run a
    ruled-out experiment.**
-3. `ARCHITECTURE.md` — the pillar you're working on and its interface contract.
-4. `TASKS.md` — the build-order backlog; do the next unchecked item.
+4. `ARCHITECTURE.md` — the pillar you're working on and its interface contract.
+5. `TASKS.md` — the build-order backlog; do the next unchecked item.
 
 ## The competition (verify specifics in `data/` source docs)
 - **Simulation** (`pokemon-tcg-ai-battle`): submit `submission.tar.gz`; public **μ** is truth.
@@ -44,19 +45,20 @@ The errors that stalled 43 sessions were mindset errors, not bad luck. Hold thes
 - **Every reported win-rate carries metadata**: games, opponents, seeds, deck, brain (Ruling R8).
 - **Don't break the spine.** `agent/` scored 668; do not rename/refactor it until the smoke test
   runs on a Python ≥3.11 machine (Ruling R7).
-- **One source of truth per concern** (Ruling R10): decisions → `RULINGS.md`; state → `STATE.md`;
-  design → `ARCHITECTURE.md`. No new top-level handoff/instruction files.
+- **One source of truth per concern** (Ruling R10): decisions → `RULINGS.md`; state → `STATE.md`
+  (+ `.cursor/SESSION.md` for ephemeral session); design → `ARCHITECTURE.md`. No new top-level
+  handoff/instruction files.
 - Improve one concrete behavior at a time, re-measure, keep only what improves the gate or fixes
   legality/stability.
 
 ## Before any Kaggle upload
 - Read `data/SUBMISSION_PLAYBOOK.md`: **5 uploads/day**, **2 Final Submissions** (select manually).
-- Dry-run packaging (`scripts/package_submission.py --scorer {heuristic,search}`); never submit
-  without explicit user confirmation.
+- Dry-run packaging (`scripts/package_submission.py --scorer {heuristic,search,lucario_mcts}`);
+  never submit without explicit user confirmation.
 
 ## Environment
 - Engine + episode pull need **Python ≥3.11** and run on the user's machine (this sandbox is 3.10
   with no Kaggle egress). GPU work (if ever revived): the Python313 torch+cu128 interpreter.
 - `pip install -r requirements.txt`. Kaggle creds under `.kaggle/` stay gitignored.
-- End-of-session: prepend a dated `STATE.md` block (state, files changed, measured result if any,
-  blockers, the single exact next action).
+- End-of-session: prepend a dated block to `STATE.md` (state, files changed, measured result if any,
+  blockers, the single exact next action). Update `.cursor/SESSION.md` when handing off in Cursor.

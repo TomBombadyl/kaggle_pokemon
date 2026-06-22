@@ -54,4 +54,6 @@ Work top to bottom. Each step ends with **something measurable**; nothing specul
 
 ## Done log
 _(move completed top-level steps here with a date)_
+- 2026-06-22 (S44c): **Lucario field RL+MCTS stack** — `lucario_mcts_runtime.py`, `train_lucario_field_mcts.py`, `lucario_mcts_policy.py`, bootstrap/smoke/cleanup scripts; sim docs; `ARCHITECTURE.md` per-deck template; committed `251da2b`, pushed `main`. 5-cycle CPU train **in progress** → `rl_mcts_field/lucarioex_v1/`.
+- 2026-06-22 (S44b): **Dragapult ex baseline** — `agent/dragapult_agent.py`, `agent_decks/dragapult_ex_sample.csv`, `scripts/gate_dragapult.py`; local gate 78–88% vs pilot brains (filter only).
 - 2026-06-22 (S44): repo reset — RULINGS/ARCHITECTURE/STATE written, 532→~100 files, spine preserved.

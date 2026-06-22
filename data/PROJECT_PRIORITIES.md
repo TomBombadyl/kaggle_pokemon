@@ -1,17 +1,25 @@
 # Project priorities (always-on)
 
-Canonical checklist for every agent run. Read with [`AGENTS.md`](../AGENTS.md), [`PROGRESS.md`](../PROGRESS.md), [`TASKS.md`](../TASKS.md).
+Canonical checklist for every agent run. Read with [`AGENTS.md`](../AGENTS.md), [`STATE.md`](../STATE.md),
+[`RULINGS.md`](../RULINGS.md), [`TASKS.md`](../TASKS.md).
+
+**Reset note (2026-06-22):** Track B PPO, deck GA, and Kaggle-notebook Lucario RL are **retired**
+(RULINGS 2C). The proven floor is rules/search (~668 μ). New ML must beat that on the real-field
+gate before shipping (Ruling R3).
 
 ---
 
-## Two parallel workstreams
+## Current workstreams
 
-| Track | What | Where | Submit as |
-|-------|------|-------|-----------|
-| **Lucario RL+MCTS** | Transformer + MCTS on fixed Lucario list | Kaggle GPU notebook → download `model_best.pth` | `lucario_mcts` via `scripts/import_lucario_rl_outputs.py` |
-| **Deck RL → Track B** | GA deck lists + per-deck MaskablePPO → distill | Local GPU (`train_track_b_deck.py`) | `learned` + `distilled_<slug>_v1.npz` |
+| Track | What | Where | Gate / submit |
+|-------|------|-------|----------------|
+| **Spine (floor)** | HeuristicScorer + SearchScorer | `agent/{agent,evalfn,search_policy}.py` | `scripts/gate_vs_public.py`, ladder μ |
+| **Per-deck rule pilot** | Official sample + never-crash wrapper | e.g. `agent/dragapult_agent.py` | `scripts/gate_dragapult.py` |
+| **Lucario field RL+MCTS** | Transformer + MCTS, **real field decks** | `scripts/train_lucario_field_mcts.py` → `rl_mcts_field/lucarioex_v1/` | Must beat SearchScorer 668; `lucario_mcts` scorer |
+| **Foundation rebuild** | `core/`, `eval/`, `field/`, `episodes/` | See `TASKS.md` F1–F3 | Empirical obs test + real-field harness |
 
-Do **not** mix brains across decks (LearnedScorer is deck-specific). Do **not** confuse Lucario RL with Track B Learned on Alakazam.
+Do **not** mix brains across decks without retraining. Do **not** gate on `pool_*` proxies or
+mirror-only self-play (Ruling R2).
 
 ---
 
@@ -19,9 +27,11 @@ Do **not** mix brains across decks (LearnedScorer is deck-specific). Do **not** 
 
 | Use | Python | Why |
 |-----|--------|-----|
-| **Track B RL, Lucario import** | `Python313` (`torch 2.11+cu128`) | RTX 4070 Ti SUPER |
-| **Smoke tests, GA, packaging** | Either | CPU OK |
-| **Avoid for RL** | miniconda3 default | `torch+cpu` only |
+| **Lucario field train, future GPU RL** | `C:\Users\tobin\AppData\Local\Programs\Python\Python313\python.exe` (`torch+cu128`) | RTX 4070 Ti SUPER |
+| **Smoke tests, packaging, CPU train** | Python 3.13 | `cg.dll` engine; current 5-cycle run is CPU |
+| **Avoid for RL** | miniconda3 default | installs `torch+cpu` only |
+
+Fetch engine once: `python scripts/fetch_sim_engine.py` → `data/sim/sample_submission/cg/cg.dll`.
 
 ---
 
@@ -29,12 +39,14 @@ Do **not** mix brains across decks (LearnedScorer is deck-specific). Do **not** 
 
 Official Pokémon TCG rules **≠** competition simulator. Organizer stance: **simulator behavior is correct behavior.**
 
-Always read [`SIMULATOR_RESOURCE_NOTES.md`](SIMULATOR_RESOURCE_NOTES.md) before changing attack logic, prize sequencing, or RL features.
+Always read [`SIMULATOR_RESOURCE_NOTES.md`](SIMULATOR_RESOURCE_NOTES.md) before changing attack logic,
+prize sequencing, setup benching, or RL labels.
 
 Key deltas:
 - Unresolvable attack effects → attack **not selectable** (mask-driven legality).
+- Setup phase may **force** benching Basics from opening hand.
+- Simultaneous KOs → sequential prizes; all-prize simultaneous = **draw** (train label 0.0).
 - Mega Zygarde Nullifying Zero → no target-order choice; coins L→R.
-- Simultaneous KOs → sequential prize take; all-prize simultaneous = **draw**.
 
 Train and gate only on **legal options from `cg`**, never from card-text inference alone.
 
@@ -45,55 +57,40 @@ Train and gate only on **legal options from `cg`**, never from card-text inferen
 Read [`COMPETITION_SCORING.md`](COMPETITION_SCORING.md) — **full μ model**.
 
 Summary:
-- **μ = Gaussian skill rating**; starts **~600** after validation self-play (not field WR).
-- Each episode updates μ on **win / loss / draw only** (Kaggle: margin/speed **not** in formula).
-- **Still avoid fast collapses** — each loss drops μ; deck-out / no bench → many losses quickly.
-- **Bench ≥1 Basic** whenever possible (`agent/agent.py`, `rule_core.py`, `evalfn.py`).
-- Log **turns + loss reason** from replays/logs; local WR ≠ μ.
+- **μ = Gaussian skill rating**; validation self-play ~600 starting point.
+- Each episode updates μ on **win / loss / draw only** (margin/speed **not** in formula).
+- **Still avoid fast collapses** — deck-out / empty bench → many losses quickly.
+- **Bench ≥1 Basic** whenever legal (`agent/agent.py`, `rule_core.py`, `bench_guard.py`).
+- Local WR ≠ μ (Ruling R1). Require **≥2 ladder readings ≥40 min apart** before trusting μ.
 
 ---
 
-## Kaggle Simulation CLI (episodes & scouting)
+## Real-field opponents (the only valid gate set)
 
-Read [`KAGGLE_SIMULATION_CLI.md`](KAGGLE_SIMULATION_CLI.md).
+Training and gating use mined lists in `agent_decks/`:
 
-After every upload:
-```bash
-kaggle competitions submissions pokemon-tcg-ai-battle -v
-kaggle competitions episodes <ref> -v
-kaggle competitions replay <episode_id> -p report/replays
-kaggle competitions logs <episode_id> <agent_index> -p report/agent_logs
-python scripts/track_ladder.py --fetch-logs
-```
+`real_mega_lucario_ex`, `real_dragapult_ex`, `real_mega_abomasnow_ex`, `real_iono`,
+`top_mined_{alakazam,trevenant,dragapult_ex,iono,mega_abomasnow_ex,mega_lucario_ex}`.
 
-Use replays/logs to fix fast losses before burning daily upload slots.
-
----
-
-## Data & imitation learning
-
-**Card metadata:** `data/EN_Card_Data.csv`, `data/JP Card Data.csv`, PDF ID lists — schema in [`SIMULATOR_RESOURCE_NOTES.md`](SIMULATOR_RESOURCE_NOTES.md).
-
-**Daily top episodes (BC/RL/IL):** index at  
-https://www.kaggle.com/datasets/kaggle/pokemon-tcg-ai-battle-episodes-index  
-Mine for meta decks, trajectories, and benchmark updates (`scripts/mine_episode_decks.py`, `report/deck_rl/`).
+Public agents: `python scripts/extract_public_agents.py` → `data/kaggle_ref/opponents/`.
 
 ---
 
 ## Submit discipline
 
 1. User **explicit OK** for Kaggle upload.
-2. `scripts/smoke_test.py` (17/17) + gate at appropriate level (L1=12g, L2=40g).
-3. [`SUBMISSION_PLAYBOOK.md`](SUBMISSION_PLAYBOOK.md) — max **5/day**; pick **2 Final Submissions** manually.
-4. Package: `dist/candidates/<name>.tar.gz`.
+2. L0: `scripts/smoke_test.py` + `scripts/smoke_cg_engine.py` (for MCTS agents).
+3. L1: `scripts/gate_vs_public.py` (real field, 30+ games/opp).
+4. [`SUBMISSION_PLAYBOOK.md`](SUBMISSION_PLAYBOOK.md) — max **5/day**; pick **2 Final Submissions** manually.
+5. Package: `dist/candidates/<name>.tar.gz`.
 
 ---
 
-## Current agent candidates (2026-06-20)
+## Agent candidates (2026-06-22)
 
 | Agent | Status |
 |-------|--------|
-| Lucario RL+MCTS | Kaggle training ~iter 2; ref 53885445 submitted (early) |
-| Alakazam Track B | **1M GPU train in progress** (Python313); submit after L2 gate |
-| gen19 fast-basic Track B | L1 passed; L2 package pending |
-| Kyogre heuristic / TA1 Search | Protected ladder baselines (633 / 626 μ) |
+| SearchScorer × real Mega Lucario ex | **668 μ floor** — do not replace without beating it |
+| Dragapult ex (official Crispin sample) | Local gate 78–88% vs pilots; ladder probe pending user OK |
+| Lucario field RL+MCTS | **5-cycle CPU train in progress** → `rl_mcts_field/lucarioex_v1/` |
+| Track B Learned / deck GA / old Kaggle Lucario RL | **Retired** (RULINGS 2C) |

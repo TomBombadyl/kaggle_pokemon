@@ -1,6 +1,10 @@
 # ADR-001: Finals portfolio strategy — maximize μ with 2 Final slots
 
-**Status:** Proposed  
+> **Superseded (2026-06-22 repo reset).** Track B / deck-GA recommendations here are retired.
+> Current strategy: rules/search floor (~668 μ), per-deck agents (`ARCHITECTURE.md`), Lucario field
+> RL+MCTS as R3-gated experiment. See `STATE.md`, `RULINGS.md`, `data/EVAL_PROTOCOL.md`.
+
+**Status:** Historical (pre-reset)  
 **Date:** 2026-06-19 (run 24)  
 **Deciders:** Dylan (project owner)  
 

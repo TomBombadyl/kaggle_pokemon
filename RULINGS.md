@@ -138,7 +138,8 @@ Real-meta lists (mined from competition episodes) — these are the field, keep 
 | Track A — rules + shallow search | `agent/{agent,evalfn,search_policy}.py`, `scripts/deck_search.py`, `gate_track_a.py` | **KEEP, slim down.** Source of every result ≥615 μ. |
 | Track B — per-deck PPO + distill | `rl/{train_rl,train_ppo,cabt_env,league}.py`, `scripts/{distill_policy,train_track_b_deck,gate_track_b}.py` | **RETIRE.** Best output 585 μ < rules; high complexity. Lessons captured; code to graveyard. |
 | Track C — deck GA / "robust deck search" | `rl/{deck_genome,deck_balance,train_deck_campaign,robust_search,robust_fitness,winrate_surrogate,meta_solver}.py`, `report/{deck_rl,robust_deck_rl*}` (~180 files) | **RETIRE.** Blind GA collapse-prone; outputs never beat hand decks. Replace with scoped, field-evaluated search (Pillar 4). |
-| Lucario RL+MCTS notebook | `agent/lucario_mcts_*.py`, `notebooks/lucario/` | **RETIRE.** 324.6 μ; deferred indefinitely. |
+| Lucario RL+MCTS (Kaggle notebook era) | `notebooks/lucario/`, early `lucario_mcts_*` | **RETIRE.** 324.6 μ; empty-bench losses; Snorlax/sample-deck training. |
+| Lucario field RL+MCTS (local fresh, 2026-06-22) | `agent/lucario_mcts_{runtime,policy}.py`, `scripts/train_lucario_field_mcts.py`, `rl_mcts_field/` | **EXPERIMENTAL — R3 gated.** Fresh: real `agent_decks/{real_*,top_mined_*}` opponents, opp deck in `search_begin`, LucarioScorer fallback. 5-cycle CPU train in progress. Must beat SearchScorer 668 on real-field gate + ≥2-reading ladder before ship. |
 | AZ self-play | `rl/az_train.py`, `report/az/` | **RETIRE.** Failed public gate; revisit only after Pillars 0–3 exist. |
 
 ### 2D. Validation / evaluation methods (the trust problem)
@@ -264,7 +265,8 @@ git log graveyard/pre-reset-20260622                    # full pre-reset history
 |---------|--------------|--------------------|
 | Track B PPO/distill (`rl/train_rl.py`, `train_ppo.py`, distill scripts, `agent/learned_policy.py`) | R3 — never beat rules | 2A, 2C |
 | Deck GA / robust search (`rl/deck_*`, `robust_*`, `meta_solver`, `winrate_surrogate`; `report/{deck_rl,robust_deck_rl*}`) | R3/R4 — collapse-prone, never beat hand decks | 2C |
-| Lucario RL+MCTS (`agent/lucario_mcts_*`, `notebooks/lucario/`) | 324.6 μ; retired | 2A |
+| Lucario RL+MCTS (Kaggle notebook era) | `notebooks/lucario/`, Snorlax-era checkpoints | 324.6 μ; retired | 2C |
+| `rl_mcts_basic/`, `notebooks/rl_mcts_field_train/` | Superseded by local `train_lucario_field_mcts.py` | removed 2026-06-22 | 2C |
 | AZ self-play (`rl/az_train.py`, `report/az`) | failed public gate | 2A |
 | `pool_*` proxy decks | R2 — invalid opponents | 2B/2D |
 | ~15 top-level handoff/instruction `.md`, scattered `report/*plan*.md` | R10 — sprawl, superseded | this file + STATE.md |

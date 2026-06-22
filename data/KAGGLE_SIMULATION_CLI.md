@@ -153,6 +153,6 @@ See [`EVAL_PROTOCOL.md`](EVAL_PROTOCOL.md) and [`COMPETITION_SCORING.md`](COMPET
 
 | Task | Command |
 |------|---------|
-| Track B train+distill+gate | `python scripts/train_track_b_deck.py --deck … --timesteps … --gate-games 40 --package` |
-| Lucario RL import | `python scripts/import_lucario_rl_outputs.py --source … --name track_d_lucario_rl_mcts` |
+| Lucario field RL+MCTS (local) | `python scripts/train_lucario_field_mcts.py --device cpu --cycles 5` then package `--scorer lucario_mcts` |
+| Dragapult gate | `python scripts/gate_dragapult.py --games 30` |
 | Ladder sync | `python scripts/track_ladder.py --fetch-logs` |

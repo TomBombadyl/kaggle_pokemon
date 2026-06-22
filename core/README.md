@@ -6,8 +6,8 @@ model so behavior is consistent. See `ARCHITECTURE.md` § Pillar 0.1 and Pillar 
 ## Planned modules
 - `cards.py` — typed registry loaded from `../data/EN_Card_Data.csv` (HP, types, attacks, energy
   cost, abilities, evolution lines, ex/Mega rule-box flags). One cached loader.
-- `engine.py` — thin tested wrapper over the local `cg` engine (`battle_start`, `battle_select`,
-  `search_*`). All engine quirks live here.
+- `engine.py` — thin tested wrapper over the local `cg` engine (`../data/sim/sample_submission/cg/`,
+  fetch via `../scripts/fetch_sim_engine.py`). Methods: `battle_start`, `battle_select`, `search_*`.
 - `obs.py` — typed parse of `obs_dict` → `Observation`, with explicit **public vs hidden** fields
   (RULINGS Part 4). 
 - `rules_notes.md` — the consolidated *verified* rules digest (supersedes scattered `data/*` notes;

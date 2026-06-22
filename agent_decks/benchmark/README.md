@@ -1,8 +1,11 @@
 # Deck RL benchmark suite
 
-Meta pool decks (`pool_*.csv`) stand in for **Worlds / championship-field**
-archetypes until official lists are added. Sources: wmh ladder write-up in
-`data/META_NOTES.md` (Dragapult, Crustle, Bellibolt, Alakazam+Dudunsparce, etc.).
+> **2026-06-22:** Deck GA (Track C) and `pool_*` proxy gating are **retired** (RULINGS R2/R3).
+> Real-field opponents are `agent_decks/{real_*,top_mined_*}`. This suite remains as historical
+> reference only until `field/registry.json` subsumes it.
+
+Meta pool decks (`pool_*.csv`) were proxies for championship-field archetypes. **Do not use for
+ladder gating or Lucario field training.**
 
 ## Fitness
 

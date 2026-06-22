@@ -243,9 +243,11 @@ pokemon/
 ├─ eval/                # 0.4 harness, gates, ladder_log                     [scaffold]
 ├─ meta/                # Pillar 2 daily meta map                            [scaffold]
 ├─ discovery/           # Pillar 4 scoped deck search                        [scaffold]
-├─ agent/              # Pillar 3 spine: HeuristicScorer + SearchScorer      [live → migrate to agents/]
-├─ scripts/            # surviving helpers (package, gate, mine, fetch)      [live, migrate piecemeal]
-├─ agent_decks/        # real_* + top_mined_* + benchmark/                   [live → migrate to field/decks/]
+├─ agent/              # Pillar 3 spine + per-deck agents                         [live]
+│    HeuristicScorer, SearchScorer, lucario_policy, lucario_mcts_*, dragapult_agent
+├─ scripts/            # package, gate, train, fetch (see notebooks/README)     [live]
+├─ rl_mcts_field/      # local per-deck RL+MCTS train outputs (gitignored)      [live runtime]
+├─ agent_decks/        # real_* + top_mined_* + benchmark/                      [live → field/decks/]
 ├─ data/               # official rules/card CSVs + EN_Card_Data.csv         [live, source citations]
 ├─ report/             # replays/ + agent_logs/ + 2 log CSVs only           [live → migrate to episodes/, eval/]
 └─ dist/               # packaged submissions only                          [live]
@@ -256,8 +258,10 @@ and it cannot be smoke-tested in this sandbox (Python 3.10 vs the engine's ≥3.
 blind is exactly the kind of unvalidated change that caused past regressions. So the spine stays
 in `agent/` until build-order step 3 migrates it **on a machine where the smoke test runs.**
 
-Removed dirs (`rl/`, most of `report/`, dead `scripts/`, `notebooks/lucario`, `pool_*`/variant
-decks, ~10 top-level handoff files) are preserved in `graveyard/pre-reset-20260622` (RULINGS Part 5).
+Removed dirs (`rl/`, `rl_mcts_basic/`, `notebooks/rl_mcts_field_train/`, `notebooks/lucario`,
+most of `report/`, dead `scripts/`, `pool_*`/variant decks, ~10 top-level handoff files) are
+preserved in `graveyard/pre-reset-20260622` (RULINGS Part 5). Use `scripts/cleanup_old_rl_artifacts.py`
+to remove resurrected stale RL folders locally.
 
 ---
 
