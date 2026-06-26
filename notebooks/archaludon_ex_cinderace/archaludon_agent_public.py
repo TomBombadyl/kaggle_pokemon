@@ -68,6 +68,11 @@ _SETUP_ACTIVE_PRIORITY = {
     RELICANTH: (5000, "Active fallback: Relicanth"),
 }
 
+_SETUP_BENCH_PRIORITY = {
+    DURALUDON: (25000, "Setup bench: Duraludon"),
+    RELICANTH: (22000, "Setup bench: Relicanth"),
+}
+
 ALWAYS_SAFE_DISCARD = {METAL_ENERGY, CINDERACE}
 
 CARD_DB = {c.cardId: c for c in all_card_data()}
@@ -469,7 +474,9 @@ def score_setup(obs, opt):
     if ctx == SelectContext.SETUP_ACTIVE_POKEMON:
         return _SETUP_ACTIVE_PRIORITY.get(cid, (0, "unknown Active"))
     if ctx == SelectContext.SETUP_BENCH_POKEMON:
-        return -10000, "never bench during setup"
+        if cid in _SETUP_BENCH_PRIORITY:
+            return _SETUP_BENCH_PRIORITY[cid]
+        return -10000, "skip non-basic setup bench"
     return 0, "non-setup"
 
 
@@ -509,6 +516,9 @@ def score_play(obs, opt):
     ids = hand_ids(obs)
 
     if cid in {DURALUDON, RELICANTH}:
+        bench_empty = len([p for p in my_state(obs).bench if p]) == 0
+        if bench_empty:
+            return 50000, "play Pokemon (empty bench — R7)"
         return 18000, "play Pokemon"
 
     if cid == FULL_METAL_LAB:
@@ -541,7 +551,7 @@ def score_play(obs, opt):
         if cid == ULTRA_BALL:
             bench_empty = len([p for p in my_state(obs).bench if p]) == 0
             if bench_empty:
-                return 300, "Ultra Ball: bench empty (donk risk)"
+                return -5000, "Ultra Ball: bench empty (must bench basic first)"
             metal_in_hand = sum(1 for c in (my_state(obs).hand or []) if c and c.id == METAL_ENERGY)
             metal_in_trash = metal_in_discard(obs)
             if metal_in_trash == 0 and metal_in_hand >= 1:

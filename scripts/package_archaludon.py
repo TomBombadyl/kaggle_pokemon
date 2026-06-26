@@ -1,8 +1,11 @@
 """Package Archaludon ex / Cinderace into a Kaggle submission tarball.
 
+Canonical name: ``archaludon`` (ref 54083197 was uploaded as
+``archaludon_ex_cinderace_r7_bench.tar.gz`` @ 1224.2 μ).
+
 Produces:
-  dist/candidates/archaludon_ex_cinderace_r7_bench.tar.gz
-  dist/candidates/archaludon_ex_cinderace_r7_bench.manifest.json
+  dist/candidates/archaludon.tar.gz
+  dist/candidates/archaludon.manifest.json
 """
 from __future__ import annotations
 
@@ -22,7 +25,10 @@ AGENT_SRC = os.path.join(ROOT, "agent", "archaludon_agent.py")
 BENCH_GUARD_SRC = os.path.join(ROOT, "agent", "archaludon_bench_guard.py")
 EMPTY_GUARD_SRC = os.path.join(ROOT, "agent", "empty_bench_guard.py")
 DECK_SRC = os.path.join(ROOT, "agent_decks", "archaludon_ex_cinderace.csv")
-NAME = "archaludon_ex_cinderace_r7_bench"
+NAME = "archaludon"
+LADDER_REF = "54083197"
+LADDER_MU = 1224.2
+KAGGLE_UPLOAD_ALIASES = ("archaludon_ex_cinderace_r7_bench",)
 BUILD_DIR = os.path.join(ROOT, "dist", "submission_build", NAME)
 CAND_DIR = os.path.join(ROOT, "dist", "candidates")
 TARBALL = os.path.join(CAND_DIR, NAME + ".tar.gz")
@@ -102,15 +108,26 @@ def build() -> None:
         "name": NAME,
         "agent": "agent/archaludon_agent.py (community v5 + R7 empty-bench guard)",
         "deck": "agent_decks/archaludon_ex_cinderace.csv",
-        "ladder_benchmark_mu": None,
-        "ladder_benchmark_ref": None,
+        "ladder_benchmark_mu": LADDER_MU,
+        "ladder_benchmark_ref": LADDER_REF,
+        "kaggle_upload_aliases": list(KAGGLE_UPLOAD_ALIASES),
         "deck_sha1": _sha(DECK_SRC),
         "agent_sha1": _sha(AGENT_SRC),
         "git_commit": _git_commit(),
         "built_at": datetime.now(timezone.utc).isoformat(),
         "tarball": os.path.relpath(TARBALL, ROOT),
         "tarball_sha256": _sha(TARBALL, "sha256"),
-        "submission": {"ref": None, "submitted_at": None, "mu_readings": []},
+        "submission": {
+            "ref": LADDER_REF,
+            "submitted_at": "2026-06-26T16:15:56.833000",
+            "mu_readings": [600.0, 731.3, LADDER_MU],
+            "status": "COMPLETE",
+            "local_gate_overall_pct": 72.7,
+            "kaggle_message": (
+                "archaludon_rules x archaludon_ex_cinderace: community v5 + R7 empty-bench guard; "
+                "local 72.7% full n=30"
+            ),
+        },
     }
     with open(MANIFEST, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)

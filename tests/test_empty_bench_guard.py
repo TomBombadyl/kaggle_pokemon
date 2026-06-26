@@ -16,6 +16,7 @@ for p in (ENGINE, ROOT):
 from agent.empty_bench_guard import is_basic_pokemon_id  # noqa: E402
 from agent.dragapult_bench_guard import _BENCH_PRIORITY as DRG_PRIORITY  # noqa: E402
 from agent.alakazam_bench_guard import _BENCH_PRIORITY as ALK_PRIORITY  # noqa: E402
+from agent.archaludon_bench_guard import _BENCH_PRIORITY as ARC_PRIORITY  # noqa: E402
 
 
 @pytest.mark.parametrize("card_id", list(DRG_PRIORITY))
@@ -28,8 +29,9 @@ def test_alakazam_priority_ids_are_basics(card_id: int):
     assert is_basic_pokemon_id(card_id), f"{card_id} must be basic for bench guard"
 
 
-def test_kadabra_not_basic():
-    assert not is_basic_pokemon_id(742)
+@pytest.mark.parametrize("card_id", list(ARC_PRIORITY))
+def test_archaludon_priority_ids_are_basics(card_id: int):
+    assert is_basic_pokemon_id(card_id), f"{card_id} must be basic for bench guard"
 
 
 def test_kadabra_not_basic():

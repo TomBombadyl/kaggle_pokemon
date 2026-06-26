@@ -20,5 +20,7 @@ recorded_at,name,ref,status,mu_reading_1,mu_reading_2,deck,agent,git_commit,loca
 2026-06-23,lucarioex_v2_field_mcts,53962060,COMPLETE,460.8,460.8,real_mega_lucario_ex.csv,lucario_mcts_field_v2_20cyc,,,RETIRED
 2026-06-20,track_d_lucario_rl_mcts,53885445,COMPLETE,368.5,368.5,real_mega_lucario_ex.csv,lucario_mcts_basic_iter0,,97.5 vs random,RETIRED wrong opponents
 2026-06-22,track_d_alakazam_rl_mcts_model4,53946148,COMPLETE,185.4,185.4,top_mined_alakazam.csv,lucario_mcts_basic_Snorlax_train,,,RETIRED pilot-not-deck demo
+2026-06-26,archaludon_r8,54088877,PENDING,,,archaludon_ex_cinderace.csv,archaludon_rules+R8a+R8b,,75.3 full n=30,"Probe vs 54083197 (1196.1 mu). Keep 54083197 Final until beat."
+2026-06-26,archaludon_r7_bench,54083197,COMPLETE,1196.1,1224.2,archaludon_ex_cinderace.csv,archaludon_rules+R7,,72.7 full n=30,"Champion Final locked"
 2026-06-22,dragapult_ex_sample_v1,53950246,ERROR,,,dragapult_ex_sample.csv,dragapult_crispin,,,__file__ NameError
 2026-06-19,a2_kyogre_v0,53854588,ERROR,,,a2_kyogre_33_energy.csv,HeuristicScorer,,,__file__ NameError

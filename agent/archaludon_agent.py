@@ -1,6 +1,13 @@
 """Archaludon ex / Cinderace — community rule pilot + R7 bench guard.
 
-Deck: env ARCHALUDON_DECK, deck.csv in cwd, or repo default.
+**Primary iteration file** — all Archaludon deck logic lives here (+ thin wrapper at
+``agent()``). Deck: ``agent_decks/archaludon_ex_cinderace.csv``. Do not port levers
+from Dragapult/Lucario/Alakazam pilots.
+
+Bench safety: ``score_setup`` / ``score_play`` / ``apply_overrides`` / ``score_option``
+(empty bench → bench Duraludon/Relicanth before END/items; R8a mandatory TO_ACTIVE;
+R8b block MAIN tempo before bench). ``archaludon_bench_guard.py`` is submission safety net only.
+
 Built by scripts/bootstrap_archaludon.py — re-run after reference updates.
 """
 
@@ -66,6 +73,11 @@ _SETUP_ACTIVE_PRIORITY = {
     CINDERACE: (100000, "Active: Cinderace Explosiveness"),
     DURALUDON: (20000, "Active fallback: Duraludon"),
     RELICANTH: (5000, "Active fallback: Relicanth"),
+}
+
+_SETUP_BENCH_PRIORITY = {
+    DURALUDON: (25000, "Setup bench: Duraludon"),
+    RELICANTH: (22000, "Setup bench: Relicanth"),
 }
 
 ALWAYS_SAFE_DISCARD = {METAL_ENERGY, CINDERACE}
@@ -143,6 +155,114 @@ def option_target(obs, opt):
 
 def my_state(obs):
     return obs.current.players[obs.current.yourIndex]
+
+
+def _bench_is_empty(obs) -> bool:
+    return len([p for p in my_state(obs).bench if p]) == 0
+
+
+def _main_has_basic_play(obs) -> bool:
+    """True if MAIN menu includes PLAY for Duraludon or Relicanth."""
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return False
+    for opt in obs.select.option:
+        if opt.type != OptionType.PLAY:
+            continue
+        card = option_card(obs, opt)
+        if card and card.id in {DURALUDON, RELICANTH}:
+            return True
+    return False
+
+
+def _active_is_empty(obs) -> bool:
+    ps = my_state(obs)
+    return not ps.active or not ps.active[0]
+
+
+def _empty_bench_basic_score(obs, opt, score: int, reason: str) -> tuple[int, str]:
+    """Central empty-bench policy for this deck (169/57 are engine Basics)."""
+    if not _bench_is_empty(obs):
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else None
+    ctx = obs.select.context
+
+    if cid in {DURALUDON, RELICANTH}:
+        if opt.type == OptionType.PLAY and ctx == SelectContext.MAIN:
+            return max(score, 50000), "empty bench: bench basic (MAIN)"
+        if opt.type == OptionType.CARD and ctx in {
+            SelectContext.SETUP_BENCH_POKEMON,
+            SelectContext.TO_BENCH,
+            SelectContext.TO_FIELD,
+        }:
+            return max(score, 25000), "empty bench: place basic"
+
+    if opt.type == OptionType.PLAY and ctx == SelectContext.MAIN and cid == ULTRA_BALL:
+        return min(score, -5000), "empty bench: no Ultra Ball"
+
+    if opt.type == OptionType.END and ctx == SelectContext.MAIN and _main_has_basic_play(obs):
+        return -50000, "empty bench: must bench basic"
+
+    return score, reason
+
+
+def _mandatory_promote_score(obs, opt, score: int, reason: str) -> tuple[int, str]:
+    """After active KO — must pick new Active from bench (82068759 class)."""
+    ctx = obs.select.context
+    if ctx not in {SelectContext.TO_ACTIVE, SelectContext.SWITCH}:
+        return score, reason
+    if opt.type != OptionType.CARD:
+        return score, reason
+    yi = obs.current.yourIndex
+    if getattr(opt, "playerIndex", yi) != yi:
+        return score, reason
+    if not _active_is_empty(obs):
+        return score, reason
+    card = option_card(obs, opt)
+    if not card:
+        return score, reason
+    promote_priority = {
+        ARCHALUDON_EX: 60000,
+        CINDERACE: 55000,
+        DURALUDON: 50000,
+        RELICANTH: 48000,
+    }
+    boost = promote_priority.get(card.id)
+    if boost is not None:
+        return max(score, boost), "must promote: empty active"
+    return score, reason
+
+
+def _empty_bench_block_tempo(obs, opt, score: int, reason: str) -> tuple[int, str]:
+    """Any MAIN tempo (items, attach, supporters) yields to bench basic when legal."""
+    if obs.select.context != SelectContext.MAIN:
+        return score, reason
+    if not _bench_is_empty(obs) or not _main_has_basic_play(obs):
+        return score, reason
+    if opt.type == OptionType.PLAY:
+        card = option_card(obs, opt)
+        if card and card.id in {DURALUDON, RELICANTH}:
+            return score, reason
+        return min(score, -5000), "empty bench: bench basic first"
+    if opt.type == OptionType.ATTACH:
+        return -50000, "empty bench: no attach before bench"
+    return score, reason
+
+
+def _to_hand_pick_floor(obs, opt, score: int, reason: str) -> tuple[int, str]:
+    """R9: never score 0 on mandatory TO_HAND picks (82068759); skip Explorer discard pass."""
+    if obs.select.context != SelectContext.TO_HAND:
+        return score, reason
+    if opt.type != OptionType.CARD:
+        return score, reason
+    effect = getattr(obs.select, "effect", None)
+    if effect and getattr(effect, "id", None) == EXPLORER:
+        return score, reason
+    if score >= 1000:
+        return score, reason
+    if option_card(obs, opt) is not None:
+        return 5000, "TO_HAND: must pick"
+    return score, reason
 
 
 def opp_state(obs):
@@ -391,6 +511,11 @@ def opp_max_damage(obs):
 # ── Overrides ──
 
 def apply_overrides(obs, opt, score, reason):
+    score, reason = _empty_bench_basic_score(obs, opt, score, reason)
+    score, reason = _mandatory_promote_score(obs, opt, score, reason)
+    score, reason = _empty_bench_block_tempo(obs, opt, score, reason)
+    score, reason = _to_hand_pick_floor(obs, opt, score, reason)
+
     if opt.type == OptionType.PLAY:
         card = option_card(obs, opt)
         cid = card.id if card else None
@@ -469,7 +594,9 @@ def score_setup(obs, opt):
     if ctx == SelectContext.SETUP_ACTIVE_POKEMON:
         return _SETUP_ACTIVE_PRIORITY.get(cid, (0, "unknown Active"))
     if ctx == SelectContext.SETUP_BENCH_POKEMON:
-        return -10000, "never bench during setup"
+        if cid in _SETUP_BENCH_PRIORITY:
+            return _SETUP_BENCH_PRIORITY[cid]
+        return -10000, "skip non-basic setup bench"
     return 0, "non-setup"
 
 
@@ -509,6 +636,9 @@ def score_play(obs, opt):
     ids = hand_ids(obs)
 
     if cid in {DURALUDON, RELICANTH}:
+        bench_empty = len([p for p in my_state(obs).bench if p]) == 0
+        if bench_empty:
+            return 50000, "play Pokemon (empty bench — R7)"
         return 18000, "play Pokemon"
 
     if cid == FULL_METAL_LAB:
@@ -541,7 +671,7 @@ def score_play(obs, opt):
         if cid == ULTRA_BALL:
             bench_empty = len([p for p in my_state(obs).bench if p]) == 0
             if bench_empty:
-                return 300, "Ultra Ball: bench empty (donk risk)"
+                return -5000, "Ultra Ball: bench empty (must bench basic first)"
             metal_in_hand = sum(1 for c in (my_state(obs).hand or []) if c and c.id == METAL_ENERGY)
             metal_in_trash = metal_in_discard(obs)
             if metal_in_trash == 0 and metal_in_hand >= 1:
@@ -740,7 +870,8 @@ def score_option(obs, opt):
 
     if ctx in {SelectContext.IS_FIRST, SelectContext.MULLIGAN,
                SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.SETUP_BENCH_POKEMON}:
-        return score_setup(obs, opt)
+        score, reason = score_setup(obs, opt)
+        return _empty_bench_basic_score(obs, opt, score, reason)
 
     if opt.type in {OptionType.YES, OptionType.NO}:
         if ctx == SelectContext.IS_FIRST:
@@ -761,7 +892,10 @@ def score_option(obs, opt):
         elif opt.type == OptionType.ATTACK:
             score, reason = best_attack_damage(obs, opt.attackId), "attack"
         elif opt.type == OptionType.END:
-            score, reason = 0, "end turn"
+            if _bench_is_empty(obs) and _main_has_basic_play(obs):
+                score, reason = -50000, "empty bench: must bench basic"
+            else:
+                score, reason = 0, "end turn"
         else:
             score, reason = 500, "generic MAIN"
     elif ctx == SelectContext.TO_HAND:

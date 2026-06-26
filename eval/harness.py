@@ -213,11 +213,14 @@ def make_alakazam_brain(
 
 def make_archaludon_brain(
     deck_path: str | Path | None = None,
+    *,
+    bench_guard: bool = True,
 ) -> Callable[[dict], list[int]]:
     import os
 
     path = str(deck_path or DEFAULT_ARCHALUDON_DECK)
     os.environ["ARCHALUDON_DECK"] = path
+    os.environ["ARCHALUDON_BENCH_GUARD"] = "1" if bench_guard else "0"
     from agent.archaludon_agent import agent as archaludon_act
 
     return archaludon_act

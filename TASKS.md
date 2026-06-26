@@ -5,7 +5,21 @@ Work top to bottom. Check `[x]` when done; log in `STATE.md`.
 
 ---
 
-## NOW — Session 49+
+## NOW — Session 52 (Archaludon primary)
+
+- [ ] **Archaludon P0 — no_active fix** — trace 82055480 + 82068759; extend R7 guard; 0 no_active @ n=30 (`eval/archaludon_iteration.md`).
+- [ ] **Archaludon P1 — ladder loss decks** — mine unknown opponent signatures from replays; add to field if recurring.
+- [ ] **Archaludon P2 — Iono harness** — 43.3% local; lever only if full-suite ≥5pp (`gate_archaludon.py`).
+- [ ] **Archaludon ladder probe** — upload only after P0 gate + material delta vs 54083197 (R12).
+- [ ] **Strategy report outline** — Archaludon story for Sep 2026 comp.
+
+## PAUSED (do not spend upload slots)
+
+- [ ] ~~SearchScorer iteration~~ — paused (26.7% local; 660.5 μ bar irrelevant vs 1224 μ).
+- [ ] ~~Alakazam upload~~ — paused (54% local; 659 μ row exists).
+- [ ] ~~Meta replay expansion~~ — use Archaludon replay set first.
+
+## DONE — Session 49–51
 
 - [x] **Agent catalog** — `eval/AGENT_CATALOG_FULL.md` (21 submissions decoded).
 - [x] **Ladder log sync** — `eval/ladder_log.csv` from full Kaggle history (was 6 rows).
@@ -14,8 +28,8 @@ Work top to bottom. Check `[x]` when done; log in `STATE.md`.
 - [x] **Alakazam best5 port** — `agent/alakazam_agent.py` + package dry-run + gate n=30 (`eval/alakazam_best5_baseline_session49.md`).
 - [x] **LucarioScorer gate @ n≥30** — **39.3%** full suite; do not upload (`eval/lucario_scorer_baseline_session50.md`).
 - [x] **R12 upload gate** — `scripts/check_upload_eligible.py` + `data/EVAL_PROTOCOL.md` §9.
-- [ ] **SearchScorer iteration** — local gate beat 660.5 μ row before ladder upload (**26.7%** @ n=30 after prize-tracker + ptr fix).
-- [x] **Archaludon ex / Cinderace port** — community v5 + R7; **72.7%** local; ladder **600.0 μ** ref 54083197.
+- [x] **Archaludon port + ladder** — **1196.1 μ** latest (peak 1224.2) ref 54083197; replays in `report/submission_replays/archaludon/`.
+- [x] **Starmie upload** — ref 54083513 COMPLETE **277.5 μ** (paused).
 - [x] **Starmie / Froslass field opponent** — ashleysandlin deck + `starmie_agent` pilot; suite `starmie`; `eval/gate_starmie_session51.md`.
 - [ ] **Meta replay expansion** — `analyze_meta_by_mu_band.py --download-per-band 50`.
 - [ ] **Strategy report outline** — from catalog + RULINGS (Sep 2026).

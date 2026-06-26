@@ -154,6 +154,10 @@ def _archetype(deck: list[int], names: dict[int, str]) -> str:
         return "lucario"
     if "abomasnow" in deck_names:
         return "abomasnow"
+    if "archaludon" in deck_names or "duraludon" in deck_names:
+        return "archaludon"
+    if "starmie" in deck_names or "froslass" in deck_names:
+        return "starmie"
     return "unknown"
 
 

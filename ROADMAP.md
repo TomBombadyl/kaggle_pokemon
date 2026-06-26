@@ -12,31 +12,30 @@
 
 | Goal | Target | How we know |
 |------|--------|-------------|
-| **Simulation** | **1000+ μ** sustained (2 readings) | Kaggle public score |
-| **Interim bar** | Beat / hold **880.9 μ** (Dragapult v3, ref 53989933) | Ladder |
-| **Home-grown** | **> 700 μ** with code in `agent/` | Ladder (today: Search **660.5**) |
-| **Strategy comp** | Report + defensible deck/pilot story | Sep 2026 submission |
+| **Simulation** | Hold / beat **1196.1 μ** latest (Archaludon ref 54083197; peak 1224.2) | Kaggle public score |
+| **Interim bar** | **1196.1 μ** latest — was 880.9 Dragapult | Ladder |
+| **Strategy comp** | Report + Archaludon deck/pilot story | Sep 2026 submission |
 
-**Gap to close:** 880.9 → 1000+ is ~120 μ on the ladder. #1 → #2 today is ~220 μ (880.9 vs 660.5). That cliff is **pilot quality**, not deck archetype folklore.
+**Primary track (Session 52+):** Refine **`archaludon_rules` × `archaludon_ex_cinderace`** only. All other agents paused.
+
+Plan: [`eval/archaludon_iteration.md`](eval/archaludon_iteration.md)
 
 ---
 
 ## 1. What we know (21 ladder submissions — do not re-litigate)
 
 ```
-880.9  dragapult_crispin × dragapult_ex_sample     ← only μ ship vehicle
-660.5  SearchScorer × real_mega_lucario_ex         ← best our code
-659.0  imported Alakazam best5                     ← ported to agent/ (53913404 — do NOT re-upload)
-651.3  basic MCTS model4 × Lucario                 ← beats field v5
-580.6  field MCTS v5 (25 cycles) × Lucario         ← RETIRED
-≤585   Track B learned / wrong-opponent MCTS       ← RETIRED
+1196.1  archaludon_rules × archaludon_ex_cinderace   ← SHIP + REFINE (54083197; peak 1224.2)
+880.9   dragapult_crispin × dragapult_ex_sample        ← superseded; Final backup
+660.5   SearchScorer × real_mega_lucario_ex            ← PAUSED
+659.0   imported Alakazam best5                        ← PAUSED
 ```
 
 **Laws (from data, not opinion):**
 1. **Ladder μ sorts agents.** Local gates, leader-suite L1, and weighted E[win] **misordered** agents (Kyogre 13%→672 μ; LucarioSearch 69.6%→500 μ).
 2. **Pilot before deck.** Same dragapult brain on Lucario list → **10%** local (S49). Alakazam: imported 659 vs our Search 545.
 3. **More field RL on Lucario hurt.** v5 (580.6) < model4 (651.3) < Search (660.5) on the **same deck**.
-4. **Only Dragapult official pilot × official sample clears 800 μ.**
+4. **Archaludon community v5 + R7 guard** peaked **1224.2 μ**, latest **1196.1 μ** — local gates underpredicted again.
 
 Full decode: [`eval/AGENT_CATALOG_FULL.md`](eval/AGENT_CATALOG_FULL.md)
 
@@ -56,38 +55,25 @@ Full decode: [`eval/AGENT_CATALOG_FULL.md`](eval/AGENT_CATALOG_FULL.md)
 
 ## 3. Phased plan
 
-### Phase A — Protect ladder (now)
+### Phase A — Protect + refine Archaludon (now)
 
-**Objective:** Hold **880.9 μ**; pin Dragapult v3 as Final when ready.
-
-| Step | Action | Command / artifact |
-|------|--------|-------------------|
-| A1 | Rebuild tarball | `python scripts/package_dragapult.py` |
-| A2 | Dry-run gate @ n=30 (filter) | `python scripts/gate_dragapult.py --games 30 --suite full --report` |
-| A3 | Final lock-in only (R12) | Near deadline → `--final-lock-in`; not for development re-probes |
-| A4 | Monitor | `python scripts/track_ladder.py` → update `eval/ladder_log.csv` |
-
-**Success:** μ ≥ 880.9 on 2 readings. **No code change** unless legality/stability regression.
-
----
-
-### Phase B — Home-grown rules uplift (primary path to 700+ μ)
-
-**Objective:** Beat **660.5 μ** (Search) and/or match **659 μ** (imported Alakazam) with `agent/` code.
+**Objective:** Lock ref **54083197** as Final; iterate offline; upload only material improvements.
 
 | Step | Action | Gate |
 |------|--------|------|
-| B1 | **Port Alakazam best5** into `agent/` | ✅ Dry-run + harness n≥30 — **no ladder re-upload** (659 μ already on 53913404, R12) |
-| B2 | **Improve** Alakazam (levers, matchup fixes) | Local n≥30 **beats** port baseline → **new** catalog row → ladder |
-| B3 | **LucarioScorer** full suite @ n=30 | `gate_lucario_rules.py --games 30 --suite full --report` |
-| B4 | **Ladder probe** LucarioScorer alone (never done; track_c was 535.6 @ 2 games) | μ vs 535.6; compare to Search 660.5 — **new row** |
-| B5 | **SearchScorer** targeted improvements on Lucario | Local n≥30 beat 660.5 WR → ladder (**new row**) |
-| B6 | **SearchScorer × dragapult_ex_sample** (never on ladder) | Local n≥30 first |
-| B7 | **Archaludon ex / Cinderace** — port community v5 + deck tweaks | Local n≥30 full suite; new catalog row if competitive (`eval/archaludon_ex_cinderace_candidate.md`) |
+| A1 | Lock Final | Kaggle UI — ref 54083197 |
+| A2 | Replay pull | `analyze_submission.py` + `convert_submission_replays.py --name archaludon` |
+| A3 | P0 fix | 0 `no_active` @ n=30 full suite |
+| A4 | Ladder probe | New package name + R12 + `check_upload_eligible` |
+| A5 | Monitor | `track_ladder.py` — beat **1196.1** latest on ≥2 readings before swapping Final |
 
-**Order:** B3/B5/B6 for **new** ladder rows. B2 only after measurable local uplift on Alakazam. **B7** when Search/Lucario iteration pauses — Metal archetype for Strategy diversity.
+**Success:** μ ≥ 1196.1 sustained OR 0 forfeit losses with stable μ.
 
-**Success:** Any home-grown row **> 700 μ** on ladder. Pivot μ chase only if **> 880.9** (unlikely without Dragapult-class official pilot).
+---
+
+### Phase B — PAUSED (Search / Alakazam / Lucario)
+
+Was primary path to 700+ μ. **Superseded by Archaludon (1196.1 μ latest).** Reopen only if Archaludon stalls.
 
 ---
 

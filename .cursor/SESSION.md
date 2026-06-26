@@ -4,30 +4,35 @@
 
 ## Current focus
 
-Session 51: **no Alakazam upload** — offline iteration only. Alakazam bench guard **default OFF** (regressed @ n=50); Dragapult levers **reverted**; latest gate **54.0%** @ n=30 vs S50 **62.0%** reference. Stable weakness vs `dragapult_ex_sample` (~33–37%). **Archaludon** ref **54083197** **COMPLETE** @ **731.3 μ** (2nd reading logged). **SearchScorer** gate fixed (battle_ptr) but **26.7%** @ n=30. **Immediate next:** replay/trace Alakazam losses vs Dragapult; `python scripts/track_ladder.py` to confirm μ stable on 54083197.
+**Session 52 — Archaludon two-Final strategy.** Champion **54083197** (R7 bench) @ **1196.1 μ** — lock Final #1. Two ladder probes uploaded today: **54088877** (R8a+R8b, μ climbing **780.7**) and **54089078** (R8+R9 TO_HAND floor, PENDING). Drop Starmie **54083513** (277.5 μ) from Finals. Primary code: `agent/archaludon_agent.py` (R7b + R8a + R8b + R9).
+
+**Next:** `python scripts/track_ladder.py` after ≥40 min for 2nd+ μ on **54088877** / **54089078**; pin best two Archaludon refs on Kaggle UI.
 
 ## Key context
 
-- Repo: `Z:\kaggle\pokemon` · branch **main** (ahead 4 of origin) · Python **3.13**
-- **No Alakazam upload** — user declined; need paired n=30 ≥62% before slot (R12)
-- Alakazam: `agent/alakazam_agent.py` · guard OFF · `eval/alakazam_iteration_session51.md`
-- Archaludon: ref **54083197** · local **72.7%** · ladder **731.3 μ** · `eval/gate_archaludon.md`
-- Dragapult: **880.9 μ** hold (53989933) · full R7 guard · R12 no re-upload
-- SearchScorer: **26.7%** local · bar **660.5 μ** · `eval/gate_search.md`
-- Starmie ref **54083513** also submitted (PENDING) — separate row; track if needed
-- Eval spine: `eval/harness.py`, `eval/gates.py`, `scripts/check_upload_eligible.py`
-- Commit **3954544**: field harness + community pilots (Sessions 49–51)
+- Repo: `Z:\kaggle\pokemon` · branch **main** (ahead of origin) · Python **3.13**
+- **Final #1:** ref **54083197** · R7 empty-bench guard · **1196.1 μ** (peak 1224.2)
+- **Probe:** ref **54088877** · R8a promote + R8b tempo · **780.7 μ** (600→704→780)
+- **Probe:** ref **54089078** · R8 + R9 `_to_hand_pick_floor` · PENDING
+- **Retire from Finals:** Starmie **54083513** @ 277.5 μ
+- **Local gate (R8+R9):** 75.3% → 68.0% n=30 full (variance; see `eval/gate_archaludon.md`)
+- **Agent levers:** `_empty_bench_basic_score`, `_mandatory_promote_score`, `_empty_bench_block_tempo`, `_to_hand_pick_floor`
+- **Tools added:** `scripts/compare_archaludon_bench_guard.py`, `trace_archaludon_no_active.py`, `extract_deck_perspective_logs.py`
+- **Docs:** `eval/archaludon_iteration.md`, `eval/archaludon_no_active_trace.md`, `eval/archaludon_bench_guard_ab.md`
+- **Deck logs (local, not committed):** `report/deck_logs/archaludon/` — ref 54083197, 42 episodes
+- **R12:** no re-upload 54083197 tarball; probes need material delta + upload gate exit 0
+- **Blocker:** ladder truth only — wait ≥2 μ readings ≥40 min apart before swapping Final #2
 
 ## Continue prompt
 
 ```text
-Continue PTCG sim — no Alakazam upload. Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @.cursor/SESSION.md, @STATE.md, @eval/alakazam_iteration_session51.md, @RULINGS.md
+Continue Archaludon two-Final ladder strategy. Read first: @C:\Users\tobin\.cursor\USER-RULES-PASTE-THIS.txt, @.cursor/SESSION.md, @STATE.md, @agent/archaludon_agent.py, @eval/archaludon_iteration.md
 
-Goal: Improve Alakazam offline (vs native Dragapult ~35% WR) without burning a ladder slot; monitor Archaludon ref 54083197.
-Status: Bench guard OFF for Alakazam; levers reverted; Dragapult 880.9 μ hold; Archaludon 731.3 μ; user passed on Alakazam upload.
-Next: Replay/trace Alakazam losses vs dragapult_ex_sample; run track_ladder.py if 54083197 needs another μ reading.
+Goal: Keep 54083197 (1196.1 μ) Final #1; pick best probe (54088877 or 54089078) for Final #2; drop Starmie 54083513.
+Status: R8+R9 uploaded; 54088877 μ climbing (780.7); 54089078 PENDING.
+Next: python scripts/track_ladder.py — compare μ vs 1196.1; update Kaggle Final pins.
 
-Branch: main | Env: Python 3.13 | Blocker: none — offline replay work.
+Branch: main | Env: Python 3.13
 ```
 
 ## Timeline
@@ -36,3 +41,4 @@ Branch: main | Env: Python 3.13 | Blocker: none — offline replay work.
 - **2026-06-26T18:30:00Z** | handoff by user | conv `session51-alakazam-offline`
 - **2026-06-26T22:45:00Z** | handoff by user | conv `session51-starmie-upload`
 - **2026-06-26T23:00:00Z** | handoff by user | conv `session51-handoff-commit`
+- **2026-06-26T21:35:00Z** | handoff by user | conv `session52-archaludon-r8-r9`

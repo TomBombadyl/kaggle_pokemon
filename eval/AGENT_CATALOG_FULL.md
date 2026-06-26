@@ -33,11 +33,50 @@ Every submission is **`brain × deck`** packaged for Kaggle `main.agent(obs)`.
 
 ---
 
-## 2. Every COMPLETE submission (21 rows)
+## 2. Every COMPLETE submission (22 rows)
+
+### Archaludon ex / Cinderace — community v5 + R7 bench guard
+
+#### #1 · μ **1196.1** (latest) · peak **1224.2** · ref `54083197` · `archaludon.tar.gz` (uploaded as `archaludon_ex_cinderace_r7_bench`)
+
+| Field | Value |
+|-------|-------|
+| **Brain** | `archaludon_rules` — community public v5 + **R7 empty-bench guard** (`archaludon_bench_guard.py`) |
+| **Deck** | `agent_decks/archaludon_ex_cinderace.csv` (public list, unchanged) |
+| **RL / training** | **None** — ported rules + wrapper |
+| **Local gate cited** | **72.7%** full native suite n=30 at upload; **67.3%** post R7b agent scoring (filter only) |
+| **μ trajectory** | 600.0 → 731.3 → **1224.2** (peak) → **1196.1** (latest, 2026-06-26 UI) |
+| **Rebuild** | `python scripts/package_archaludon.py` |
+| **Verdict** | **Still #1 on ladder** (+315 μ vs Dragapult). **Lock Final Submission (54083197).** R12: no duplicate upload. |
+
+#### R8 probe · ref `54088877` · `archaludon.tar.gz` · **PENDING**
+
+| Field | Value |
+|-------|-------|
+| **Brain** | `archaludon_rules` + **R8a** `_mandatory_promote_score` + **R8b** `_empty_bench_block_tempo` |
+| **Local gate** | **75.3%** full n=30 (64.7% → 70.7% → 75.3%) |
+| **Delta vs 54083197** | Material scoring change — upload gate exit 0 |
+| **Verdict** | Probe only — keep **54083197** Final until μ beats **1196.1** on ≥2 readings |
+
+---
+
+### Starmie / Froslass — ashleysandlin spread
+
+#### · μ **277.5** · ref `54083513` · `starmie_froslass_ashleysandlin.tar.gz`
+
+| Field | Value |
+|-------|-------|
+| **Brain** | `starmie_rules` — PrizeTracker + finish search + R7 bench guard |
+| **Deck** | `agent_decks/starmie_froslass_ashleysandlin.csv` |
+| **Local gate cited** | Mirror **56.7%** n=30; full suite **9.3%** |
+| **μ trajectory** | 300.3 → **277.5** |
+| **Verdict** | COMPLETE; **paused** — far below Archaludon / Dragapult bars. |
+
+---
 
 ### Dragapult ex — official pilot
 
-#### #1 · μ **880.9** · ref `53989933` · `dragapult_ex_sample.tar.gz` (v3)
+#### #2 · μ **880.9** · ref `53989933` · `dragapult_ex_sample.tar.gz` (v3)
 
 | Field | Value |
 |-------|-------|
@@ -46,7 +85,7 @@ Every submission is **`brain × deck`** packaged for Kaggle `main.agent(obs)`.
 | **RL / training** | **None** — verbatim public sample + wrapper |
 | **Local gate cited** | 90.6% vs SearchScorer; 0 `no_active` losses |
 | **Rebuild** | `python scripts/package_dragapult.py` |
-| **Verdict** | **Only μ > 800. Ship track.** |
+| **Verdict** | **Prior bar** — superseded by Archaludon (1196.1 μ latest). |
 
 #### #2 · μ **833.0** · ref `53950779` · `dragapult_ex_sample.tar.gz` (v2)
 
@@ -271,7 +310,6 @@ Earlier upload of v5 training (cycle ~13, 43.5% field eval). Superseded by 53995
 
 | Brain × deck | Why it matters |
 |--------------|----------------|
-| **archaludon_rules × `archaludon_ex_cinderace`** | Ported S50 — **72.7%** local full n=30; not laddered (`eval/gate_archaludon.md`) |
 | SearchScorer × `dragapult_ex_sample` | Only official Crispin submitted on that list |
 | SearchScorer × Alakazam after porting best5 | Close 660 vs 659 gap with our packaging |
 | LucarioScorer × `real_mega_lucario_ex` @ n=30 | **39.3%** local (`eval/lucario_scorer_baseline_session50.md`) — upload blocked; beat Search **660.5 μ** |
@@ -285,6 +323,7 @@ Earlier upload of v5 training (cycle ~13, 43.5% field eval). Superseded by 53995
 | Agent | Rebuild command |
 |-------|-----------------|
 | Dragapult v3 | `python scripts/package_dragapult.py` |
+| Archaludon v5 + R7 | `python scripts/package_archaludon.py` |
 | Search × Lucario | `python scripts/package_submission.py --name lucario_ex_search --scorer search --deck agent_decks/real_mega_lucario_ex.csv` |
 | Lucario v5 MCTS | `python scripts/repackage_champions.py --include-lucario` (needs `rl_mcts_field/` backup) |
 | Imported Alakazam | `python scripts/package_alakazam.py` |
