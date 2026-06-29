@@ -50,6 +50,20 @@
       "suites": ["starmie"],
       "opponent_brain": "native",
       "notes": "Gold-medal list (ashleysandlin) + repo starmie_agent rule pilot."
+    },
+    "starmie_cinderace_hybrid": {
+      "deck_path": "agent_decks/starmie_cinderace_hybrid.csv",
+      "archetype": "starmie_water",
+      "suites": ["starmie"],
+      "opponent_brain": "native",
+      "notes": "Ladder-dominant Starmie/Cinderace + Crushing Hammer (9/23 replay cluster)."
+    },
+    "starmie_froslass_risky_ruins": {
+      "deck_path": "agent_decks/starmie_froslass_risky_ruins.csv",
+      "archetype": "starmie_water",
+      "suites": ["starmie"],
+      "opponent_brain": "native",
+      "notes": "Tournament spread: Froslass + Munkidori + Risky Ruins (Pokemon.com pattern)."
     }
   },
   "suites": {
@@ -73,7 +87,9 @@
       "ryotasueyoshi_alakazam_best5"
     ],
     "starmie": [
-      "starmie_froslass_ashleysandlin"
+      "starmie_froslass_ashleysandlin",
+      "starmie_cinderace_hybrid",
+      "starmie_froslass_risky_ruins"
     ]
   }
 }

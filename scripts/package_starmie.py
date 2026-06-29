@@ -1,11 +1,12 @@
-"""Package Starmie / Froslass into a Kaggle submission tarball.
+"""Package Starmie pilots into a Kaggle submission tarball.
 
-Produces:
-  dist/candidates/starmie_froslass_ashleysandlin.tar.gz
-  dist/candidates/starmie_froslass_ashleysandlin.manifest.json
+  python scripts/package_starmie.py
+  python scripts/package_starmie.py --deck agent_decks/starmie_froslass_risky_ruins.csv
+  python scripts/package_starmie.py --deck agent_decks/starmie_cinderace_hybrid.csv
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import os
@@ -23,12 +24,8 @@ BENCH_GUARD_SRC = os.path.join(ROOT, "agent", "starmie_bench_guard.py")
 EMPTY_GUARD_SRC = os.path.join(ROOT, "agent", "empty_bench_guard.py")
 PRIZE_SRC = os.path.join(ROOT, "agent", "prize_tracker.py")
 FINISH_SRC = os.path.join(ROOT, "agent", "finish_search.py")
-DECK_SRC = os.path.join(ROOT, "agent_decks", "starmie_froslass_ashleysandlin.csv")
-NAME = "starmie_froslass_ashleysandlin"
-BUILD_DIR = os.path.join(ROOT, "dist", "submission_build", NAME)
+DEFAULT_DECK = os.path.join(ROOT, "agent_decks", "starmie_froslass_ashleysandlin.csv")
 CAND_DIR = os.path.join(ROOT, "dist", "candidates")
-TARBALL = os.path.join(CAND_DIR, NAME + ".tar.gz")
-MANIFEST = os.path.join(CAND_DIR, NAME + ".manifest.json")
 
 MAIN_PY = '''"""Kaggle cabt submission entry point — Starmie / Froslass rule pilot."""
 import os
@@ -78,57 +75,66 @@ def _copytree_no_pyc(src: str, dst: str) -> None:
     )
 
 
-def build() -> None:
+def build(*, deck_src: str | None = None, name: str | None = None) -> tuple[str, str]:
+    deck_src = deck_src or DEFAULT_DECK
+    if not os.path.isabs(deck_src):
+        deck_src = os.path.join(ROOT, deck_src)
+    name = name or os.path.splitext(os.path.basename(deck_src))[0]
+    build_dir = os.path.join(ROOT, "dist", "submission_build", name)
+    tarball = os.path.join(CAND_DIR, name + ".tar.gz")
+    manifest = os.path.join(CAND_DIR, name + ".manifest.json")
+
     if not os.path.isdir(ENGINE_CG):
         raise FileNotFoundError(f"engine cg/ not found: {ENGINE_CG}")
-    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, PRIZE_SRC, FINISH_SRC, DECK_SRC):
+    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, PRIZE_SRC, FINISH_SRC, deck_src):
         if not os.path.exists(p):
             raise FileNotFoundError(p)
-    deck_lines = [x for x in open(DECK_SRC, encoding="utf-8").read().split("\n") if x.strip()]
+    deck_lines = [x for x in open(deck_src, encoding="utf-8").read().split("\n") if x.strip()]
     if len(deck_lines) != 60:
         raise ValueError(f"deck must be 60 cards, got {len(deck_lines)}")
 
-    if os.path.exists(BUILD_DIR):
-        shutil.rmtree(BUILD_DIR)
-    os.makedirs(BUILD_DIR)
-    with open(os.path.join(BUILD_DIR, "main.py"), "w", encoding="utf-8") as f:
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
+    os.makedirs(build_dir)
+    with open(os.path.join(build_dir, "main.py"), "w", encoding="utf-8") as f:
         f.write(MAIN_PY)
-    shutil.copy2(AGENT_SRC, os.path.join(BUILD_DIR, "starmie_agent.py"))
-    shutil.copy2(BENCH_GUARD_SRC, os.path.join(BUILD_DIR, "starmie_bench_guard.py"))
-    shutil.copy2(EMPTY_GUARD_SRC, os.path.join(BUILD_DIR, "empty_bench_guard.py"))
-    shutil.copy2(PRIZE_SRC, os.path.join(BUILD_DIR, "prize_tracker.py"))
-    shutil.copy2(FINISH_SRC, os.path.join(BUILD_DIR, "finish_search.py"))
-    shutil.copy2(DECK_SRC, os.path.join(BUILD_DIR, "deck.csv"))
-    _copytree_no_pyc(ENGINE_CG, os.path.join(BUILD_DIR, "cg"))
+    shutil.copy2(AGENT_SRC, os.path.join(build_dir, "starmie_agent.py"))
+    shutil.copy2(BENCH_GUARD_SRC, os.path.join(build_dir, "starmie_bench_guard.py"))
+    shutil.copy2(EMPTY_GUARD_SRC, os.path.join(build_dir, "empty_bench_guard.py"))
+    shutil.copy2(PRIZE_SRC, os.path.join(build_dir, "prize_tracker.py"))
+    shutil.copy2(FINISH_SRC, os.path.join(build_dir, "finish_search.py"))
+    shutil.copy2(deck_src, os.path.join(build_dir, "deck.csv"))
+    _copytree_no_pyc(ENGINE_CG, os.path.join(build_dir, "cg"))
 
     os.makedirs(CAND_DIR, exist_ok=True)
-    with tarfile.open(TARBALL, "w:gz") as tar:
+    with tarfile.open(tarball, "w:gz") as tar:
         for item in BUNDLE_FILES:
-            tar.add(os.path.join(BUILD_DIR, item), arcname=item)
+            tar.add(os.path.join(build_dir, item), arcname=item)
 
-    manifest = {
-        "name": NAME,
-        "agent": "agent/starmie_agent.py (ashleysandlin + PrizeTracker + finish search + R7 bench guard)",
-        "deck": "agent_decks/starmie_froslass_ashleysandlin.csv",
+    manifest_data = {
+        "name": name,
+        "agent": "agent/starmie_agent.py (spread/hybrid + PrizeTracker + finish search + R7 bench guard)",
+        "deck": os.path.relpath(deck_src, ROOT),
         "ladder_benchmark_mu": None,
         "ladder_benchmark_ref": None,
-        "deck_sha1": _sha(DECK_SRC),
+        "deck_sha1": _sha(deck_src),
         "agent_sha1": _sha(AGENT_SRC),
         "git_commit": _git_commit(),
         "built_at": datetime.now(timezone.utc).isoformat(),
-        "tarball": os.path.relpath(TARBALL, ROOT),
-        "tarball_sha256": _sha(TARBALL, "sha256"),
+        "tarball": os.path.relpath(tarball, ROOT),
+        "tarball_sha256": _sha(tarball, "sha256"),
         "submission": {"ref": None, "submitted_at": None, "mu_readings": []},
     }
-    with open(MANIFEST, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, indent=2)
-    print(f"built {os.path.relpath(TARBALL, ROOT)} ({os.path.getsize(TARBALL)/1024:.1f} KiB)")
-    print(f"manifest {os.path.relpath(MANIFEST, ROOT)}")
+    with open(manifest, "w", encoding="utf-8") as f:
+        json.dump(manifest_data, f, indent=2)
+    print(f"built {os.path.relpath(tarball, ROOT)} ({os.path.getsize(tarball)/1024:.1f} KiB)")
+    print(f"manifest {os.path.relpath(manifest, ROOT)}")
+    return tarball, manifest
 
 
-def dry_run() -> None:
+def dry_run(tarball: str, manifest: str) -> None:
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        with tarfile.open(TARBALL) as tar:
+        with tarfile.open(tarball) as tar:
             try:
                 tar.extractall(tmp, filter="data")
             except TypeError:
@@ -147,11 +153,15 @@ def dry_run() -> None:
         print(f"dry-run OK: exec main (no __file__) + cg + deck-select -> {len(out)} cards")
     print(
         f"\nBefore upload: python scripts/check_upload_eligible.py "
-        f"--manifest {os.path.relpath(MANIFEST, ROOT)} "
-        f'--change "starmie_rules: NEW row ashleysandlin + PrizeTracker" --local-gate 56.7'
+        f"--manifest {os.path.relpath(manifest, ROOT)} "
+        f'--change "starmie_rules: deck variant probe" --local-gate <WR>'
     )
 
 
 if __name__ == "__main__":
-    build()
-    dry_run()
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--deck", default=None, help="Deck CSV path (default: ashleysandlin)")
+    ap.add_argument("--name", default=None, help="Package name override")
+    args = ap.parse_args()
+    tarball, manifest = build(deck_src=args.deck, name=args.name)
+    dry_run(tarball, manifest)

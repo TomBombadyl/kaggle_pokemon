@@ -54,6 +54,21 @@ Pattern documented in `ARCHITECTURE.md` § Per-deck agent template.
 
 ---
 
+## Deck builder (community)
+
+| Job | Path |
+|-----|------|
+| **siguremon Deck Builder Tool** — browser UI for `deck.csv` | [`siguremon_deck_builder/`](siguremon_deck_builder/) · [Kaggle kernel](https://www.kaggle.com/code/siguremon/deck-builder-tool) |
+| CLI deck validation (engine + CSV rules) | `scripts/validate_deck.py` |
+
+```powershell
+kaggle kernels pull siguremon/deck-builder-tool -p notebooks/siguremon_deck_builder -m
+python scripts/export_siguremon_deck_builder.py
+cd notebooks/siguremon_deck_builder; python -m http.server 8080
+```
+
+---
+
 ## Other
 
 | Job | Path |
