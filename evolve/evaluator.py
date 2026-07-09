@@ -2,8 +2,12 @@
 
 Never implements new evaluation logic -- every score comes from the same
 eval/harness.py + eval/gates.py path already trusted (Ruling R2: measure on the
-real field only). Metadata on every result matches Ruling R8 (games, opponents,
-seeds, deck, brain).
+real field only). Metadata on every result covers games, opponents, deck, brain
+(Ruling R8). Game-level seeds are NOT captured: eval/harness.py's run_match /
+gate_vs_opponent never fix or record a per-game random seed anywhere in this
+codebase (MatchupResult.seeds exists but is always empty), so this is a
+pre-existing gap in the harness, not something evolve/ invents or can fabricate
+data for -- do not add a fake seeds field here.
 
 Also reports weighted E[win] against the current field mixture
 (field/weights.json, built from daily Kaggle episode pulls via

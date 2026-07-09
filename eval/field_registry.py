@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "field" / "registry.json"
 
 
+@lru_cache(maxsize=4)
 def load_registry(path: Path | None = None) -> dict[str, Any]:
+    """Cached per (path) -- every existing caller uses the default path, so this
+    is effectively one disk read per process instead of one per call. Safe because
+    no caller mutates the returned dict (callers that need a copy already do
+    dict(opp) / list(...) at the point of use)."""
     p = path or REGISTRY_PATH
     return json.loads(p.read_text(encoding="utf-8"))
 

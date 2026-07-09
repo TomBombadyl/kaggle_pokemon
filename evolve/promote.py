@@ -17,18 +17,50 @@ user-confirmed Kaggle upload -> >=2 ladder mu readings (R12).
 from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
+from typing import Callable
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
-def _parse_kv(spec: str) -> dict:
+def _parse_kv(spec: str, *, key_cast: Callable[[str], object] = str) -> dict:
+    """key_cast must match the real dict's key type -- _ATTACK_BASE_DMG is keyed by
+    int attack_id, _ICE_CREAM_HP_THRESHOLD by str matchup name. Getting this wrong
+    produces a dict that silently never matches on lookup (wrong type, not KeyError)."""
     out: dict = {}
     for pair in spec.split(","):
         pair = pair.strip()
         if not pair:
             continue
         k, v = pair.split("=", 1)
-        key = k.strip()
+        key = key_cast(k.strip())
         out[key] = float(v) if "." in v else int(v)
     return out
+
+
+def _check_bounds(block: str, values: dict) -> None:
+    """Best-effort warning if a hand-typed value falls outside evolve/targets.py's
+    declared range for this block. Silently skipped if the cg engine (needed to
+    build the target registry) isn't available -- promote.py can still be used to
+    format values, just without the sanity check."""
+    try:
+        from evolve.targets import get_target
+    except ImportError:
+        return
+    try:
+        target = get_target("archaludon")
+    except Exception:
+        return
+    block_bounds = target.bounds.get(block, {})
+    for key, value in values.items():
+        bounds = block_bounds.get(key)
+        if bounds is None:
+            print(f"  warning: {key!r} has no declared bounds for {block} -- new key?")
+        elif not (bounds.lo <= value <= bounds.hi):
+            print(f"  warning: {key}={value} outside evolve/targets.py bounds [{bounds.lo}, {bounds.hi}]")
 
 
 def main() -> int:
@@ -42,12 +74,16 @@ def main() -> int:
         return 1
 
     if args.ice_cream_hp_threshold:
+        values = _parse_kv(args.ice_cream_hp_threshold, key_cast=str)
         print("Paste into agent/archaludon_agent.py, replacing _ICE_CREAM_HP_THRESHOLD:")
-        print(_parse_kv(args.ice_cream_hp_threshold))
+        print(values)
+        _check_bounds("ice_cream_hp_threshold", values)
         print()
     if args.attack_base_dmg:
+        values = _parse_kv(args.attack_base_dmg, key_cast=int)
         print("Paste into agent/archaludon_agent.py, replacing _ATTACK_BASE_DMG:")
-        print(_parse_kv(args.attack_base_dmg))
+        print(values)
+        _check_bounds("attack_base_dmg", values)
         print()
 
     print(

@@ -24,6 +24,7 @@ ENGINE_CG = os.path.join(ROOT, "data", "sim", "sample_submission", "cg")
 AGENT_SRC = os.path.join(ROOT, "agent", "archaludon_agent.py")
 BENCH_GUARD_SRC = os.path.join(ROOT, "agent", "archaludon_bench_guard.py")
 EMPTY_GUARD_SRC = os.path.join(ROOT, "agent", "empty_bench_guard.py")
+LEVERS_SRC = os.path.join(ROOT, "agent", "archaludon_levers.py")
 DECK_SRC = os.path.join(ROOT, "agent_decks", "archaludon_ex_cinderace.csv")
 NAME = "archaludon"
 LADDER_REF = "54083197"
@@ -74,7 +75,7 @@ def _copytree_no_pyc(src: str, dst: str) -> None:
 def build() -> None:
     if not os.path.isdir(ENGINE_CG):
         raise FileNotFoundError(f"engine cg/ not found: {ENGINE_CG}")
-    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, DECK_SRC):
+    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, LEVERS_SRC, DECK_SRC):
         if not os.path.exists(p):
             raise FileNotFoundError(p)
     deck_lines = [x for x in open(DECK_SRC, encoding="utf-8").read().split("\n") if x.strip()]
@@ -89,6 +90,7 @@ def build() -> None:
     shutil.copy2(AGENT_SRC, os.path.join(BUILD_DIR, "archaludon_agent.py"))
     shutil.copy2(BENCH_GUARD_SRC, os.path.join(BUILD_DIR, "archaludon_bench_guard.py"))
     shutil.copy2(EMPTY_GUARD_SRC, os.path.join(BUILD_DIR, "empty_bench_guard.py"))
+    shutil.copy2(LEVERS_SRC, os.path.join(BUILD_DIR, "archaludon_levers.py"))
     shutil.copy2(DECK_SRC, os.path.join(BUILD_DIR, "deck.csv"))
     _copytree_no_pyc(ENGINE_CG, os.path.join(BUILD_DIR, "cg"))
 
@@ -99,6 +101,7 @@ def build() -> None:
             "archaludon_agent.py",
             "archaludon_bench_guard.py",
             "empty_bench_guard.py",
+            "archaludon_levers.py",
             "deck.csv",
             "cg",
         ):

@@ -244,23 +244,27 @@ def gate_archaludon_matchups(
 
     param_overrides (evolve/evaluator.py hook): {'ice_cream_hp_threshold': {...},
     'attack_base_dmg': {...}} merged over the base constants in archaludon_agent.py
-    for this gate run only. See agent/archaludon_levers.py.
+    for this gate run only -- reset unconditionally on exit (even on error) so a
+    candidate's overrides can never leak into a later, unrelated gate call. See
+    agent/archaludon_levers.py.
     """
     clear_caches()
     deck = hero_deck or DEFAULT_ARCHALUDON_DECK
     opp_list = opponents or opponents_for_suite(suite)
-    if param_overrides is not None:
-        from agent.archaludon_levers import set_archaludon_param_overrides
+    try:
+        brain = make_archaludon_brain(deck, param_overrides=param_overrides)
+        return run_suite(
+            brain,
+            deck,
+            opp_list,
+            games_per_opp=games_per_opp,
+            hero_brain_label="archaludon_agent",
+        )
+    finally:
+        if param_overrides is not None:
+            from agent.archaludon_levers import set_archaludon_param_overrides
 
-        set_archaludon_param_overrides(param_overrides)
-    brain = make_archaludon_brain(deck)
-    return run_suite(
-        brain,
-        deck,
-        opp_list,
-        games_per_opp=games_per_opp,
-        hero_brain_label="archaludon_agent",
-    )
+            set_archaludon_param_overrides(None)
 
 
 def gate_starmie_matchups(

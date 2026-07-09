@@ -54,7 +54,8 @@ def run(
     games_per_opp: int,
     suite: str,
     seed: int,
-) -> list[EvalResult]:
+) -> list[tuple[int, EvalResult]]:
+    """Returns [(generation_index, EvalResult), ...] -- generation 0 is the baseline."""
     target = get_target(target_name)
     rng = random.Random(seed)
 
@@ -66,7 +67,7 @@ def run(
 
     survivors = [base_params(target)]
     keep_k = max(2, population // 3)
-    history = [baseline]
+    history: list[tuple[int, EvalResult]] = [(0, baseline)]
 
     for gen in range(1, generations + 1):
         candidates = propose(target, survivors, population=population, rng=rng)
@@ -74,7 +75,7 @@ def run(
             evaluate(target, c, games_per_opp=games_per_opp, suite=suite) for c in candidates
         ]
         results.sort(key=lambda r: r.wr_pct, reverse=True)
-        history.extend(results)
+        history.extend((gen, r) for r in results)
         survivors = [r.params for r in results[:keep_k]]
         best = results[0]
         print(
@@ -85,26 +86,26 @@ def run(
     return history
 
 
-def write_report(target_name: str, generation: int, history: list[EvalResult]) -> Path:
-    baseline, *rest = history
-    rest_sorted = sorted(rest, key=lambda r: r.wr_pct, reverse=True)
+def write_report(target_name: str, generation: int, history: list[tuple[int, EvalResult]]) -> Path:
+    (_, baseline), *rest = history
+    rest_sorted = sorted(rest, key=lambda gr: gr[1].wr_pct, reverse=True)
     lines = [
         f"# evolve run -- {target_name} (gen{generation})",
         "",
         f"- Baseline: **{baseline.wr_pct:.1f}%** [{baseline.ci_low_pct:.1f}, {baseline.ci_high_pct:.1f}] "
         f"(n={baseline.games}, {baseline.hero_brain} x {baseline.hero_deck})",
-        f"- Candidates evaluated: {len(rest)}",
+        f"- Candidates evaluated: {len(rest)} across generations 1-{generation}",
         "",
-        "## Top candidates",
+        "## Top candidates (pooled across all generations, ranked by raw win-rate)",
         "",
-        "| Rank | WR% | 95% CI | n | Weighted E[win]% | Beats baseline CI? | Params |",
-        "|------|-----|--------|---|-------------------|---------------------|--------|",
+        "| Rank | Gen | WR% | 95% CI | n | Weighted E[win]% | Beats baseline CI? | Params |",
+        "|------|-----|-----|--------|---|-------------------|---------------------|--------|",
     ]
-    for i, r in enumerate(rest_sorted[:10], start=1):
+    for i, (gen, r) in enumerate(rest_sorted[:10], start=1):
         beats = "yes" if r.ci_low_pct > baseline.ci_high_pct else "no"
         weighted = f"{r.weighted_e_win_pct:.1f}" if r.weighted_e_win_pct is not None else "n/a"
         lines.append(
-            f"| {i} | {r.wr_pct:.1f} | [{r.ci_low_pct:.1f}, {r.ci_high_pct:.1f}] | {r.games} | "
+            f"| {i} | {gen} | {r.wr_pct:.1f} | [{r.ci_low_pct:.1f}, {r.ci_high_pct:.1f}] | {r.games} | "
             f"{weighted} | {beats} | `{r.params}` |"
         )
     lines.append("")

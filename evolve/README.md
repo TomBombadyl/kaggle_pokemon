@@ -13,8 +13,12 @@ on the real field only), and never edits a shipped agent file automatically.
   (`agent/archaludon_agent.py`), scored via `eval.gates.gate_archaludon_matchups`. Archaludon is
   the pilot because it's the only unpaused primary track right now (`ROADMAP.md` Sec 0).
 - `evaluator.py` — candidate params → scalar score, via the real field harness. No new
-  evaluation logic; every score carries the same games/opponents/seeds metadata Ruling R8
-  requires, plus a weighted E[win] figure (see below) for context.
+  evaluation logic; every score carries the games/opponents/deck/brain metadata Ruling R8
+  requires, plus a weighted E[win] figure (see below) for context. Game-level seeds are **not**
+  captured — `eval/harness.py` never fixes or records a per-game random seed anywhere in this
+  codebase (pre-existing, not introduced here), so treat within-run win-rate deltas as noisy at
+  the margins; the Wilson CI already reported per candidate is what actually bounds that noise,
+  not a seed log.
 - `proposer.py` — candidate generation. Ships a working local perturbation strategy (bounded,
   keep-top-K survivors, not greedy single-best — `RULINGS.md` already documents blind
   single-point GA collapsing onto local-gate noise). `propose()` is the one function to swap
@@ -56,3 +60,15 @@ python evolve/run_evolution.py --target archaludon --generations 3 --population 
 Requires the same environment as `eval/harness.py` — Python ≥3.11 and the `cg` engine under
 `data/sim/sample_submission` (see `README.md` / `AGENTS.md` "Environment") — so it does not run
 in the Py3.10, no-Kaggle-egress sandbox this session may be running in.
+
+## Known limitation: sequential candidate evaluation
+
+`run_evolution.py` evaluates each generation's candidates one at a time in a single process.
+`scripts/arena.py` already documents that the `cg` engine's `Battle.battle_ptr` is a per-process
+ctypes singleton — threads are unsafe, but that script already uses `ProcessPoolExecutor` (one
+game per worker process, engine imported lazily inside the worker) as the safe way to parallelize
+across this exact engine. `run_evolution.py` doesn't reuse that pattern yet; a real pilot with
+`--population 6 --generations 3` plays roughly 20x more games than a single `gate_archaludon.py`
+run, sequentially. Parallelizing candidate evaluation the same way `scripts/arena.py` does is the
+natural next step once the pilot itself is validated — not done here to avoid shipping
+engine-parallelization code that couldn't be tested against the real `cg` engine in this sandbox.

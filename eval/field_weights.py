@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 WEIGHTS_PATH = ROOT / "field" / "weights.json"
 
 
+@lru_cache(maxsize=4)
 def load_weights(path: Path | None = None) -> dict[str, Any]:
+    """Cached per (path) -- see load_registry's docstring in field_registry.py for
+    why this is safe. scripts/build_field_weights.py, which rewrites weights.json,
+    always runs as a separate process (see evolve/run_evolution.py
+    --refresh-episodes), so a stale in-process cache is not a concern here."""
     p = path or WEIGHTS_PATH
     return json.loads(p.read_text(encoding="utf-8"))
 

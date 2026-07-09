@@ -215,12 +215,16 @@ def make_archaludon_brain(
     deck_path: str | Path | None = None,
     *,
     bench_guard: bool = True,
+    param_overrides: dict[str, dict] | None = None,
 ) -> Callable[[dict], list[int]]:
     import os
+
+    from agent.archaludon_levers import set_archaludon_param_overrides
 
     path = str(deck_path or DEFAULT_ARCHALUDON_DECK)
     os.environ["ARCHALUDON_DECK"] = path
     os.environ["ARCHALUDON_BENCH_GUARD"] = "1" if bench_guard else "0"
+    set_archaludon_param_overrides(param_overrides)
     from agent.archaludon_agent import agent as archaludon_act
 
     return archaludon_act
