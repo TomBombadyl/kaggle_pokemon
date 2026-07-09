@@ -4,6 +4,48 @@
 
 ---
 
+## As of 2026-07-09 (evolve/ pilot run — real result: no improvement found, 3 gens)
+
+**Ran for real** on the dev machine (this sandbox still has no `cg` engine / Kaggle egress —
+these numbers are real games, run locally, not simulated here):
+
+```
+python evolve/run_evolution.py --target archaludon --generations 3 --population 6 --games 30 --report
+gen0 baseline: 68.7% [60.9, 75.5] (n=150)
+gen1: best 73.3% [65.7, 79.8] (n=150) vs baseline 68.7%
+gen2: best 69.3% [61.5, 76.2] (n=150) vs baseline 68.7%
+gen3: best 69.3% [61.5, 76.2] (n=150) vs baseline 68.7%
+```
+
+Full table: `eval/evolve_archaludon_gen3.md`. **Result: no candidate's Wilson CI cleared the
+baseline's** — best raw win-rate (73.3%, gen1) still overlaps baseline `[60.9, 75.5]`. Per
+Ruling R8's own statistical bar, that's noise, not signal. **Nothing promoted, nothing changed
+in `agent/archaludon_agent.py`.** Legitimate negative result after one pilot, not a failure of
+the tool — 18 candidates across 3 generations of ±15% bounded perturbation on 2 constant blocks
+is a small search; three ways to read it: (a) the shipped constants are already close to a local
+optimum for this gate, (b) 3 generations / population 6 is too small a budget to find a real
+effect against this much game-outcome noise (n=150 total games has WR CI half-width ~7pp), or
+(c) `_ICE_CREAM_HP_THRESHOLD` / `_ATTACK_BASE_DMG` aren't where the marginal win is — a different
+target (matchup levers, a different constant block) might show more headroom.
+
+**Bug found + fixed by running it for real:** `evolve/targets.py`'s `_archaludon_target()`
+imported `agent.archaludon_agent` directly, which only sets up `sys.path` for the
+Kaggle-packaged runtime, not a dev machine — `eval/harness.py` covers the dev-machine `cg` path
+itself, but harness isn't imported until `evaluate()` resolves `gate_fn`, *after* `get_target()`
+already tried and failed to import `archaludon_agent`. Fixed by calling the existing
+`agent.cg_bootstrap.ensure_cg_engine()` (already used by dragapult/iono/abomasnow agents) at the
+top of `_archaludon_target()`, before the archaludon_agent import. This is exactly the kind of
+bug that only running against the real engine surfaces — the synthetic dry-run earlier this
+session (fake `EvolveTarget`, monkeypatched `evaluate()`) never exercised the real
+`_archaludon_target()` function at all, so it couldn't have caught this.
+
+**THE SINGLE NEXT ACTION:** pick one of (a)/(b)/(c) above and re-run with a deliberate change —
+e.g. `--generations 6 --population 10` for a bigger budget on the same target, or add a second
+`evolve/targets.py` entry for a different constant block — rather than re-running the same
+config expecting a different answer.
+
+---
+
 ## As of 2026-07-09 (evolve/ landed — AlphaEvolve-style search, additive only)
 
 **What landed:** `evolve/` module (targets.py, evaluator.py, proposer.py, run_evolution.py,

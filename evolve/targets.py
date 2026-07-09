@@ -39,6 +39,16 @@ def base_params(target: EvolveTarget) -> dict[str, dict]:
 
 
 def _archaludon_target() -> EvolveTarget:
+    # archaludon_agent.py only sets up sys.path for the Kaggle-packaged runtime
+    # (__file__'s dir + /kaggle_simulations/agent); on a dev machine the cg engine
+    # lives under data/sim/sample_submission, which only eval/harness.py adds to
+    # sys.path -- and harness isn't imported until evaluate() resolves gate_fn,
+    # *after* this function has already tried to import agent.archaludon_agent.
+    # Same helper other agents (dragapult/iono/abomasnow) already use for this.
+    from agent.cg_bootstrap import ensure_cg_engine
+
+    ensure_cg_engine()
+
     from agent.archaludon_agent import _ATTACK_BASE_DMG, _ICE_CREAM_HP_THRESHOLD
 
     return EvolveTarget(
