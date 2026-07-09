@@ -482,10 +482,16 @@ def prize_value(pokemon):
     return 1
 
 
+try:
+    from agent.archaludon_levers import merged_attack_base_dmg, merged_ice_cream_hp_threshold
+except ImportError:
+    from archaludon_levers import merged_attack_base_dmg, merged_ice_cream_hp_threshold
+
+
 def best_attack_damage(obs, attack_id):
     if attack_id == RAGING_HAMMER:
         return 80 + damage_on(active_pokemon(obs)) // 10 * 10
-    return _ATTACK_BASE_DMG.get(attack_id, 0)
+    return merged_attack_base_dmg(_ATTACK_BASE_DMG).get(attack_id, 0)
 
 
 def is_metal_weak(pokemon):
@@ -731,7 +737,7 @@ def should_skip_ice_cream(obs, active):
             if effective_damage(rh_dmg, opp_act) >= opp_act.hp and effective_damage(rh_after, opp_act) < opp_act.hp:
                 return True, "skip Ice Cream: healing loses Raging Hammer KO"
     matchup = detect_matchup(obs)
-    threshold = _ICE_CREAM_HP_THRESHOLD.get(matchup, 220)
+    threshold = merged_ice_cream_hp_threshold(_ICE_CREAM_HP_THRESHOLD).get(matchup, 220)
     if active.hp > threshold:
         return True, f"skip Ice Cream: HP {active.hp} > {threshold} ({matchup})"
     return False, ""

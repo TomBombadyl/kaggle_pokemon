@@ -413,3 +413,9 @@ def clear_caches() -> None:
         dragapult_levers.set_dragapult_lever_overrides(None)
     except ImportError:
         pass
+    try:
+        from agent import archaludon_levers
+
+        archaludon_levers.set_archaludon_param_overrides(None)
+    except ImportError:
+        pass

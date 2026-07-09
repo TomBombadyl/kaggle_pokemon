@@ -4,6 +4,35 @@
 
 ---
 
+## As of 2026-07-09 (evolve/ landed — AlphaEvolve-style search, additive only)
+
+**What landed:** `evolve/` module (targets.py, evaluator.py, proposer.py, run_evolution.py,
+promote.py) — generates many candidate parameter sets per round against Archaludon's
+`_ICE_CREAM_HP_THRESHOLD` / `_ATTACK_BASE_DMG` constants and scores each through the existing
+`eval/harness.py` + `eval/gates.py` path (no new eval logic). Small additive hook added:
+`agent/archaludon_levers.py` (mirrors `agent/dragapult_levers.py`'s override pattern) +
+`param_overrides` kwarg on `eval.gates.gate_archaludon_matchups`. Nothing in `agent/*.py` is
+edited automatically — promotion (`evolve/promote.py`) is a manual, human-reviewed step, and a
+promoted candidate still goes through the unchanged `check_upload_eligible.py` / R12 pipeline
+before any Kaggle upload. Full design: `evolve/README.md`.
+
+**Safety net:** no repo state was destructively changed. Pre-overhaul tree is commit
+`5e2116723004b6ed1985e90ae65f620c3513ddd4` (tip of `origin/main` and this branch before this
+session) — `git checkout 5e2116723004b6ed1985e90ae65f620c3513ddd4` recovers it exactly. Frozen
+ladder-proven baselines (unaffected either way, since Kaggle keeps submission history
+regardless of repo state): `archaludon_rules × archaludon_ex_cinderace` ref **54083197** (peak
+**1224.2 μ** / latest **1196.1 μ**); `dragapult_crispin × dragapult_ex_sample` ref **53989933**
+(**880.9 μ**).
+
+**Not yet done:** the pilot evolution run itself. This sandbox has no `cg` engine / Kaggle
+egress (see `README.md` Environment), so `evolve/run_evolution.py` has been syntax-checked but
+not run end-to-end. **Single next action:** on the dev machine (Py≥3.11), run
+`python evolve/run_evolution.py --target archaludon --generations 3 --population 6 --games 20 --report`
+and check whether any candidate's Wilson CI clears the current baseline's — that's the bar for
+extending this past the pilot (per `evolve/README.md`).
+
+---
+
 ## As of 2026-06-28 Session 57d (R12 probe uploaded — handoff)
 
 **Leader:** **54083197** @ **1196.1 μ** (R12 — do not re-upload). **Latest probe:** **54139502** R7+R12 dead-active tempo — **PENDING** (local **70.7%** n=150, uploaded 2026-06-28T12:13 UTC). R11 **54138853** reading 2: **632.9 μ**.

@@ -238,11 +238,21 @@ def gate_archaludon_matchups(
     games_per_opp: int = 20,
     opponents: list[str] | None = None,
     hero_deck: str | Path | None = None,
+    param_overrides: dict[str, dict] | None = None,
 ) -> HarnessResult:
-    """L1: Archaludon ex / Cinderace agent vs native field opponents."""
+    """L1: Archaludon ex / Cinderace agent vs native field opponents.
+
+    param_overrides (evolve/evaluator.py hook): {'ice_cream_hp_threshold': {...},
+    'attack_base_dmg': {...}} merged over the base constants in archaludon_agent.py
+    for this gate run only. See agent/archaludon_levers.py.
+    """
     clear_caches()
     deck = hero_deck or DEFAULT_ARCHALUDON_DECK
     opp_list = opponents or opponents_for_suite(suite)
+    if param_overrides is not None:
+        from agent.archaludon_levers import set_archaludon_param_overrides
+
+        set_archaludon_param_overrides(param_overrides)
     brain = make_archaludon_brain(deck)
     return run_suite(
         brain,
