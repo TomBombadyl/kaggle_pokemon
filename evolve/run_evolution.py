@@ -28,7 +28,7 @@ if str(ROOT) not in sys.path:
 
 from evolve.evaluator import EvalResult, evaluate  # noqa: E402
 from evolve.proposer import propose  # noqa: E402
-from evolve.targets import TARGETS, base_params  # noqa: E402
+from evolve.targets import available_targets, base_params, get_target  # noqa: E402
 
 EVAL_DIR = ROOT / "eval"
 
@@ -55,7 +55,7 @@ def run(
     suite: str,
     seed: int,
 ) -> list[EvalResult]:
-    target = TARGETS[target_name]
+    target = get_target(target_name)
     rng = random.Random(seed)
 
     baseline = evaluate(target, base_params(target), games_per_opp=games_per_opp, suite=suite)
@@ -127,7 +127,7 @@ def write_report(target_name: str, generation: int, history: list[EvalResult]) -
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--target", choices=sorted(TARGETS), required=True)
+    ap.add_argument("--target", choices=available_targets(), required=True)
     ap.add_argument("--generations", type=int, default=3)
     ap.add_argument("--population", type=int, default=6)
     ap.add_argument("--games", type=int, default=20, dest="games_per_opp")

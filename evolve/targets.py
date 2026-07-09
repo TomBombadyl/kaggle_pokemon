@@ -61,8 +61,23 @@ def _archaludon_target() -> EvolveTarget:
     )
 
 
-def _load_targets() -> dict[str, EvolveTarget]:
-    return {"archaludon": _archaludon_target()}
+_TARGET_BUILDERS = {"archaludon": _archaludon_target}
+_target_cache: dict[str, EvolveTarget] = {}
 
 
-TARGETS: dict[str, EvolveTarget] = _load_targets()
+def available_targets() -> list[str]:
+    return sorted(_TARGET_BUILDERS)
+
+
+def get_target(name: str) -> EvolveTarget:
+    """Build (and cache) a target on first use -- keeps import of this module free
+
+    of the cg-engine dependency chain that building an EvolveTarget requires, so
+    evolve.proposer and the search algorithm itself stay importable/testable
+    without the real game engine.
+    """
+    if name not in _target_cache:
+        if name not in _TARGET_BUILDERS:
+            raise KeyError(f"unknown evolve target: {name!r} (available: {available_targets()})")
+        _target_cache[name] = _TARGET_BUILDERS[name]()
+    return _target_cache[name]
