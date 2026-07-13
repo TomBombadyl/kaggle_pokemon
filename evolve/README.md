@@ -57,6 +57,13 @@ every other change in this repo.
 python evolve/run_evolution.py --target archaludon --generations 3 --population 6 --games 20 --report
 ```
 
+Or the one-command runner, which also checks git state, resolves any pending ladder probe, and
+fetches the `cg` engine if it's missing:
+
+```powershell
+powershell -File scripts/run_evolve_pilot.ps1 -Generations 6 -Population 10 -Games 30
+```
+
 Requires the same environment as `eval/harness.py` — Python ≥3.11 and the `cg` engine under
 `data/sim/sample_submission` (see `README.md` / `AGENTS.md` "Environment") — so it does not run
 in the Py3.10, no-Kaggle-egress sandbox this session may be running in.
