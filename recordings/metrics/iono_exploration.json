@@ -1,0 +1,149 @@
+{
+  "arms": {
+    "0": {
+      "games": 2492,
+      "decided": 2492,
+      "wins": 1268,
+      "other": 0,
+      "deviations": 0,
+      "dev_per_game": 0.0,
+      "decisions": 145754,
+      "win_pct": 50.88,
+      "se": 1.001,
+      "ci95": [
+        48.92,
+        52.84
+      ]
+    },
+    "0.02": {
+      "games": 161,
+      "decided": 161,
+      "wins": 73,
+      "other": 0,
+      "deviations": 107,
+      "dev_per_game": 0.6646,
+      "decisions": 8933,
+      "win_pct": 45.34,
+      "se": 3.923,
+      "ci95": [
+        37.85,
+        53.05
+      ],
+      "diff_vs_control_pp": -5.54,
+      "two_se_diff": 8.1,
+      "verdict": "ns",
+      "odds_per_deviation": 0.7158
+    },
+    "0.05": {
+      "games": 1601,
+      "decided": 1601,
+      "wins": 671,
+      "other": 0,
+      "deviations": 2742,
+      "dev_per_game": 1.7127,
+      "decisions": 91866,
+      "win_pct": 41.91,
+      "se": 1.233,
+      "ci95": [
+        39.52,
+        44.34
+      ],
+      "diff_vs_control_pp": -8.97,
+      "two_se_diff": 3.18,
+      "verdict": "SIGNIFICANT",
+      "odds_per_deviation": 0.8096
+    },
+    "0.15": {
+      "games": 1948,
+      "decided": 1948,
+      "wins": 498,
+      "other": 0,
+      "deviations": 9720,
+      "dev_per_game": 4.9897,
+      "decisions": 106565,
+      "win_pct": 25.56,
+      "se": 0.988,
+      "ci95": [
+        23.68,
+        27.55
+      ],
+      "diff_vs_control_pp": -25.32,
+      "two_se_diff": 2.81,
+      "verdict": "SIGNIFICANT",
+      "odds_per_deviation": 0.8015
+    }
+  },
+  "first_deviation": {
+    "PLAY": {
+      "games": 1341,
+      "wins": 428,
+      "win_pct": 31.92,
+      "se": 1.27,
+      "ci95": [
+        29.48,
+        34.46
+      ]
+    },
+    "CARD": {
+      "games": 759,
+      "wins": 263,
+      "win_pct": 34.65,
+      "se": 1.73,
+      "ci95": [
+        31.35,
+        38.11
+      ]
+    },
+    "ATTACH": {
+      "games": 374,
+      "wins": 117,
+      "win_pct": 31.28,
+      "se": 2.4,
+      "ci95": [
+        26.79,
+        36.15
+      ]
+    },
+    "ATTACK": {
+      "games": 304,
+      "wins": 97,
+      "win_pct": 31.91,
+      "se": 2.67,
+      "ci95": [
+        26.92,
+        37.35
+      ]
+    },
+    "NO": {
+      "games": 162,
+      "wins": 47,
+      "win_pct": 29.01,
+      "se": 3.57,
+      "ci95": [
+        22.57,
+        36.42
+      ]
+    },
+    "EVOLVE": {
+      "games": 123,
+      "wins": 48,
+      "win_pct": 39.02,
+      "se": 4.4,
+      "ci95": [
+        30.86,
+        47.85
+      ]
+    },
+    "RETREAT": {
+      "games": 60,
+      "wins": 30,
+      "win_pct": 50.0,
+      "se": 6.45,
+      "ci95": [
+        37.73,
+        62.27
+      ]
+    }
+  },
+  "per_deviation": 0.7756
+}

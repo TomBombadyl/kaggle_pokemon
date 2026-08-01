@@ -1,0 +1,192 @@
+[
+  {
+    "variant": "budget200",
+    "desc": "SearchScorer budget=200ms (prod baseline)",
+    "kwargs": {
+      "budget_ms": 200.0,
+      "heuristic_blend": 0.0
+    },
+    "brain": "search",
+    "games_per_opp": 48,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 16.666666666666668,
+    "overall_ci": [
+      11.463231075610265,
+      23.60240674216227
+    ],
+    "overall_wins": 24,
+    "overall_games": 144,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 14.583333333333334,
+        "wins": 7,
+        "losses": 41,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 18.75,
+        "wins": 9,
+        "losses": 39,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 16.666666666666668,
+        "wins": 8,
+        "losses": 40,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 7.0
+  },
+  {
+    "variant": "budget400",
+    "desc": "SearchScorer budget=400ms",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "heuristic_blend": 0.0
+    },
+    "brain": "search",
+    "games_per_opp": 48,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 19.444444444444443,
+    "overall_ci": [
+      13.809457199178105,
+      26.667377467113383
+    ],
+    "overall_wins": 28,
+    "overall_games": 144,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 12.5,
+        "wins": 6,
+        "losses": 42,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 25.0,
+        "wins": 12,
+        "losses": 36,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 20.833333333333332,
+        "wins": 10,
+        "losses": 38,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 6.9
+  },
+  {
+    "variant": "lucario400_blend02",
+    "desc": "LucarioSearch 400ms + Lucario-rank blend 0.2",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "guard_top_k": 2,
+      "heuristic_blend": 0.2
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 48,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 19.444444444444443,
+    "overall_ci": [
+      13.809457199178105,
+      26.667377467113383
+    ],
+    "overall_wins": 28,
+    "overall_games": 144,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 12.5,
+        "wins": 6,
+        "losses": 42,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 20.833333333333332,
+        "wins": 10,
+        "losses": 38,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 25.0,
+        "wins": 12,
+        "losses": 36,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 8.2
+  },
+  {
+    "variant": "lucario400",
+    "desc": "LucarioSearchScorer 400ms guard_k=2",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "guard_top_k": 2,
+      "heuristic_blend": 0.0
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 48,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 24.305555555555557,
+    "overall_ci": [
+      18.02684436266439,
+      31.919584788535264
+    ],
+    "overall_wins": 35,
+    "overall_games": 144,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 25.0,
+        "wins": 12,
+        "losses": 36,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 29.166666666666668,
+        "wins": 14,
+        "losses": 34,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 18.75,
+        "wins": 9,
+        "losses": 39,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 8.2
+  }
+]

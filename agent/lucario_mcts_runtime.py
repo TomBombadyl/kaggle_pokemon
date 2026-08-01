@@ -80,6 +80,16 @@ TEMP_PLIES = _ei("LUC_TEMP_PLIES", 8)
 VALUE_LAMBDA = _ef("LUC_VALUE_LAMBDA", 0.9)
 DIRICHLET_ALPHA = _ef("LUC_DIRICHLET_ALPHA", 0.03)
 DIRICHLET_EPS = _ef("LUC_DIRICHLET_EPS", 0.25)
+# PUCT exploration scale (AlphaZero uses ~1–2 with visit-normalized Q; sample used 0.4).
+PUCT_C = _ef("LUC_PUCT_C", 0.4)
+# IS-MCTS-lite: independent search_begin determinizations; aggregate root visits.
+DETERMINIZATIONS = max(1, _ei("LUC_DETERMINIZATIONS", 1))
+# Policy target for LearnSample: "value" (legacy relative Q) | "visits" (AlphaZero N^{1/t}).
+POLICY_TARGET = os.environ.get("LUC_POLICY_TARGET", "value").strip().lower()
+# Mix LucarioScorer one-hot into root prior (before Dirichlet). 0=off.
+PRIOR_BLEND = max(0.0, min(1.0, _ef("LUC_PRIOR_BLEND", 0.0)))
+# Visit-count policy temperature (only when POLICY_TARGET=visits).
+POLICY_VISIT_TEMP = max(0.05, _ef("LUC_POLICY_VISIT_TEMP", 1.0))
 TIME_BUDGET = _ef("LUC_TIME_BUDGET_SEC", 6.0 * 3600)
 # Kaggle: 10 min/player cumulative decision time; forfeit on overrun. Train with 9:59 buffer.
 PLAYER_CLOCK_LIMIT_SEC = _ef("LUC_PLAYER_CLOCK_LIMIT_SEC", 599.0)
@@ -616,6 +626,29 @@ def _apply_dirichlet_noise(children: list[Child]) -> None:
         child.prob = (1.0 - DIRICHLET_EPS) * child.prob + DIRICHLET_EPS * (n / total)
 
 
+def _apply_scorer_prior_blend(children: list[Child], obs_dict: dict) -> None:
+    """Blend LucarioScorer pick into NN prior at root (IS-MCTS / AlphaZero prior)."""
+    if PRIOR_BLEND <= 0.0 or not children:
+        return
+    # Prior blend does not require lever_blend>0 — only a wired LucarioScorer.
+    scorer_pick = _scorer_root_pick(obs_dict, require_lever=False)
+    if scorer_pick is None:
+        return
+    matched = False
+    for child in children:
+        if _selections_equal(child.select, scorer_pick):
+            matched = True
+            break
+    if not matched:
+        return
+    for child in children:
+        onehot = 1.0 if _selections_equal(child.select, scorer_pick) else 0.0
+        child.prob = (1.0 - PRIOR_BLEND) * child.prob + PRIOR_BLEND * onehot
+    s = sum(c.prob for c in children) or 1.0
+    for child in children:
+        child.prob /= s
+
+
 def _dead_expand_node(
     parent: Node,
     your_index: int,
@@ -787,8 +820,11 @@ def clear_training_opponent_context() -> None:
     set_training_opponent_context("", None, deck_scope_enabled=True)
 
 
-def _scorer_root_pick(obs_dict: dict) -> list[int] | None:
-    if _LUCARIO_SCORER is None or _LEVER_BLEND <= 0:
+def _scorer_root_pick(obs_dict: dict, *, require_lever: bool = True) -> list[int] | None:
+    """LucarioScorer root action. require_lever=True for visit bonus; False for prior blend."""
+    if _LUCARIO_SCORER is None:
+        return None
+    if require_lever and _LEVER_BLEND <= 0:
         return None
     try:
         sel = obs_dict.get("select") or {}
@@ -895,18 +931,17 @@ def _stub_energy_id(deck: list[int]) -> int:
     return 6
 
 
-def mcts_agent(
+def _mcts_single_determinization(
     obs_dict,
+    obs,
     your_deck: list[int],
     model,
     *,
-    opp_deck: list[int] | None = None,
-    add_noise: bool = False,
-    temperature: float = 0.0,
+    opp_deck: list[int],
+    add_noise: bool,
+    temperature: float,
 ):
-    """MCTS with simulator-valid children; opponent belief from real deck list."""
-    opp_deck = opp_deck or your_deck
-    obs = to_observation_class(obs_dict)
+    """One search_begin + SEARCH_COUNT sims. Core loop unchanged; knobs via globals."""
     your_index = obs.current.yourIndex
     state = obs.current
     opp_ps = state.players[1 - your_index]
@@ -924,6 +959,8 @@ def mcts_agent(
         opponent_active=[_stub_pokemon_id(opp_deck)] if len(active) > 0 and active[0] is None else [],
     )
     root, sample = create_node(None, search_state, your_index, your_deck, model)
+    if root.children and PRIOR_BLEND > 0.0 and your_index == obs.current.yourIndex:
+        _apply_scorer_prior_blend(root.children, obs_dict)
     if add_noise and root.children:
         _apply_dirichlet_noise(root.children)
 
@@ -932,7 +969,7 @@ def mcts_agent(
         nxt = None
         while True:
             value = -1e9
-            c = 0.4 * math.sqrt(current.visit)
+            c = PUCT_C * math.sqrt(current.visit)
             for child in current.children:
                 if child.invalid:
                     continue
@@ -963,9 +1000,126 @@ def mcts_agent(
                 current.backprop(current.value)
                 break
 
+    search_end()
+    return root, sample
+
+
+def _fill_policy_targets(
+    sample: LearnSample | None,
+    root: Node,
+    max_child: Child,
+    *,
+    lever_override: bool,
+) -> None:
+    """Write LearnSample.policy from either relative Q or visit counts."""
+    if sample is None or not root.children:
+        return
+    sample.value = root.total / max(1, root.visit)
+    if lever_override:
+        for i, child in enumerate(root.children):
+            sample.policy[i] = (
+                1.0 if _selections_equal(child.select, max_child.select) else -1.0
+            )
+        return
+    if POLICY_TARGET == "visits":
+        # AlphaZero: π ∝ N^{1/τ}, then map to [-1,1] for existing Huber head.
+        raw = []
+        for child in root.children:
+            n = float(child.node.visit) if child.node is not None and not child.invalid else 0.0
+            raw.append(n ** (1.0 / POLICY_VISIT_TEMP))
+        tot = sum(raw) or 1.0
+        for i, r in enumerate(raw):
+            p = r / tot  # [0,1]
+            sample.policy[i] = max(-1.0, min(1.0, 2.0 * p - 1.0))
+        return
+    # Legacy relative value targets.
+    min_value = 10.0
+    for child in root.children:
+        if child.node is not None and not child.invalid:
+            v = child.node.total / child.node.visit
+            if min_value > v:
+                min_value = v
+    for i, child in enumerate(root.children):
+        base = sample.value
+        if child.node is None or child.invalid:
+            v = min_value - base - 0.03
+        else:
+            v = child.node.total / child.node.visit - base
+        sample.policy[i] = max(-1.0, min(1.0, v))
+
+
+def mcts_agent(
+    obs_dict,
+    your_deck: list[int],
+    model,
+    *,
+    opp_deck: list[int] | None = None,
+    add_noise: bool = False,
+    temperature: float = 0.0,
+):
+    """MCTS with simulator-valid children; opponent belief from real deck list.
+
+    When LUC_DETERMINIZATIONS>1, run independent determinizations and pick by
+    summed root visits (IS-MCTS-lite / PIMC root vote). Core PUCT loop unchanged.
+    """
+    opp_deck = opp_deck or your_deck
+    obs = to_observation_class(obs_dict)
+    your_index = obs.current.yourIndex
+    n_det = max(1, DETERMINIZATIONS)
+
+    if n_det == 1:
+        root, sample = _mcts_single_determinization(
+            obs_dict, obs, your_deck, model,
+            opp_deck=opp_deck, add_noise=add_noise, temperature=temperature,
+        )
+        visit_map: dict[tuple, float] = {}
+        child_by_key: dict[tuple, Child] = {}
+        for child in root.children:
+            key = tuple(sorted(child.select))
+            child_by_key[key] = child
+            if child.node is not None and not child.invalid:
+                visit_map[key] = float(child.node.visit)
+        agg_root, agg_sample = root, sample
+    else:
+        visit_map = {}
+        child_by_key = {}
+        q_sum: dict[tuple, float] = {}
+        q_n: dict[tuple, int] = {}
+        agg_sample = None
+        agg_root = None
+        for d in range(n_det):
+            root, sample = _mcts_single_determinization(
+                obs_dict, obs, your_deck, model,
+                opp_deck=opp_deck,
+                add_noise=add_noise and d == 0,
+                temperature=temperature,
+            )
+            if agg_sample is None:
+                agg_sample = sample
+                agg_root = root
+            for child in root.children:
+                key = tuple(sorted(child.select))
+                if key not in child_by_key:
+                    child_by_key[key] = child
+                if child.node is not None and not child.invalid:
+                    visit_map[key] = visit_map.get(key, 0.0) + float(child.node.visit)
+                    q_sum[key] = q_sum.get(key, 0.0) + child.node.total / max(1, child.node.visit)
+                    q_n[key] = q_n.get(key, 0) + 1
+        # Rebuild a synthetic visited list from aggregated visits on last root children order.
+        if agg_root is not None:
+            for child in agg_root.children:
+                key = tuple(sorted(child.select))
+                if key in visit_map and child.node is not None:
+                    # Stamp aggregate visits for policy targets / lever pick.
+                    child.node.visit = max(1, int(round(visit_map[key])))
+                    if key in q_sum and q_n.get(key, 0) > 0:
+                        avg_q = q_sum[key] / q_n[key]
+                        child.node.total = avg_q * child.node.visit
+
     visited = [
-        (c, c.node.visit) for c in root.children
-        if c.node is not None and not c.invalid
+        (child_by_key[k], visit_map[k])
+        for k in visit_map
+        if k in child_by_key
     ]
     lever_override = False
     if visited:
@@ -982,41 +1136,22 @@ def mcts_agent(
         else:
             default_child = max(visited, key=lambda t: t[1])[0]
         max_child = default_child
-        if obs.current.yourIndex == your_index and _LEVER_BLEND > 0:
+        if your_index == obs.current.yourIndex and _LEVER_BLEND > 0:
             lever_child = _pick_root_child(
                 visited, default_child, obs_dict, temperature=temperature,
             )
             lever_override = not _selections_equal(lever_child.select, default_child.select)
             max_child = lever_child
     else:
-        max_child = root.children[0] if root.children else Child(
+        fallback_children = (agg_root.children if agg_root is not None else [])
+        max_child = fallback_children[0] if fallback_children else Child(
             random.sample(list(range(len(obs.select.option))), obs.select.maxCount), 1.0
         )
 
-    min_value = 10.0
-    for child in root.children:
-        if child.node is not None and not child.invalid:
-            v = child.node.total / child.node.visit
-            if min_value > v:
-                min_value = v
-    if sample is not None:
-        sample.value = root.total / max(1, root.visit)
-        if lever_override:
-            for i, child in enumerate(root.children):
-                sample.policy[i] = (
-                    1.0 if _selections_equal(child.select, max_child.select) else -1.0
-                )
-        else:
-            for i, child in enumerate(root.children):
-                base = sample.value
-                if child.node is None or child.invalid:
-                    v = min_value - base - 0.03
-                else:
-                    v = child.node.total / child.node.visit - base
-                sample.policy[i] = max(-1.0, min(1.0, v))
+    if agg_root is not None:
+        _fill_policy_targets(agg_sample, agg_root, max_child, lever_override=lever_override)
 
-    search_end()
-    return max_child.select, sample
+    return max_child.select, agg_sample
 
 
 def load_lucario_deck(path: str | Path | None = None) -> list[int]:

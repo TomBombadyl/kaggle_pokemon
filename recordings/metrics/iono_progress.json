@@ -1,0 +1,20 @@
+{
+  "latest": 50.7,
+  "default_lever": "tomato",
+  "gate_n400_peak": 55.5,
+  "multi_run_mean_5x200": 50.7,
+  "multi_run_min": 49.5,
+  "multi_run_max": 52.0,
+  "none_n400": 31.2,
+  "delta_pp_vs_none": 19.5,
+  "target": 55.0,
+  "gap_pp": 4.3,
+  "status": "KEEP_tomato_mean_50p7_need_plus4pp_for_stable_55",
+  "tomato_md_mean": 34.67,
+  "tomato_md_decision": "REJECT",
+  "crustle_n120": {
+    "flg": 92.5,
+    "majkel": 87.5
+  },
+  "ts": "2026-07-31T02:40:00+08:00"
+}

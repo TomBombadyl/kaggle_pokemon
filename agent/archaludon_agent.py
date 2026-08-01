@@ -1,8 +1,9 @@
 """Archaludon ex / Cinderace — community rule pilot + R7 bench guard.
 
 **Primary iteration file** — all Archaludon deck logic lives here (+ thin wrapper at
-``agent()``). Deck: ``agent_decks/archaludon_ex_cinderace.csv``. Do not port levers
-from Dragapult/Lucario/Alakazam pilots.
+``agent()``). Deck: ``agent_decks/archaludon_ex_cinderace.csv`` (**= sample_archaludon_75wr shell**,
+2026-07-30: 4×Cinderace + 4×Full Metal Lab + 11×Metal; legacy Charmeleon line retired).
+Do not port levers from Dragapult/Lucario/Alakazam pilots.
 
 Bench safety: ``score_setup`` / ``score_play`` / ``apply_overrides`` / ``score_option``
 (empty bench → bench Duraludon/Relicanth before END/items). R12 dead-active tempo:
@@ -26,6 +27,7 @@ for p in ([os.path.dirname(os.path.abspath(ROOT))] if ROOT else []) + [CG_PATH]:
 
 from cg.api import (
     AreaType,
+    CardType,
     LogType,
     OptionType,
     SelectContext,
@@ -45,11 +47,23 @@ DURALUDON = 169
 ARCHALUDON_EX = 190
 CINDERACE = 666
 RELICANTH = 57
-CRUSTLE_LINE = {344, 345, 532}
+CRUSTLE_LINE = {344, 345, 532, 533}
 STARMIE_LINE = {1030, 1031}
 LUCARIO_LINE = {677, 678}
 HOP_LINE = {288, 289, 299, 304, 307, 308, 309, 310, 878, 879}
 HOP_SNORLAX = 304
+# 2026-07 meta: Marnie Grimmsnarl darkness engine (dominant ladder archetype)
+GRIMMSNARL_LINE = {646, 647, 648, 642, 643, 644, 645, 649}  # Impidimp→Grimmsnarl + Marnie line
+MUNKIDORI_IDS = {112, 139}
+SPIKEMUTH_GYM = 1259
+SPIKY_ENERGY = 14
+IONO_LINE = {265, 266, 268, 269, 270, 271}  # Voltorb/Electrode/Tadbulb/Bellibolt/Wattrel/Kilowattrel
+IONO_THREATS = {269, 271}  # Bellibolt ex / Kilowattrel — prize + burst
+LIGHTNING_ENERGY = 4
+IONO_STADIUM = 1254  # Levincia
+DRAGAPULT_LINE = {119, 120, 121}  # Dreepy / Drakloak / Dragapult ex
+DRAGAPULT_EX = 121
+DRAKLOAK = 120
 
 METAL_ENERGY = 8
 
@@ -63,11 +77,18 @@ BOSS = 1182
 EXPLORER = 1185
 LILLIE = 1227
 FULL_METAL_LAB = 1244
+CRUSHING_HAMMER = 1120  # majkel energy denial (×4)
+
+# crustle lever `deckcons` (KEPT 2026-07-31): deck size above which Explorer's
+# Guidance (-6 deck) is still affordable in the Crustle deck-out race.
+# Overridable for threshold sweeps; ARCH_CRUSTLE_DECKCONS=0 disables the lever.
+DECKCONS_EXPLORER_FLOOR = int(os.environ.get("ARCH_DECKCONS_FLOOR", "30"))
 
 RAGING_HAMMER = 224
 METAL_DEFENDER = 253
+TURBO_FLARE = 965  # Cinderace — re-fuel bench after Hammer
 
-_ATTACK_BASE_DMG = {METAL_DEFENDER: 220, 965: 50, 223: 30, 61: 30}
+_ATTACK_BASE_DMG = {METAL_DEFENDER: 220, TURBO_FLARE: 50, 223: 30, 61: 30}
 
 _SETUP_ACTIVE_PRIORITY = {
     CINDERACE: (100000, "Active: Cinderace Explosiveness"),
@@ -355,12 +376,17 @@ def _prize_counts(obs) -> tuple[int, int]:
 
 
 def score_attack(obs, opt) -> tuple[int, str]:
-    """R10: prioritize KOs and prize-race tempo (7/10 champion losses were prize)."""
+    """R10 + sample_75wr matchup attack priorities (Starmie/Crustle)."""
     aid = getattr(opt, "attackId", None) or 0
     dmg = best_attack_damage(obs, aid)
     opp = opp_active_pokemon(obs)
     our_prizes, opp_prizes = _prize_counts(obs)
     behind = our_prizes > opp_prizes
+    matchup = detect_matchup(obs)
+
+    # Crustle: Metal Defender does 0 into common shells — hard ban MD
+    if matchup == "crustle" and aid == METAL_DEFENDER:
+        return -12000, "Crustle: Metal Defender does 0 (hard ban)"
 
     if opp and effective_damage(dmg, opp) >= opp.hp:
         pv = prize_value(opp)
@@ -369,11 +395,32 @@ def score_attack(obs, opt) -> tuple[int, str]:
             score += 5000
         if our_prizes <= pv:
             score += 10000
+        # Starmie: prefer clean 220 MD KO over RH chip when both lethal
+        if matchup == "starmie" and aid == METAL_DEFENDER:
+            score += 3000
+        # Crustle: RH KO is the only clean prize path
+        if matchup == "crustle" and aid == RAGING_HAMMER:
+            score += 8000
         return score, "attack KO"
 
     score = dmg + (3000 if behind else 0)
     if aid == METAL_DEFENDER and opp and effective_damage(dmg, opp) >= opp.hp - 30:
         score += 2000
+    # Starmie race: pressure with MD when Relicanth online even if not KO
+    if matchup == "starmie" and aid == METAL_DEFENDER and has_in_play(obs, RELICANTH):
+        score += 1500
+    if matchup == "crustle" and aid == RAGING_HAMMER:
+        # RH is the only real attack path — strong default over END/items
+        score += 4500
+        active = active_pokemon(obs)
+        if active and damage_on(active) >= 60:
+            score += 2000  # RH scales with our damage counters
+    if matchup == "dragapult" and aid == METAL_DEFENDER and has_in_play(obs, RELICANTH):
+        score += 800
+    if matchup == "iono" and aid == METAL_DEFENDER and has_in_play(obs, RELICANTH):
+        score += 700
+        if opp and opp.id in IONO_THREATS:
+            score += 300
     return score, "attack"
 
 
@@ -592,12 +639,164 @@ def planned_archaludon_attacks(obs):
 
 
 # ── Matchup detection & opponent max damage ──
+# Ported from sample_archaludon_75wr (75% WR vs 1300 Starmie public agent)
+
+ALAKAZAM_LINE = {741, 742, 743}
+_ALA_BOARD_GAIN = {66: 3, 742: 2, 305: 2, 65: 2, 741: 1}  # Dudunsparce, Kadabra, Dunsparce, Abra
+
+
+def _estimate_alakazam_from_pokes(opp, pokes):
+    """(floor, ceiling, ceiling_with_boss) damage from visible Alakazam line."""
+    ids = [p.id for p in pokes if p]
+    if not (ALAKAZAM_LINE & set(ids)):
+        return 0, 0, 0
+    base = opp.handCount + 1
+    gain = sum(_ALA_BOARD_GAIN.get(i, 0) for i in ids)
+    enriching_seen = (
+        any(c and c.id == 13 for c in (opp.discard or []))
+        or any(c and c.id == 13 for p in pokes if p for c in (getattr(p, "energyCards", None) or []))
+    )
+    if not enriching_seen:
+        gain += 3
+    if any(i == 140 for i in ids):
+        gain += 3
+    return base * 20, (base + gain + 2) * 20, (base + gain - 1) * 20
+
+
+def _estimate_alakazam(obs):
+    """(floor, ceiling, ceiling_with_boss) from Powerful Hand — sample_75wr."""
+    opp = opp_state(obs)
+    pokes = ([opp.active[0]] if opp.active else []) + list(opp.bench or [])
+    return _estimate_alakazam_from_pokes(opp, pokes)
+
+
+# flg / イワパレス shell extras (2026-07 LB#1): wall + Spiky + Boss toolbox
+MEGA_KANGASKHAN_EX = 756
+CORNERSTONE_OGERPON_EX = 117
+FLG_WALL_SHELL = {MEGA_KANGASKHAN_EX, CORNERSTONE_OGERPON_EX} | CRUSTLE_LINE
+
+
+def _opp_board_has_spiky(obs) -> bool:
+    opp = opp_state(obs)
+    for p in ([opp.active[0]] if opp.active else []) + list(opp.bench or []):
+        if p and _opp_has_spiky(p):
+            return True
+    return False
+
+
+def _opp_hammer_seen(obs) -> bool:
+    """True if opponent has already played Crushing Hammer (in discard).
+
+    crustle single lever `hammer_prior` (2026-07-31): the default is reactive —
+    it only fires after a Hammer has already stripped an energy. majkel runs 4x
+    Crushing Hammer (flg runs 0, see recordings/metrics/crustle_majkel_vs_flg_diagnosis.md)
+    and the two shells are visually identical on board, so under this lever we
+    presume hammer pressure for the whole Crustle matchup instead of waiting for
+    discard evidence. Costs some flg win rate by construction — gate both.
+    """
+    opp = opp_state(obs)
+    if any(c and c.id == CRUSHING_HAMMER for c in (opp.discard or [])):
+        return True
+    return False
+
+
+def _board_metal_energy(obs) -> int:
+    return sum(energy_count(p) for p in all_my_pokemon(obs) if p)
+
+
+def _energy_starved(obs) -> bool:
+    """After Hammer strips: Active attacker needs re-fuel or board metal is thin."""
+    active = active_pokemon(obs)
+    if active and active.id in {DURALUDON, ARCHALUDON_EX} and energy_count(active) < 2:
+        return True
+    if _board_metal_energy(obs) <= 1:
+        return True
+    if metal_in_discard(obs) >= 2 and METAL_ENERGY not in hand_ids(obs):
+        return True
+    return False
+
+
+def _crustle_boss_actually_playable(obs) -> bool:
+    """crustle single lever A/B (2026-07-31), env ARCH_CRUSTLE_LEVER=rhsoft.
+
+    The Spiky branch drops Raging Hammer to 2500 whenever Boss is *in hand*,
+    on the theory that gusting first is better. But Boss in hand is not Boss
+    on the board: if the supporter for the turn is already spent, or the
+    opponent has no bench to gust, that turn we neither Boss nor swing — the
+    only wincon line goes idle while Crushing Hammer strips us. This gate
+    keeps the soft-RH deferral only when the Boss can really be played now.
+
+    Default (lever unset) returns True → byte-identical to previous behaviour.
+    """
+    if os.environ.get("ARCH_CRUSTLE_LEVER", "").strip().lower() != "rhsoft":
+        return True
+    if getattr(obs.current, "supporterPlayed", False):
+        return False
+    opp = opp_state(obs)
+    return any(p for p in (opp.bench or []) if p)
+
+
+def _crustle_explorer_allowed(obs) -> bool:
+    """crustle lever `deckcons` — KEPT and default ON 2026-07-31.
+
+    Terminal-state profiling of 6000 Crustle games (recordings/metrics/
+    crustle_deckout_diagnosis.md) shows we practically never lose the prize race
+    here: 76-82% of losses are our own deck-out, and in those the opponent still
+    has ~7 cards of deck left. The wall matchups are a deck-out race we lose by
+    a handful of cards.
+
+    Explorer's Guidance is the single biggest self-inflicted burn in the list:
+    it looks at 6 and *discards 4* to gain 2, i.e. -6 deck per copy, x4 copies.
+    Lillie's Determination by contrast shuffles the hand back in and is roughly
+    deck-neutral, and Poke Pad / Pokegear / Ultra Ball are -1 each. So Explorer
+    is only allowed while the deck is deep enough that six cards cannot decide
+    the race. The old guard fired at deckCount <= 10, long past the point of no
+    return, and it lumped in Lillie, which actually refills the deck.
+
+    Pooled A/B, gate_archaludon.py 5x1500 per cell, same session:
+
+        arm       majkel            flg
+        base      86.16 +- 0.23     89.06 +- 0.57
+        deckcons  95.30 +- 0.43     95.78 +- 0.30
+
+    +9.14pp / +6.72pp, both CI95 disjoint. min(flg, majkel) 86.16 -> 95.30
+    against a ship floor of 89.
+
+    Set ARCH_CRUSTLE_DECKCONS=0 to restore the old behaviour (A/B arm A).
+    """
+    if os.environ.get("ARCH_CRUSTLE_DECKCONS", "1").strip() == "0":
+        return True
+    return my_state(obs).deckCount > DECKCONS_EXPLORER_FLOOR
+
 
 def detect_matchup(obs):
     opp = opp_state(obs)
     ids = {p.id for p in (opp.active + opp.bench) if p}
-    if ids & CRUSTLE_LINE:
+    # Priority: Crustle / flg wall shell (metal-hate) → Grimmsnarl → …
+    # Early flg often leads Ogerpon/Kangaskhan before Crustle is visible.
+    if ids & CRUSTLE_LINE or ids & FLG_WALL_SHELL:
         return "crustle"
+    if _opp_board_has_spiky(obs) and not (ids & GRIMMSNARL_LINE):
+        # Spiky Energy toolbox strongly correlates with flg/Crustle shells
+        return "crustle"
+    if ids & GRIMMSNARL_LINE or ids & MUNKIDORI_IDS:
+        return "grimmsnarl"
+    if ids & ALAKAZAM_LINE:
+        return "alakazam"
+    # Iono: mon line, lightning energy on board, or Levincia stadium
+    stadium = getattr(obs.current, "stadium", None) or getattr(obs.current, "stadiumCard", None)
+    stadium_id = getattr(stadium, "id", None) if stadium else None
+    if ids & IONO_LINE or stadium_id == IONO_STADIUM:
+        return "iono"
+    # Lightning energy without other mon tags → likely Iono shell
+    for p in list(opp.active or []) + list(opp.bench or []):
+        if not p:
+            continue
+        for c in getattr(p, "energyCards", None) or []:
+            if getattr(c, "id", None) == LIGHTNING_ENERGY:
+                return "iono"
+    if ids & DRAGAPULT_LINE:
+        return "dragapult"
     if ids & HOP_LINE:
         return "hop"
     if ids & STARMIE_LINE:
@@ -609,8 +808,18 @@ def detect_matchup(obs):
 
 def opp_max_damage(obs):
     matchup = detect_matchup(obs)
+    if matchup == "alakazam":
+        _, ceiling, _ = _estimate_alakazam(obs)
+        return ceiling or 220
     if matchup == "crustle":
         return 120
+    if matchup == "grimmsnarl":
+        # Grimmsnarl ex + Munkidori spread — treat as high burst
+        return 280
+    if matchup == "iono":
+        return 240
+    if matchup == "dragapult":
+        return 200  # Phantom Dive / multi-prize pressure; FML helps
     if matchup == "hop":
         return 220
     if matchup == "lucario":
@@ -620,11 +829,19 @@ def opp_max_damage(obs):
     return 220
 
 
+def _opp_has_spiky(poke) -> bool:
+    if not poke:
+        return False
+    return any(getattr(c, "id", None) == SPIKY_ENERGY for c in (getattr(poke, "energyCards", None) or []))
+
+
 # ── Overrides ──
 
 def apply_overrides(obs, opt, score, reason):
     score, reason = _empty_bench_basic_score(obs, opt, score, reason)
     score, reason = _dead_active_tempo_score(obs, opt, score, reason)
+    # Global prize-race: don't attach when a legal attack already KOs Active
+    score, reason = _prize_race_attach_cap(obs, opt, score, reason)
 
     if opt.type == OptionType.PLAY:
         card = option_card(obs, opt)
@@ -632,7 +849,80 @@ def apply_overrides(obs, opt, score, reason):
         if my_state(obs).deckCount <= 10 and cid == EXPLORER:
             return -5000, "hard: don't Explorer with low deck"
 
-    if detect_matchup(obs) != "crustle":
+    matchup = detect_matchup(obs)
+    if matchup == "grimmsnarl":
+        return _apply_grimmsnarl_overrides(obs, opt, score, reason)
+    if matchup == "iono":
+        # R14k light stack FAILED 2026-07-31 (14.6–23.4%). Single-lever A/B via ARCH_IONO_LEVER.
+        # R14m NULL. R14n MD-pressure KEEP: 33.8% vs 27.8% none @ n400 (+6.0pp).
+        # Default r14n. Stacked variants: r14o = r14n + Relicanth; r14p = r14n + FML.
+        # Default tomato (2026-07-31): iono-only sample_75wr delegate ≥55% local.
+        # Score-path levers (r14n etc.) only apply when not using tomato agent path.
+        lever = os.environ.get("ARCH_IONO_LEVER", "tomato").strip().lower()
+        if lever in ("tomato", "75wr", "sample75"):
+            return score, reason  # full-agent delegate in _agent_impl
+        if lever in ("", "none", "off", "0", "r14h"):
+            return score, reason
+        if lever == "r14m":
+            return _apply_iono_r14m_evolve_race(obs, opt, score, reason)
+        if lever == "r14n":
+            return _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+        if lever == "r14n2":
+            # REJECTED n400: 27.8% vs r14n 30.8%
+            return _apply_iono_r14n2_lethal_hard(obs, opt, score, reason)
+        if lever == "r14u":
+            # REJECTED n400: 27.5% vs r14n 33.8%
+            return _apply_iono_r14u_rh_fallback(obs, opt, score, reason)
+        if lever == "r14n_draw":
+            # Component A/B: only soft-cap draw when MD ready
+            return _apply_iono_r14n_component(obs, opt, score, reason, mode="draw")
+        if lever == "r14n_atk":
+            # Component A/B: only MD/RH attack boosts
+            return _apply_iono_r14n_component(obs, opt, score, reason, mode="atk")
+        if lever == "r14n_end":
+            # Component A/B: only END penalty when MD ready
+            return _apply_iono_r14n_component(obs, opt, score, reason, mode="end")
+        if lever == "r14o":
+            # REJECTED n400: 28.5% vs r14n 32.0%
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14o_relicanth(obs, opt, score, reason)
+        if lever == "r14p":
+            # NULL n400: 32.5% vs r14n 32.0%
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14p_fml(obs, opt, score, reason)
+        if lever == "r14q":
+            # REJECTED n400: 25.8%
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14q_attach_race(obs, opt, score, reason)
+        if lever == "r14r":
+            # REJECTED n400: 31.2%
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14r_turbo_flare(obs, opt, score, reason)
+        if lever == "r14s":
+            # REJECTED n400: 26.2%
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14s_boss_loaded(obs, opt, score, reason)
+        if lever == "r14v":
+            # NULL n400 2026-07-31: 28.5% ≈ none 28.0% — soft pre-MD engine no lift
+            return _apply_iono_r14v_md_plus_engine(obs, opt, score, reason)
+        if lever == "r14w":
+            # REJECTED n400 2026-07-31: 25.2% vs r14n 33.2%
+            return _apply_iono_r14w_prize_boss(obs, opt, score, reason)
+        if lever == "r14x":
+            # stacked r14n+r14w — only if r14w alone KEPT (it was not)
+            score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+            return _apply_iono_r14w_prize_boss(obs, opt, score, reason)
+        if lever == "r14y":
+            # NULL/REJECT n400 2026-07-31: 28.8% vs r14n 29.5%
+            return _apply_iono_r14y_cape(obs, opt, score, reason)
+        if lever in ("tomato", "75wr", "sample75"):
+            # Iono-only full-agent delegate handled in _agent_impl (not score path).
+            # If we reached apply_overrides, tomato path missed — no-op.
+            return score, reason
+        return score, reason
+    if matchup == "dragapult":
+        return _apply_dragapult_light_overrides(obs, opt, score, reason)
+    if matchup != "crustle":
         return score, reason
 
     card = option_card(obs, opt)
@@ -640,26 +930,83 @@ def apply_overrides(obs, opt, score, reason):
     ctx = obs.select.context
 
     if opt.type == OptionType.EVOLVE and cid == ARCHALUDON_EX:
-        return -10000, "Crustle: don't evolve to ex"
+        return -15000, "Crustle: never evolve to ex (MD dead)"
 
     if opt.type == OptionType.ATTACK:
         aid = getattr(opt, 'attackId', None)
         if aid == METAL_DEFENDER:
-            return -5000, "Crustle: Metal Defender does 0"
+            return -12000, "Crustle: Metal Defender does 0"
         if aid == RAGING_HAMMER:
             opp_act = opp_active_pokemon(obs)
-            rh_dmg = 80 + damage_on(active_pokemon(obs)) // 10 * 10
-            if opp_act and rh_dmg < opp_act.hp:
-                opp_has_spiky = any(
-                    getattr(c, 'id', None) == 14
-                    for c in (getattr(opp_act, 'energyCards', None) or []))
-                if opp_has_spiky:
-                    return -3000, "Crustle: don't attack into Spiky Energy without OHKO"
-            return max(score, 200), "Crustle: Raging Hammer"
+            active = active_pokemon(obs)
+            rh_dmg = 80 + damage_on(active) // 10 * 10 if active else 80
+            if opp_act and rh_dmg < opp_act.hp and _opp_has_spiky(opp_act):
+                # Spiky×4 shells (flg/majkel): prefer Boss first, but still RH if
+                # we need tempo (don't stall into deck-out / Hammer denial).
+                if hand_ids(obs) and BOSS in hand_ids(obs):
+                    return 2500, "Crustle: RH into Spiky soft (Boss preferred)"
+                # No Boss: RH is still the only wincon — keep positive
+                return max(score, 7000), "Crustle: RH into Spiky (no Boss)"
+            # Strong default: RH is the only real pressure
+            boost = 14000
+            if opp_act and rh_dmg >= opp_act.hp:
+                boost = 30000
+            elif active and damage_on(active) >= 40:
+                boost = 18000
+            return max(score, boost), "Crustle: Raging Hammer primary"
+        # Cinderace Turbo Flare — re-accelerate after Crushing Hammer
+        if aid == TURBO_FLARE:
+            bench_needs = any(
+                p and p.id == DURALUDON and energy_count(p) < 3
+                for p in (my_state(obs).bench or [])
+            )
+            if bench_needs or _energy_starved(obs) or _opp_hammer_seen(obs):
+                return max(score, 16000), "Hammer: Turbo Flare re-fuel bench"
+            return max(score, 8000), "Crustle: Turbo Flare setup"
+        # Weak basic attacks only if RH unavailable
+        if aid not in (RAGING_HAMMER, METAL_DEFENDER, TURBO_FLARE):
+            return min(score, 500), "Crustle: weak attack fallback"
+
+    if opt.type == OptionType.RETREAT:
+        active = active_pokemon(obs)
+        # If stuck as Archaludon ex vs Crustle, retreat to Duraludon for RH line
+        if active and active.id == ARCHALUDON_EX:
+            return max(score, 16000), "Crustle: retreat ex → Duraludon RH line"
+        if active and active.id == RELICANTH:
+            return max(score, 12000), "Crustle: retreat Relicanth (no RH)"
+        if active and active.id == CINDERACE:
+            # After Turbo setup, get attacker in Active
+            if has_in_play(obs, DURALUDON):
+                return max(score, 9000), "Crustle: Cinderace out → Duraludon"
 
     if opt.type == OptionType.PLAY:
         if cid == RELICANTH:
-            return -5000, "Crustle: skip Relicanth"
+            return -8000, "Crustle: skip Relicanth (MD path dead)"
+        if cid == BOSS:
+            # flg: Spiky Active or fat Crustle → Boss for better RH target
+            opp_act = opp_active_pokemon(obs)
+            if opp_act and (_opp_has_spiky(opp_act) or opp_act.hp >= 180):
+                return max(score, 20000), "Crustle/flg: Boss off Spiky/fat wall"
+            return max(score, 12000), "Crustle: Boss for better RH target"
+        if cid == FULL_METAL_LAB:
+            return max(score, 9000), "Crustle: Full Metal Lab wall"
+        if cid == HERO_CAPE:
+            return max(score, 8500), "Crustle: Cape for RH tank"
+        if cid == CINDERACE:
+            # 75wr: Explosiveness + Turbo Flare is the energy engine (Hammer resilience)
+            if not has_in_play(obs, CINDERACE):
+                return max(score, 17000), "Crustle/Hammer: Cinderace re-fuel engine"
+        if cid == NIGHT_STRETCHER:
+            md = metal_in_discard(obs)
+            if md >= 1 and _energy_starved(obs):
+                return max(score, 24000), "Hammer: Stretcher metal (starved)"
+            if md >= 2 or (_opp_hammer_seen(obs) and md >= 1):
+                return max(score, 19000), "Hammer: Stretcher metal recovery"
+        if cid == EXPLORER and _crustle_explorer_allowed(obs):
+            if _energy_starved(obs) and not obs.current.supporterPlayed:
+                return max(score, 14000), "Hammer: Explorer dig energy/line"
+        elif cid == EXPLORER:
+            return -5000, "Crustle/deckcons: Explorer burns 6 deck for 2"
         dc = my_state(obs).deckCount
         if dc <= 10 and cid in (EXPLORER, LILLIE):
             if cid == LILLIE and dc <= 3 and my_state(obs).handCount >= dc + 6:
@@ -673,19 +1020,712 @@ def apply_overrides(obs, opt, score, reason):
     if opt.type == OptionType.ATTACH:
         target = option_target(obs, opt)
         tid = target.id if target else None
-        if getattr(opt, 'inPlayArea', None) == AreaType.BENCH and tid == DURALUDON:
-            return score + 10000, "Crustle: bench Duraludon energy priority"
-        if getattr(opt, 'inPlayArea', None) == AreaType.ACTIVE:
+        area = getattr(opt, 'inPlayArea', None)
+        starved = _energy_starved(obs) or _opp_hammer_seen(obs)
+        if area == AreaType.BENCH and tid == DURALUDON:
+            boost = 16000 if starved else 14000
+            return score + boost, "Crustle/Hammer: bench Duraludon energy"
+        if area == AreaType.ACTIVE:
             active = active_pokemon(obs)
+            if active and active.id == DURALUDON:
+                ec = energy_count(active)
+                if ec < 2:
+                    # After Hammer strip — re-attach is top priority
+                    return score + (20000 if starved else 15000), "Hammer: re-fuel Active RH"
+                if ec < 3:
+                    return score + 12000, "Crustle: fuel Active Duraludon for RH"
+                return score + 4000, "Crustle: overfuel Active Duraludon"
+            if active and active.id == ARCHALUDON_EX:
+                return score - 2000, "Crustle: don't fuel ex (prefer retreat)"
+            if active and active.id == CINDERACE and energy_count(active) < 1:
+                return score + 10000, "Hammer: enable Cinderace Turbo"
             if active and energy_count(active) >= 2:
                 return score + 3000, "Crustle: Active 3rd energy"
 
+    if opt.type == OptionType.END:
+        # Never pass the turn with metal in hand and attach still available
+        if (
+            not obs.current.energyAttached
+            and METAL_ENERGY in hand_ids(obs)
+            and active_pokemon(obs)
+            and active_pokemon(obs).id in {DURALUDON, ARCHALUDON_EX, CINDERACE}
+        ):
+            return -8000, "Hammer: don't END with attach available"
+
     if ctx == SelectContext.TO_HAND and opt.type == OptionType.CARD and cid == ARCHALUDON_EX:
-        return -3000, "Crustle: skip Archaludon ex"
+        return -8000, "Crustle: skip Archaludon ex to hand"
+
+    if ctx == SelectContext.TO_HAND and opt.type == OptionType.CARD and cid == DURALUDON:
+        return max(score, 5000), "Crustle: prefer Duraludon to hand"
+
+    # Night Stretcher / search: prefer metal energy when starved (Hammer)
+    if ctx == SelectContext.TO_HAND and opt.type == OptionType.CARD and cid == METAL_ENERGY:
+        if _energy_starved(obs) or _opp_hammer_seen(obs) or metal_in_discard(obs) >= 1:
+            return max(score, 15000), "Hammer: pick metal energy"
 
     if ctx in {SelectContext.DISCARD, SelectContext.DISCARD_CARD_OR_ATTACHED_CARD}:
         if cid == ARCHALUDON_EX and score < 0:
-            return 9000, "Crustle: discard Archaludon ex"
+            return 12000, "Crustle: discard Archaludon ex"
+        if cid == RELICANTH:
+            return max(score, 4000), "Crustle: discard Relicanth OK"
+        # Never discard metal from hand when Hammer pressure is real
+        if cid == METAL_ENERGY and (_opp_hammer_seen(obs) or _energy_starved(obs)):
+            return -12000, "Hammer: keep metal in hand"
+
+    return score, reason
+
+
+def _apply_grimmsnarl_overrides(obs, opt, score, reason):
+    """R13 — Marnie Grimmsnarl / Munkidori (2026-07 ladder #1 meta).
+
+    Goals: race to Metal Defender 220 KO; Boss damaged Grimmsnarl/Munkidori;
+    keep bench Basic alive; don't stall with dead Relicanth Active.
+    """
+    card = option_card(obs, opt)
+    cid = card.id if card else getattr(opt, "cardId", None)
+    ctx = obs.select.context
+    active = active_pokemon(obs)
+    opp_act = opp_active_pokemon(obs)
+
+    # Attack selection: prefer lethal Metal Defender; Raging Hammer if it KOs / chips better
+    if opt.type == OptionType.ATTACK:
+        aid = getattr(opt, "attackId", None)
+        if opp_act and active:
+            md = effective_damage(220, opp_act) if has_in_play(obs, RELICANTH) else 0
+            # Metal Defender only if Relicanth in play (ability path) — still score MD high when available
+            if aid == METAL_DEFENDER:
+                if opp_act.hp <= 220 or (md and md >= opp_act.hp):
+                    return max(score, 25000), "Grimmsnarl: Metal Defender KO"
+                return max(score, 8000), "Grimmsnarl: Metal Defender pressure"
+            if aid == RAGING_HAMMER:
+                rh = 80 + damage_on(active) // 10 * 10
+                if effective_damage(rh, opp_act) >= opp_act.hp:
+                    return max(score, 24000), "Grimmsnarl: Raging Hammer KO"
+                # Prefer RH when MD unavailable and we need chip
+                if not has_in_play(obs, RELICANTH):
+                    return max(score, 5000), "Grimmsnarl: RH without Relicanth"
+
+    # Boss: pull low-HP threat or Munkidori off bench
+    if opt.type == OptionType.PLAY and cid == BOSS:
+        return max(score, 18000), "Grimmsnarl: Boss priority"
+
+    # Keep Relicanth for Metal Defender engine — unlike Crustle matchup
+    if opt.type == OptionType.PLAY and cid == RELICANTH:
+        if not has_in_play(obs, RELICANTH):
+            return max(score, 16000), "Grimmsnarl: play Relicanth for MD"
+
+    # Evolve to Archaludon ex aggressively (need 220)
+    if opt.type == OptionType.EVOLVE and cid == ARCHALUDON_EX:
+        return max(score, 20000), "Grimmsnarl: evolve to ex for 220"
+
+    # Energy: load Active Archaludon/Duraludon first (race)
+    if opt.type == OptionType.ATTACH:
+        target = option_target(obs, opt)
+        tid = target.id if target else None
+        area = getattr(opt, "inPlayArea", None)
+        if area == AreaType.ACTIVE and tid in {DURALUDON, ARCHALUDON_EX}:
+            return score + 8000, "Grimmsnarl: Active metal attach race"
+        if area == AreaType.BENCH and tid == DURALUDON:
+            # secondary attacker OK but secondary to Active race
+            return score + 2000, "Grimmsnarl: bench Duraludon attach"
+
+    # Heal only when under KO range from ~280 burst
+    if opt.type == OptionType.PLAY and cid == JUMBO_ICE_CREAM and active:
+        if active.id == ARCHALUDON_EX and active.hp <= 280:
+            return max(score, 12000), "Grimmsnarl: Ice Cream under burst range"
+
+    # TO_HAND / search: prefer energy + Boss + evolve pieces
+    if ctx == SelectContext.TO_HAND and opt.type == OptionType.CARD:
+        if cid == METAL_ENERGY:
+            return max(score, 9000), "Grimmsnarl: grab Metal"
+        if cid == BOSS:
+            return max(score, 8500), "Grimmsnarl: grab Boss"
+        if cid == ARCHALUDON_EX:
+            return max(score, 8000), "Grimmsnarl: grab ex"
+        if cid == RELICANTH:
+            return max(score, 7000), "Grimmsnarl: grab Relicanth"
+
+    return score, reason
+
+
+def _apply_iono_r14m_evolve_race(obs, opt, score, reason):
+    """R14m single lever — evolve for Metal Defender race vs Lightning.
+
+    Global score_evolve returns −500 when Active Dura has energy but metal_in_discard==0.
+    A/B NULL 2026-07-31: 29.4% vs 30.0% n160 — do not default.
+    """
+    if opt.type != OptionType.EVOLVE:
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else getattr(opt, "cardId", None)
+    if cid != ARCHALUDON_EX:
+        return score, reason
+    target = option_target(obs, opt)
+    if not target or target.id != DURALUDON:
+        return score, reason
+    if getattr(opt, "inPlayArea", None) != AreaType.ACTIVE:
+        return score, reason
+    ec = energy_count(target)
+    if ec < 2:
+        return score, reason
+    boost = 19000 if ec >= 3 else 14000
+    return max(score, boost), f"Iono R14m: evolve Active Dura e={ec} for MD race"
+
+
+def _iono_md_legal(obs) -> bool:
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return False
+    if not has_in_play(obs, RELICANTH):
+        return False
+    return any(
+        o.type == OptionType.ATTACK and getattr(o, "attackId", None) == METAL_DEFENDER
+        for o in (obs.select.option or [])
+    )
+
+
+def _apply_iono_r14n_component(obs, opt, score, reason, mode: str):
+    """Component split of R14n for A/B (draw | atk | end)."""
+    if not _iono_md_legal(obs):
+        return score, reason
+    opp_act = opp_active_pokemon(obs)
+
+    if mode == "atk" and opt.type == OptionType.ATTACK:
+        aid = getattr(opt, "attackId", None)
+        if aid == METAL_DEFENDER and opp_act:
+            if effective_damage(220, opp_act) >= opp_act.hp:
+                return max(score, score + 5000), "Iono R14n_atk: MD lethal"
+            return max(score, score + 2500), "Iono R14n_atk: MD pressure"
+        if aid == RAGING_HAMMER and opp_act:
+            active = active_pokemon(obs)
+            rh = 80 + (damage_on(active) // 10 * 10 if active else 0)
+            if effective_damage(rh, opp_act) >= opp_act.hp:
+                return max(score, score + 4000), "Iono R14n_atk: RH lethal"
+        return score, reason
+
+    if mode == "draw" and opt.type == OptionType.PLAY:
+        card = option_card(obs, opt)
+        cid = card.id if card else None
+        if cid in {LILLIE, EXPLORER, POKE_PAD, ULTRA_BALL, POKEGEAR}:
+            return min(score, 3000), "Iono R14n_draw: attack > draw when MD ready"
+        return score, reason
+
+    if mode == "end" and opt.type == OptionType.END:
+        return score - 8000, "Iono R14n_end: don't END with MD ready"
+    return score, reason
+
+
+def _apply_iono_r14n_md_pressure(obs, opt, score, reason):
+    """R14n single lever — prefer Metal Defender pressure / KO over tempo items.
+
+    KEEP 2026-07-31: 33.8% vs none 27.8% @ n400 (+6.0pp). Default lever.
+    """
+    if not _iono_md_legal(obs):
+        return score, reason
+    opp_act = opp_active_pokemon(obs)
+
+    if opt.type == OptionType.ATTACK:
+        aid = getattr(opt, "attackId", None)
+        if aid == METAL_DEFENDER and opp_act:
+            if effective_damage(220, opp_act) >= opp_act.hp:
+                return max(score, score + 5000), "Iono R14n: MD lethal"
+            return max(score, score + 2500), "Iono R14n: MD pressure"
+        if aid == RAGING_HAMMER and opp_act:
+            active = active_pokemon(obs)
+            rh = 80 + (damage_on(active) // 10 * 10 if active else 0)
+            if effective_damage(rh, opp_act) >= opp_act.hp:
+                return max(score, score + 4000), "Iono R14n: RH lethal"
+        return score, reason
+
+    if opt.type == OptionType.PLAY:
+        card = option_card(obs, opt)
+        cid = card.id if card else None
+        if cid in {LILLIE, EXPLORER, POKE_PAD, ULTRA_BALL, POKEGEAR}:
+            return min(score, 3000), "Iono R14n: attack > draw when MD ready"
+    if opt.type == OptionType.END:
+        return score - 8000, "Iono R14n: don't END with MD ready"
+    return score, reason
+
+
+def _apply_iono_r14n2_lethal_hard(obs, opt, score, reason):
+    """R14n2 — when any legal attack KOs Active, hard-prioritize it (R11-style always-on).
+
+    Differs from r14n: triggers on ANY lethal attack (not only MD-present), and uses
+    absolute floors so attach/play cannot outrank a prize take.
+    """
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return score, reason
+    opp_act = opp_active_pokemon(obs)
+    if not opp_act:
+        return score, reason
+
+    lethal_aids = []
+    for o in obs.select.option or []:
+        if o.type != OptionType.ATTACK:
+            continue
+        aid = getattr(o, "attackId", None) or 0
+        dmg = best_attack_damage(obs, aid)
+        if effective_damage(dmg, opp_act) >= opp_act.hp:
+            lethal_aids.append(aid)
+
+    if lethal_aids:
+        if opt.type == OptionType.ATTACK:
+            aid = getattr(opt, "attackId", None)
+            if aid in lethal_aids:
+                pv = prize_value(opp_act)
+                return max(score, 55000 + pv * 5000), "Iono R14n2: hard lethal"
+            return score, reason
+        if opt.type in {OptionType.ATTACH, OptionType.PLAY, OptionType.EVOLVE, OptionType.END}:
+            return min(score, 4000), "Iono R14n2: cap tempo when lethal"
+        return score, reason
+
+    # No lethal — fall back to r14n MD pressure behavior
+    return _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+
+
+def _apply_iono_r14u_rh_fallback(obs, opt, score, reason):
+    """R14u — r14n when MD ready; else RH/attack pressure when Relicanth missing.
+
+    Diagnosis: r14n only fires with Relicanth+MD legal (~late game). Early Lightning
+    race is lost while we draw/setup. Prefer swinging RH (or any attack) over END/draw.
+    """
+    # First apply r14n (no-op if MD not legal)
+    score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return score, reason
+    # If MD already legal, r14n handled it
+    if has_in_play(obs, RELICANTH) and any(
+        o.type == OptionType.ATTACK and getattr(o, "attackId", None) == METAL_DEFENDER
+        for o in (obs.select.option or [])
+    ):
+        return score, reason
+
+    has_attack = any(o.type == OptionType.ATTACK for o in (obs.select.option or []))
+    if not has_attack:
+        return score, reason
+
+    opp_act = opp_active_pokemon(obs)
+    if opt.type == OptionType.ATTACK:
+        aid = getattr(opt, "attackId", None)
+        active = active_pokemon(obs)
+        if aid == RAGING_HAMMER and opp_act and active:
+            rh = 80 + damage_on(active) // 10 * 10
+            if effective_damage(rh, opp_act) >= opp_act.hp:
+                return max(score, score + 4500), "Iono R14u: RH lethal (no MD)"
+            return max(score, score + 2800), "Iono R14u: RH pressure (no MD)"
+        # any other attack still better than END
+        return max(score, score + 1500), "Iono R14u: take attack (no MD)"
+    if opt.type == OptionType.PLAY:
+        card = option_card(obs, opt)
+        cid = card.id if card else None
+        if cid in {LILLIE, EXPLORER, POKE_PAD, POKEGEAR}:
+            return min(score, 2500), "Iono R14u: attack > draw (no MD)"
+    if opt.type == OptionType.END:
+        return score - 7000, "Iono R14u: don't END with attack (no MD)"
+    return score, reason
+
+
+def _apply_iono_r14o_relicanth(obs, opt, score, reason):
+    """R14o single add-on — get Relicanth online for Metal Defender (needs ability).
+
+    Only PLAY Relicanth when missing and a Dura/ex line is already in play.
+    Modest boost (not 15k stack) so it doesn't starve energy attaches.
+    """
+    if opt.type != OptionType.PLAY:
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else None
+    if cid != RELICANTH:
+        return score, reason
+    if has_in_play(obs, RELICANTH):
+        return score, reason
+    if not (has_in_play(obs, DURALUDON) or has_in_play(obs, ARCHALUDON_EX)):
+        return score, reason
+    return max(score, score + 3500), "Iono R14o: Relicanth for MD"
+
+
+def _apply_iono_r14p_fml(obs, opt, score, reason):
+    """R14p single add-on — Full Metal Lab ASAP when Active is Metal (Lightning chip cut)."""
+    if opt.type != OptionType.PLAY:
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else None
+    if cid != FULL_METAL_LAB:
+        return score, reason
+    active = active_pokemon(obs)
+    if not active or active.id not in {DURALUDON, ARCHALUDON_EX}:
+        return score, reason
+    return max(score, score + 2800), "Iono R14p: FML on Metal Active"
+
+
+def _apply_iono_r14q_attach_race(obs, opt, score, reason):
+    """R14q single add-on — Active metal attach race before MD is online."""
+    if opt.type != OptionType.ATTACH:
+        return score, reason
+    if getattr(obs.current, "energyAttached", False):
+        return score, reason
+    target = option_target(obs, opt)
+    if not target:
+        return score, reason
+    if getattr(opt, "inPlayArea", None) != AreaType.ACTIVE:
+        return score, reason
+    if target.id not in {DURALUDON, ARCHALUDON_EX}:
+        return score, reason
+    ec = energy_count(target)
+    if ec >= 3:
+        return score, reason
+    return score + 2500, f"Iono R14q: Active metal race e={ec}"
+
+
+def _apply_iono_r14r_turbo_flare(obs, opt, score, reason):
+    """R14r single add-on — Cinderace Turbo Flare into bench Duraludon (energy engine)."""
+    if opt.type != OptionType.ATTACK:
+        return score, reason
+    aid = getattr(opt, "attackId", None)
+    if aid != 965:  # Turbo Flare
+        return score, reason
+    active = active_pokemon(obs)
+    if not active or active.id != CINDERACE:
+        return score, reason
+    if not any(p and p.id == DURALUDON for p in (my_state(obs).bench or [])):
+        return score, reason
+    return max(score, score + 3200), "Iono R14r: Turbo Flare -> bench Dura"
+
+
+def _apply_iono_r14s_boss_loaded(obs, opt, score, reason):
+    """R14s single add-on — Boss only loaded Bellibolt/Kilowattrel when we can attack."""
+    if opt.type != OptionType.PLAY:
+        return score, reason
+    if getattr(obs.current, "supporterPlayed", False):
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else None
+    if cid != BOSS:
+        return score, reason
+    threats = [
+        p
+        for p in opp_bench_pokemon(obs)
+        if p and p.id in IONO_THREATS and energy_count(p) >= 2
+    ]
+    if not threats:
+        return score, reason
+    if not any(o.type == OptionType.ATTACK for o in (obs.select.option or [])):
+        return score, reason
+    return max(score, score + 2200), "Iono R14s: Boss loaded threat + attack ready"
+
+
+def _apply_iono_r14v_md_plus_engine(obs, opt, score, reason):
+    """R14v — r14n when MD legal; soft pre-MD engine otherwise.
+
+    Expert-iteration diagnosis (2026-07-31):
+      - r14n only fires late (Relicanth + MD legal) → early Lightning race lost
+      - r14u early RH spam REJECTED; r14k full light stack REJECTED
+      - r14o hard Relicanth / r14q attach race REJECTED when always-on
+
+    Design: keep r14n late; pre-MD only mild Active-metal race + Relicanth online
+    when Dura line already in play + END penalty if attack/attach available.
+    Soft magnitudes so attach/Boss/draw still compete.
+
+    A/B NULL n400 2026-07-31: 28.5% vs none 28.0% — do not default.
+    """
+    score, reason = _apply_iono_r14n_md_pressure(obs, opt, score, reason)
+    if _iono_md_legal(obs):
+        return score, reason
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return score, reason
+
+    if opt.type == OptionType.ATTACH:
+        target = option_target(obs, opt)
+        tid = target.id if target else None
+        if getattr(opt, "inPlayArea", None) == AreaType.ACTIVE and tid in {
+            DURALUDON,
+            ARCHALUDON_EX,
+        }:
+            return max(score, score + 4500), "Iono R14v: Active metal race (pre-MD)"
+
+    if opt.type == OptionType.PLAY:
+        card = option_card(obs, opt)
+        cid = card.id if card else None
+        if cid == RELICANTH and not has_in_play(obs, RELICANTH):
+            if has_in_play(obs, DURALUDON) or has_in_play(obs, ARCHALUDON_EX):
+                return max(score, 11000), "Iono R14v: Relicanth online (pre-MD)"
+
+    if opt.type == OptionType.END:
+        has_atk = any(o.type == OptionType.ATTACK for o in (obs.select.option or []))
+        if has_atk:
+            return score - 5000, "Iono R14v: attack over END (pre-MD)"
+        if not obs.current.energyAttached and METAL_ENERGY in hand_ids(obs):
+            return score - 3500, "Iono R14v: attach over END (pre-MD)"
+
+    return score, reason
+
+
+def _iono_killable_threats(obs):
+    """Bench Iono 2-prize threats we can KO with a planned attack this turn."""
+    attacks = planned_archaludon_attacks(obs)
+    if not attacks:
+        return []
+    out = []
+    for target in opp_bench_pokemon(obs):
+        if not target or target.id not in IONO_THREATS:
+            continue
+        if any(effective_damage(atk["damage"], target) >= target.hp for atk in attacks):
+            out.append(target)
+    return out
+
+
+def _apply_iono_r14w_prize_boss(obs, opt, score, reason):
+    """R14w single lever — prize-efficiency Boss vs Iono.
+
+    Loss DS (n=200, 2026-07-31): losses end Active=None (board wipe) 100%;
+    wins keep Arch 88% / Relicanth 62%. Opp Active on losses is Voltorb ~96%.
+    Base Boss saves when Active is KO-able — so we take 1-prize Voltorb and leave
+    loaded Bellibolt_ex / Kilowattrel to sweep us next.
+
+    Lever: if a bench IONO_THREAT is KO-able, hard-prefer Boss PLAY (even when
+    Active 1-prize is also KO-able). Target selection already weights prize_value.
+    Does NOT stack r14n — pure single lever for A/B.
+    """
+    if obs.select is None:
+        return score, reason
+    ctx = obs.select.context
+
+    # MAIN: play Boss when a 2-prize threat is KO-able
+    if ctx == SelectContext.MAIN and opt.type == OptionType.PLAY:
+        if getattr(obs.current, "supporterPlayed", False):
+            return score, reason
+        card = option_card(obs, opt)
+        cid = card.id if card else None
+        if cid != BOSS:
+            return score, reason
+        threats = _iono_killable_threats(obs)
+        if not threats:
+            return score, reason
+        remaining = len(my_state(obs).prize)
+        best_pv = max(prize_value(t) for t in threats)
+        # Lethal close via Boss path
+        if best_pv >= remaining:
+            return max(score, 55000), "Iono R14w: LETHAL Boss 2-prize"
+        return max(score, 28000), "Iono R14w: Boss KO-able Bellibolt/Kilo"
+
+    # SWITCH/TO_ACTIVE (Boss target): hard prefer killable IONO_THREATS
+    if ctx in {SelectContext.SWITCH, SelectContext.TO_ACTIVE}:
+        card = option_card(obs, opt)
+        if not card:
+            return score, reason
+        yi = obs.current.yourIndex
+        pi = getattr(opt, "playerIndex", yi)
+        if pi == yi:
+            return score, reason
+        attacks = planned_archaludon_attacks(obs)
+        killable = any(
+            effective_damage(atk["damage"], card) >= card.hp for atk in attacks
+        ) if attacks else False
+        if card.id in IONO_THREATS and killable:
+            return max(score, 45000 + prize_value(card) * 3000), "Iono R14w: target 2-prize KO"
+        if card.id in IONO_THREATS:
+            return max(score, 18000 + energy_count(card) * 200), "Iono R14w: target threat"
+        # Soft-down 1-prize Active snipes when a killable threat exists on bench
+        if killable and card.id not in IONO_THREATS and _iono_killable_threats(obs):
+            return min(score, 8000), "Iono R14w: deprior 1-prize vs threat"
+
+    return score, reason
+
+
+def _apply_iono_r14y_cape(obs, opt, score, reason):
+    """R14y single lever — Hero's Cape on Arch/Dura ASAP vs Iono.
+
+    Loss DS: 100% of losses end with no Active (board wipe by Voltorb). Arch is
+    2-prize and dies before Relicanth/MD closes. +30 HP tool is the cheapest
+    survival lever that does not rewire attack selection.
+
+    Pure single lever (no r14n stack) for A/B.
+    """
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return score, reason
+    if opt.type != OptionType.PLAY:
+        return score, reason
+    card = option_card(obs, opt)
+    cid = card.id if card else None
+    if cid != HERO_CAPE:
+        return score, reason
+    targets = [
+        p
+        for p in all_my_pokemon(obs)
+        if p and p.id in {ARCHALUDON_EX, DURALUDON} and not has_tool(p)
+    ]
+    if not targets:
+        return score, reason
+    # Prefer Caping Arch; still worth it on Dura that will evolve
+    has_arch = any(p.id == ARCHALUDON_EX for p in targets)
+    return max(score, 24000 if has_arch else 18000), (
+        "Iono R14y: Cape Arch" if has_arch else "Iono R14y: Cape Dura"
+    )
+
+
+def _apply_iono_overrides(obs, opt, score, reason):
+    """Legacy full R14 (kept for A/B; do not wire — regressed). Prefer light path."""
+    return _apply_iono_light_overrides(obs, opt, score, reason)
+
+
+def _apply_iono_light_overrides(obs, opt, score, reason):
+    """R14k — R14j + END penalty when attack available.
+
+    Base (safe): MD/RH lethal, Active metal attach, Relicanth for MD, Boss >=2e.
+    + ONE new lever (R14i): Cinderace Turbo Flare (965) when Dura is on bench.
+    """
+    card = option_card(obs, opt)
+    cid = card.id if card else getattr(opt, "cardId", None)
+    active = active_pokemon(obs)
+    opp_act = opp_active_pokemon(obs)
+
+    # Never gift free Lightning turn if we can attack or attach
+    if opt.type == OptionType.END and obs.select.context == SelectContext.MAIN:
+        if planned_archaludon_attacks(obs):
+            return score - 6000, "Iono: attack over END"
+        if not obs.current.energyAttached and METAL_ENERGY in hand_ids(obs):
+            return score - 4000, "Iono: attach over END"
+
+    # Boss early threats (Bellibolt/Kilowattrel) before they load energy
+    if opt.type == OptionType.PLAY and cid == BOSS:
+        threats = [
+            p for p in ([opp_act] if opp_act else []) + list(opp_bench_pokemon(obs) or [])
+            if p and p.id in IONO_THREATS
+        ]
+        if threats:
+            return max(score, 19000), "Iono: Boss threat off bench/active"
+        return max(score, 8000), "Iono: Boss available"
+
+    if opt.type == OptionType.PLAY and cid == RELICANTH and not has_in_play(obs, RELICANTH):
+        return max(score, 15000), "Iono: Relicanth for MD race"
+
+    if opt.type == OptionType.EVOLVE and cid == ARCHALUDON_EX:
+        return max(score, 18000), "Iono: evolve for 220 MD"
+
+    if opt.type == OptionType.ATTACH:
+        target = option_target(obs, opt)
+        area = getattr(opt, "inPlayArea", None)
+        tid = target.id if target else None
+        if area == AreaType.ACTIVE and tid in {DURALUDON, ARCHALUDON_EX}:
+            return score + 9000, "Iono: Active metal race"
+        if area == AreaType.ACTIVE and tid == CINDERACE and energy_count(target or active_pokemon(obs) or type("X", (), {"id": 0})()) < 1:
+            return score + 7000, "Iono: enable Turbo Flare"
+
+    if opt.type == OptionType.ATTACK and opp_act and active:
+        aid = getattr(opt, "attackId", None)
+        if aid == METAL_DEFENDER and has_in_play(obs, RELICANTH):
+            if effective_damage(220, opp_act) >= opp_act.hp:
+                return max(score, score + 4000), "Iono: MD lethal"
+            if opp_act.id in IONO_LINE and energy_count(opp_act) <= 1:
+                return max(score, score + 1000), "Iono: MD unloaded"
+        if aid == RAGING_HAMMER:
+            rh = 80 + damage_on(active) // 10 * 10
+            if effective_damage(rh, opp_act) >= opp_act.hp:
+                return max(score, score + 3500), "Iono: RH lethal"
+        # R14i single new lever
+        if aid == 965 and active and active.id == CINDERACE:
+            if any(p and p.id == DURALUDON for p in (my_state(obs).bench or [])):
+                return max(score, score + 3500), "Iono: Turbo Flare -> bench Dura"
+
+    if opt.type == OptionType.ATTACH:
+        target = option_target(obs, opt)
+        tid = target.id if target else None
+        if getattr(opt, "inPlayArea", None) == AreaType.ACTIVE and tid in {
+            DURALUDON,
+            ARCHALUDON_EX,
+        }:
+            return score + 1500, "Iono: Active metal attach"
+
+    if opt.type == OptionType.PLAY and cid == RELICANTH and not has_in_play(obs, RELICANTH):
+        if has_in_play(obs, DURALUDON) or has_in_play(obs, ARCHALUDON_EX):
+            return max(score, score + 1200), "Iono: Relicanth for MD"
+
+    if opt.type == OptionType.PLAY and cid == BOSS and not obs.current.supporterPlayed:
+        threats = [
+            p
+            for p in opp_bench_pokemon(obs)
+            if p and p.id in IONO_THREATS and energy_count(p) >= 2
+        ]
+        if threats and planned_archaludon_attacks(obs):
+            return max(score, score + 1800), "Iono: Boss loaded threat"
+
+    # R14j single lever: FML ASAP vs Lightning chip (don't wait for ex online)
+    if opt.type == OptionType.PLAY and cid == FULL_METAL_LAB:
+        return max(score, score + 2500), "Iono: FML ASAP (R14j)"
+
+    return score, reason
+
+
+def _apply_dragapult_light_overrides(obs, opt, score, reason):
+    """R16c — Dragapult: prize-race attach cap + KO priority (no over-evolve).
+
+    Global R11 attach cap is wired; here only matchup-specific KO/Boss/FML.
+    """
+    card = option_card(obs, opt)
+    cid = card.id if card else getattr(opt, "cardId", None)
+    ctx = obs.select.context
+    active = active_pokemon(obs)
+    opp_act = opp_active_pokemon(obs)
+    lethal = _main_legal_attack_ko(obs)
+
+    # Extra attach discipline when behind: no bench attach if we can attack
+    our_prizes, opp_prizes = _prize_counts(obs)
+    if (
+        opt.type == OptionType.ATTACH
+        and ctx == SelectContext.MAIN
+        and our_prizes > opp_prizes
+        and planned_archaludon_attacks(obs)
+    ):
+        if getattr(opt, "inPlayArea", None) == AreaType.BENCH:
+            return min(score, 2000), "Draga: no bench attach when prize-behind"
+
+    if opt.type == OptionType.END and ctx == SelectContext.MAIN and lethal:
+        return score - 5000, "Draga: take KO over END"
+
+    if opt.type == OptionType.ATTACK and opp_act and active:
+        aid = getattr(opt, "attackId", None)
+        if aid == METAL_DEFENDER and has_in_play(obs, RELICANTH):
+            if effective_damage(220, opp_act) >= opp_act.hp:
+                return max(score, score + 5000), "Draga: MD lethal"
+            if opp_act.id == DRAGAPULT_EX:
+                return max(score, score + 2200), "Draga: MD into ex"
+        if aid == RAGING_HAMMER:
+            rh = 80 + damage_on(active) // 10 * 10
+            if effective_damage(rh, opp_act) >= opp_act.hp:
+                return max(score, score + 4500), "Draga: RH lethal"
+            if opp_act.id == DRAKLOAK and energy_count(opp_act) <= 2:
+                return max(score, score + 1500), "Draga: RH chip Drakloak"
+
+    if opt.type == OptionType.PLAY and cid == BOSS and not obs.current.supporterPlayed:
+        bench_ex = [p for p in opp_bench_pokemon(obs) if p and p.id == DRAGAPULT_EX]
+        if bench_ex and planned_archaludon_attacks(obs) and active and active.id in {
+            ARCHALUDON_EX,
+            DURALUDON,
+        }:
+            if opp_act and opp_act.id in {119, DRAKLOAK}:
+                return max(score, score + 2800), "Draga: Boss pull ex"
+            if any(energy_count(p) >= 2 for p in bench_ex):
+                return max(score, score + 2000), "Draga: Boss loaded ex"
+
+    if opt.type == OptionType.PLAY and cid == FULL_METAL_LAB:
+        if active and active.id in {DURALUDON, ARCHALUDON_EX}:
+            return max(score, score + 1500), "Draga: FML vs Dive"
+
+    if opt.type == OptionType.ATTACH and not lethal:
+        target = option_target(obs, opt)
+        tid = target.id if target else None
+        if getattr(opt, "inPlayArea", None) == AreaType.ACTIVE and tid in {
+            DURALUDON,
+            ARCHALUDON_EX,
+        }:
+            if target and energy_count(target) < 3:
+                return score + 1200, "Draga: Active metal"
+
+    if opt.type == OptionType.PLAY and cid == RELICANTH and not has_in_play(obs, RELICANTH):
+        opp_ids = {p.id for p in (opp_state(obs).active + opp_state(obs).bench) if p}
+        if DRAGAPULT_EX in opp_ids or DRAKLOAK in opp_ids:
+            if has_in_play(obs, DURALUDON) or has_in_play(obs, ARCHALUDON_EX):
+                return max(score, score + 1300), "Draga: Relicanth for MD"
 
     return score, reason
 
@@ -714,12 +1754,17 @@ _ICE_CREAM_HP_THRESHOLD = {
     "lucario": 270,
     "starmie": 210,
     "crustle": 120,
+    "grimmsnarl": 280,
+    "iono": 240,
+    "dragapult": 230,
+    "alakazam": 200,  # floor/ceiling path preferred; threshold fallback
     "hop": 220,
     "generic": 230,
 }
 
 
 def should_skip_ice_cream(obs, active):
+    """Ice Cream policy: sample_75wr Alakazam all-or-nothing + matchup HP floors."""
     if active.id != ARCHALUDON_EX:
         return True, "skip Ice Cream: not Archaludon ex"
     opp_act = opp_active_pokemon(obs)
@@ -731,6 +1776,32 @@ def should_skip_ice_cream(obs, active):
             if effective_damage(rh_dmg, opp_act) >= opp_act.hp and effective_damage(rh_after, opp_act) < opp_act.hp:
                 return True, "skip Ice Cream: healing loses Raging Hammer KO"
     matchup = detect_matchup(obs)
+    # sample_75wr: Alakazam — only heal if multi-Ice reaches survival band
+    if matchup == "alakazam":
+        floor, ceiling, _ = _estimate_alakazam(obs)
+        attacks = planned_archaludon_attacks(obs)
+        if opp_act and attacks and any(effective_damage(a["damage"], opp_act) >= opp_act.hp for a in attacks):
+            _, ceiling, _ = _estimate_alakazam_from_pokes(
+                opp_state(obs),
+                ([opp_act] if opp_act else []) + list(opp_bench_pokemon(obs) or []),
+            )
+        ice_count = sum(1 for c in (my_state(obs).hand or []) if c and c.id == JUMBO_ICE_CREAM)
+        max_hp = getattr(active, "maxHp", active.hp)
+        hp_after_all = min(max_hp, active.hp + ice_count * 80)
+        if hp_after_all <= active.hp:
+            return True, "skip Ice Cream: no effective healing"
+        if floor and hp_after_all < floor:
+            return True, f"skip Ice Cream: even {ice_count}x heal ({hp_after_all}) < floor {floor}"
+        if ceiling and hp_after_all >= ceiling:
+            return False, f"use Ice Cream: {ice_count}x heal ({hp_after_all}) >= ceil {ceiling}"
+        return False, f"use Ice Cream: band floor={floor} ceil={ceiling}"
+    # Starmie: tighter heal — 210 burst common; stay under KO range for trade
+    if matchup == "starmie":
+        threshold = 210
+        if active.hp > threshold:
+            return True, f"skip Ice Cream: HP {active.hp} > {threshold} (starmie)"
+        # Prefer heal when under 210 so we survive next star attack
+        return False, "use Ice Cream: starmie survival"
     threshold = _ICE_CREAM_HP_THRESHOLD.get(matchup, 220)
     if active.hp > threshold:
         return True, f"skip Ice Cream: HP {active.hp} > {threshold} ({matchup})"
@@ -769,6 +1840,12 @@ def score_play(obs, opt):
                     return -500, reason
         if cid == NIGHT_STRETCHER:
             disc = discard_ids(obs)
+            matchup = detect_matchup(obs)
+            # Crustle/majkel: Hammer puts metal in discard — recover aggressively
+            if matchup == "crustle" and METAL_ENERGY in disc:
+                if _energy_starved(obs) or _opp_hammer_seen(obs) or metal_in_discard(obs) >= 2:
+                    return 24000, "Hammer: Night Stretcher metal"
+                return 12000, "Crustle: Stretcher metal available"
             has_urgent = (
                 (DURALUDON in disc and DURALUDON not in ids and count_in_play(obs, DURALUDON) + count_in_play(obs, ARCHALUDON_EX) <= 1)
                 or (ARCHALUDON_EX in disc and ARCHALUDON_EX not in ids and has_in_play(obs, DURALUDON))
@@ -1000,7 +2077,8 @@ def score_option(obs, opt):
         elif opt.type == OptionType.ABILITY:
             score, reason = 1, "ability"
         elif opt.type == OptionType.ATTACK:
-            score, reason = best_attack_damage(obs, opt.attackId), "attack"
+            # Use matchup-aware score_attack (was raw damage only — ignored KO/levers)
+            score, reason = score_attack(obs, opt)
         elif opt.type == OptionType.END:
             if _bench_is_empty(obs) and _main_has_basic_play(obs):
                 score, reason = -50000, "empty bench: must bench basic"
@@ -1017,7 +2095,7 @@ def score_option(obs, opt):
                  SelectContext.HEAL, SelectContext.DAMAGE}:
         score, reason = score_target(obs, opt)
     elif ctx == SelectContext.ATTACK:
-        score, reason = best_attack_damage(obs, opt.attackId), "attack"
+        score, reason = score_attack(obs, opt)
     elif opt.type == OptionType.CARD:
         score, reason = score_to_hand(obs, opt)
     elif opt.type == OptionType.ENERGY:
@@ -1219,20 +2297,653 @@ def choose_options(obs):
     return selected
 
 
+_tomato_agent = None
+_tomato_load_error = None
+
+
+def _get_tomato_agent():
+    """Lazy-load sample_archaludon_75wr agent (Iono-only delegate lever)."""
+    global _tomato_agent, _tomato_load_error
+    if _tomato_agent is not None:
+        return _tomato_agent
+    if _tomato_load_error is not None:
+        return None
+    try:
+        import importlib.util
+        here = os.path.dirname(os.path.abspath(__file__))
+        candidates = [
+            os.path.join(here, "..", "extracted_agents", "sample_archaludon_75wr", "main.py"),
+            os.path.join(here, "sample_archaludon_75wr_main.py"),
+        ]
+        path = next((p for p in candidates if os.path.exists(p)), None)
+        if path is None:
+            _tomato_load_error = "tomato main.py not found"
+            return None
+        tomato_dir = os.path.dirname(path)
+        spec = importlib.util.spec_from_file_location("sample_archaludon_75wr_iono", path)
+        mod = importlib.util.module_from_spec(spec)
+        # Ensure tomato resolves its own deck.csv if needed at import
+        prev = os.getcwd()
+        try:
+            os.chdir(tomato_dir)
+            spec.loader.exec_module(mod)
+        finally:
+            os.chdir(prev)
+        _tomato_agent = mod.agent
+        return _tomato_agent
+    except Exception as e:
+        _tomato_load_error = f"{type(e).__name__}: {e}"
+        return None
+
+
+# Matchups where OUR specialist levers beat sample_75wr (Crustle wall, etc.).
+_TOMATO_EXCLUDE_MATCHUPS = frozenset({
+    "crustle", "grimmsnarl", "alakazam", "dragapult", "hop", "starmie", "lucario",
+})
+
+
+_specialist_latched = False
+
+
+def _should_use_tomato(obs) -> bool:
+    """Tomato default for Iono + early generic; keep ours on specialist matchups.
+
+    Rationale (2026-07-31):
+      - pure iono-only gate (detect==iono) → ~51.5% n400 (shy of 55)
+      - early turns are often matchup=generic → our weak path poisons the board
+        before Lightning is visible, then tomato inherits a losing setup
+      - pure tomato full-game fails Crustle (~75–80) → must exclude specialist MUs
+    """
+    try:
+        m = detect_matchup(obs)
+    except Exception:
+        m = "generic"
+    excl = _TOMATO_EXCLUDE_MATCHUPS
+    # arch single lever KEEP (2026-07-31): alakazam was our worst weighted
+    # matchup. Delegating it to sample_75wr moved the alakazam suite
+    # 36.98%±1.34 → 54.68%±2.34 (n=200 each, ci95 disjoint) with dual
+    # unchanged at 93.0%. Default ON; ARCH_TOMATO_ALAKAZAM=0 restores ours.
+    if os.environ.get("ARCH_TOMATO_ALAKAZAM", "1").strip().lower() not in ("0", "off", "false"):
+        excl = excl - {"alakazam"}
+    # arch R2 single lever KEEP (2026-07-31): dragapult carries the highest field
+    # weight (0.365) and was 49.0% with our scorer. Delegating it to sample_75wr
+    # moved the 4-deck dragapult suite 66.32%±2.04 → 73.18%±1.19 and `meta`
+    # overall 74.06%±1.14 → 78.32%±0.54 (ci95 disjoint both), dual 93.0 → 92.5
+    # (NULL, floor held). Default ON; ARCH_TOMATO_DRAGAPULT=0 restores ours.
+    if os.environ.get("ARCH_TOMATO_DRAGAPULT", "1").strip().lower() not in ("0", "off", "false"):
+        excl = excl - {"dragapult"}
+    # arch R4 single lever KEEP (2026-07-31): grimmsnarl was the last big matchup
+    # still on our own scorer and it is 65.7% of the live top-band field. Every
+    # gate scores it against `opponent_brain: random` and saturates at
+    # 97.18%±0.20, so the R13 override table had never been measured against a
+    # pilot. Under `intel_pilot_ab.py --pilot rulecore` (3% illegal fallback,
+    # U0) the same 3 decks measure our scorer at 74.00%±1.10 vs the sample_75wr
+    # delegate at 91.12%±0.47 — +17.12pp, ci95 disjoint, 900 games per arm. So
+    # _apply_grimmsnarl_overrides (R13) is a net liability against anything that
+    # actually plays the deck; it only looked fine because the pilot was random.
+    # Guards, both NULL (flat), no floor touched:
+    #   meta 78.48%±0.36 → 78.60%±0.73  (2×se_diff 1.63)
+    #   dual 96.40%±0.34 → 96.96%±0.27  (2×se_diff 0.87, floor ≥90 held)
+    # meta/dual are flat *because* their grimmsnarl decks are random-piloted and
+    # already saturated — the gain is real but invisible to the ship floors.
+    # Verified no detection leak: none of the iono / alakazam / crustle /
+    # dragapult gate decks contain any GRIMMSNARL_LINE or MUNKIDORI_IDS card, so
+    # this cannot move those matchups (their per-opponent swings were seed noise).
+    # Default ON; ARCH_TOMATO_GRIMMSNARL=0 restores ours.
+    if os.environ.get("ARCH_TOMATO_GRIMMSNARL", "1").strip().lower() not in ("0", "off", "false"):
+        excl = excl - {"grimmsnarl"}
+    specialist = m in excl
+    # arch R3 single lever A/B — verdict NULL, do NOT re-run (2026-07-31).
+    # Hypothesis: tomato originally took every "generic" (pre-reveal) turn
+    # because generic was also hiding the alakazam and dragapult boards it could
+    # not yet identify. Both are now explicit tomato matchups, so "generic" is
+    # mostly the opening turns of a crustle / grimmsnarl game — boards our
+    # specialist scorer then has to inherit.
+    # Measured (5 shards x 50 games/opp): meta 76.66%±0.50 → 77.34%±0.52,
+    # diff +0.68 vs 2×se_diff 1.44 → not decisive; dual 93.76 → 93.76 flat.
+    # Left env-gated and OFF by default; ARCH_TOMATO_GENERIC=0 restricts tomato
+    # to the matchups it explicitly owns.
+    if m == "generic" and os.environ.get(
+        "ARCH_TOMATO_GENERIC", "1"
+    ).strip().lower() in ("0", "off", "false"):
+        return False
+    # crustle single lever (2026-07-31): detect_matchup is stateless, so once the
+    # Crustle / flg shell is KO'd off the board it decays back to "generic" and
+    # tomato seizes control mid-game on a board our scorer built. Latch the
+    # specialist verdict for the rest of the game instead.
+    if os.environ.get("ARCH_CRUSTLE_LEVER", "").strip().lower() == "latch":
+        global _specialist_latched
+        if specialist:
+            _specialist_latched = True
+        elif _specialist_latched:
+            return False
+    return not specialist
+
+
+# ── Iono BC prior runtime (NumPy-only, optional) ─────────────────────────────
+
+_IONO_BC = None
+_IONO_BC_ERROR = None
+_BC_OPTION_TYPES = list(OptionType)
+_BC_OPTION_TYPE_INDEX = {t: i for i, t in enumerate(_BC_OPTION_TYPES)}
+
+
+def _to_int(x, default=0):
+    try:
+        return int(x)
+    except Exception:
+        return default
+
+
+def _bc_pokemon_features(pkm):
+    if pkm is None:
+        return [0.0, 0.0, 0.0]
+    hp = _to_int(getattr(pkm, "hp", 0))
+    max_hp = _to_int(getattr(pkm, "maxHp", hp), hp)
+    return [float(hp), float(max(0, max_hp - hp)), float(energy_count(pkm))]
+
+
+def _bc_state_vector(obs):
+    """Schema-v2 state vector, matched to scripts/collect_iono_decisions.py."""
+    me = my_state(obs)
+    opp = opp_state(obs)
+    act = active_pokemon(obs)
+    oact = opp_active_pokemon(obs)
+    act_hp, act_dmg, act_en = _bc_pokemon_features(act)
+    opp_hp, opp_dmg, opp_en = _bc_pokemon_features(oact)
+    act_id = _to_int(getattr(act, "id", 0)) if act else 0
+    opp_id = _to_int(getattr(oact, "id", 0)) if oact else 0
+    ctx = getattr(getattr(obs, "select", None), "context", None)
+    n_opts = len(getattr(getattr(obs, "select", None), "option", None) or [])
+    odata = CARD_DB.get(opp_id)
+    return [
+        float(_to_int(getattr(obs.current, "turn", 0))),
+        float(len(getattr(me, "prize", None) or [])),
+        float(len(getattr(opp, "prize", None) or [])),
+        float(_to_int(getattr(me, "handCount", 0))),
+        float(_to_int(getattr(me, "deckCount", 0))),
+        float(len(getattr(me, "discard", None) or [])),
+        float(len(getattr(me, "bench", None) or [])),
+        float(len(getattr(opp, "bench", None) or [])),
+        act_hp, act_dmg, act_en,
+        float(act_id == DURALUDON),
+        float(act_id == ARCHALUDON_EX),
+        float(act_id == CINDERACE),
+        float(act_id == RELICANTH),
+        float(act is None),
+        opp_hp, opp_dmg, opp_en,
+        float(bool(getattr(odata, "ex", False) or getattr(odata, "megaEx", False))) if oact else 0.0,
+        float(opp_id in IONO_THREATS),
+        float(ctx == SelectContext.MAIN),
+        float(ctx in (SelectContext.SETUP_ACTIVE_POKEMON, SelectContext.SETUP_BENCH_POKEMON)),
+        float(ctx in (SelectContext.SWITCH, SelectContext.TO_ACTIVE, SelectContext.TO_BENCH)),
+        float(n_opts),
+    ]
+
+
+def _bc_option_vector(obs, opt):
+    vec = [0.0] * len(_BC_OPTION_TYPES)
+    idx = _BC_OPTION_TYPE_INDEX.get(getattr(opt, "type", None))
+    if idx is not None:
+        vec[idx] = 1.0
+    card = option_card(obs, opt)
+    card_id = _to_int(getattr(card, "id", 0)) if card is not None else _to_int(getattr(opt, "cardId", 0))
+    cdata = CARD_DB.get(card_id)
+    ctype = getattr(cdata, "cardType", None)
+    is_pkm = float(ctype == CardType.POKEMON)
+    is_energy = float(ctype in (CardType.BASIC_ENERGY, CardType.SPECIAL_ENERGY))
+    targets_opp = 0.0
+    try:
+        yi = obs.current.yourIndex
+        targets_opp = float(opt.playerIndex is not None and opt.playerIndex != yi)
+    except Exception:
+        pass
+    return vec + [float(card_id), is_pkm, is_energy, targets_opp]
+
+
+def _bc_is_fragile_state(s):
+    # Raw schema-v2 indices: my_bench=6, active_energy=10, active Arch=12,
+    # active Cinderace=13. Same cluster as analyze_iono_loss_clusters.py.
+    return (not (s[12] >= 0.5 or s[13] >= 0.5)) or s[10] < 2.0 or s[6] <= 0.0
+
+
+def _get_iono_bc():
+    """Lazy-load the exported NumPy prior. Missing/failed model means fallback."""
+    global _IONO_BC, _IONO_BC_ERROR
+    if os.environ.get("ARCH_IONO_BC_ENABLE", "0").strip().lower() not in ("1", "true", "on"):
+        return None
+    if _IONO_BC is not None:
+        return _IONO_BC
+    if _IONO_BC_ERROR is not None:
+        return None
+    try:
+        import numpy as np
+
+        env = os.environ.get("ARCH_IONO_BC_NPZ")
+        here = os.path.dirname(os.path.abspath(__file__)) if ROOT else os.getcwd()
+        candidates = []
+        if env:
+            candidates.append(env)
+        candidates += [
+            os.path.join(here, "models", "iono_prior_v2.npz"),
+            os.path.join(here, "iono_prior_v2.npz"),
+            os.path.join(os.getcwd(), "iono_prior_v2.npz"),
+        ]
+        path = next((p for p in candidates if p and os.path.exists(p)), None)
+        if path is None:
+            _IONO_BC_ERROR = "iono_prior_v2.npz not found"
+            return None
+        z = np.load(path, allow_pickle=True)
+        _IONO_BC = {"np": np, "path": path, **{k: z[k] for k in z.files}}
+        return _IONO_BC
+    except Exception as e:
+        _IONO_BC_ERROR = f"{type(e).__name__}: {e}"
+        return None
+
+
+def _silu(np, x):
+    return x / (1.0 + np.exp(-x))
+
+
+def _iono_bc_pick(obs):
+    """Return [option_index] from BC prior, or None to fall back to tomato."""
+    model = _get_iono_bc()
+    if model is None or obs.select is None:
+        return None
+    opts = list(obs.select.option or [])
+    if not opts:
+        return None
+    # Model was trained only on single-choice decisions.
+    if not (obs.select.minCount <= 1 <= obs.select.maxCount):
+        return None
+    max_options = int(model.get("max_options", [32])[0])
+    if len(opts) > max_options:
+        return None
+    try:
+        raw_s = _bc_state_vector(obs)
+        scope = os.environ.get("ARCH_IONO_BC_SCOPE", "fragile").strip().lower()
+        if scope == "fragile" and not _bc_is_fragile_state(raw_s):
+            return None
+        np = model["np"]
+        s = np.asarray(raw_s, dtype=np.float32)
+        s = (s - model["state_mean"]) / model["state_std"]
+        o = np.asarray([_bc_option_vector(obs, opt) for opt in opts], dtype=np.float32)
+        o[:, -4] = np.log1p(o[:, -4]) / 8.0
+
+        se = _silu(np, s @ model["se0_w"].T + model["se0_b"])
+        se = _silu(np, se @ model["se2_w"].T + model["se2_b"])
+        oe = _silu(np, o @ model["oe0_w"].T + model["oe0_b"])
+        se_exp = np.repeat(se.reshape(1, -1), len(opts), axis=0)
+        h = _silu(np, np.concatenate([se_exp, oe], axis=1) @ model["sc0_w"].T + model["sc0_b"])
+        logits = (h @ model["sc2_w"].T + model["sc2_b"]).reshape(-1)
+        order = np.argsort(logits)[::-1]
+        if len(order) < 1:
+            return None
+        margin = float(os.environ.get("ARCH_IONO_BC_MARGIN", "0.0") or 0.0)
+        if len(order) > 1 and float(logits[order[0]] - logits[order[1]]) < margin:
+            return None
+        return [int(order[0])]
+    except Exception:
+        return None
+
+
 def _agent_impl(obs_dict):
     obs = to_observation_class(obs_dict)
     if obs.select is None:
-        global _opp_last_attack_id, _cur_turn_logs
+        global _opp_last_attack_id, _cur_turn_logs, _specialist_latched
+        _specialist_latched = False
         _opp_last_attack_id = None
         _cur_turn_logs.clear()
         return my_deck
     _update_opp_attack_tracking(obs)
     if not obs.select.option:
         return []
+
+    # Single lever: tomato default except specialist matchups (Crustle/…).
+    # A/B: tomato | tomato_md | tomato_strict | r14n | none
+    lever = os.environ.get("ARCH_IONO_LEVER", "tomato").strip().lower()
+    use_tomato = False
+    if lever in (
+        "tomato", "75wr", "sample75",
+        "tomato_md", "tomato+md", "tomato_lethal",
+        "tomato_setup", "tomato+setup",
+        "tomato_fork", "tomato+fork",
+        "tomato_boss", "tomato+boss",
+        "tomato_boss2", "tomato+boss2",
+        "tomato_bc", "tomato+bc", "bc",
+    ):
+        use_tomato = _should_use_tomato(obs)
+    elif lever in ("tomato_strict", "iono_only"):
+        try:
+            use_tomato = detect_matchup(obs) == "iono"
+        except Exception:
+            use_tomato = False
+    if use_tomato:
+        if lever in ("tomato_bc", "tomato+bc", "bc"):
+            bc = _iono_bc_pick(obs)
+            if bc:
+                return bc
+        if lever in ("tomato_fork", "tomato+fork"):
+            try:
+                pre = _tomato_fork_preempt(obs)
+            except Exception:
+                pre = None
+            if pre:
+                return pre
+        if lever in ("tomato_boss", "tomato+boss", "tomato_boss2", "tomato+boss2"):
+            try:
+                pre = _tomato_boss_preempt(
+                    obs, lookahead=lever in ("tomato_boss2", "tomato+boss2")
+                )
+            except Exception:
+                pre = None
+            if pre:
+                return pre
+        ta = _get_tomato_agent()
+        if ta is not None:
+            try:
+                out = ta(obs_dict)
+                if isinstance(out, list) and out:
+                    lever_pf = os.environ.get("ARCH_IONO_LEVER", "tomato").strip().lower()
+                    if lever_pf in ("tomato_md", "tomato+md", "tomato_lethal"):
+                        # REJECTED mean ~34.7% — hard-forcing lethal breaks tempo
+                        out = _tomato_lethal_postfilter(obs, out)
+                    elif lever_pf in ("tomato_setup", "tomato+setup"):
+                        out = _tomato_setup_postfilter(obs, out)
+                    return out
+            except Exception:
+                pass  # fall through to our scorer
+
     try:
         return choose_options(obs)
     except Exception:
         return random.sample(list(range(len(obs.select.option))), obs.select.maxCount)
+
+
+def _tomato_lethal_postfilter(obs, chosen: list[int]) -> list[int]:
+    """Single add-on over tomato: never END/draw when a legal attack KOs Active.
+
+    Diagnosis: tomato mean ~50.7% n1000; gap to 55% ≈4pp. Avoids tempo miss
+    when sample_75wr ranks supporter/item above a free prize take.
+    """
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return chosen
+    opts = list(obs.select.option or [])
+    if not opts or not chosen:
+        return chosen
+    opp_act = opp_active_pokemon(obs)
+    if not opp_act:
+        return chosen
+    lethal_idxs = []
+    for i, o in enumerate(opts):
+        if o.type != OptionType.ATTACK:
+            continue
+        aid = getattr(o, "attackId", None) or 0
+        dmg = best_attack_damage(obs, aid)
+        if effective_damage(dmg, opp_act) >= opp_act.hp:
+            lethal_idxs.append(i)
+    if not lethal_idxs:
+        return chosen
+    # If already attacking lethally, keep
+    if any(i in lethal_idxs for i in chosen):
+        return chosen
+    # Prefer highest prize-value style: first lethal index (MD often earlier)
+    return [lethal_idxs[0]]
+
+
+def _tomato_setup_postfilter(obs, chosen: list[int]) -> list[int]:
+    """Single add-on over tomato: force setup race pieces vs Lightning wipe.
+
+    Tomato loss DS n200: losses 100% Active=None, Arch present only 10%;
+    wins Arch 95%. Setup / keep-Arch online is the gap to 55%.
+
+    Priority (MAIN only):
+      1) empty bench → PLAY Dura/Relicanth if legal
+      2) Active Dura e>=2 + Arch in hand → EVOLVE Arch
+    Soft: only override when tomato chose END/draw/item instead.
+    """
+    if obs.select is None or obs.select.context != SelectContext.MAIN:
+        return chosen
+    opts = list(obs.select.option or [])
+    if not opts:
+        return chosen
+
+    def _is_tempo_waste(idx: int) -> bool:
+        if idx < 0 or idx >= len(opts):
+            return True
+        o = opts[idx]
+        if o.type in {OptionType.END, OptionType.RETREAT}:
+            return True
+        if o.type == OptionType.PLAY:
+            card = option_card(obs, o)
+            cid = card.id if card else None
+            if cid in {LILLIE, EXPLORER, POKE_PAD, POKEGEAR, ULTRA_BALL}:
+                return True
+        return False
+
+    # 1) empty bench basics
+    if _bench_is_empty(obs):
+        for i, o in enumerate(opts):
+            if o.type != OptionType.PLAY:
+                continue
+            card = option_card(obs, o)
+            if card and card.id in {DURALUDON, RELICANTH}:
+                if not chosen or all(_is_tempo_waste(c) for c in chosen):
+                    return [i]
+                break
+
+    # 2) evolve Active Dura → Arch when energized
+    active = active_pokemon(obs)
+    if (
+        active
+        and active.id == DURALUDON
+        and energy_count(active) >= 2
+        and ARCHALUDON_EX in hand_ids(obs)
+    ):
+        for i, o in enumerate(opts):
+            if o.type != OptionType.EVOLVE:
+                continue
+            card = option_card(obs, o)
+            cid = card.id if card else getattr(o, "cardId", None)
+            if cid != ARCHALUDON_EX:
+                continue
+            target = option_target(obs, o)
+            if target and target.id == DURALUDON:
+                if not chosen or all(_is_tempo_waste(c) for c in chosen):
+                    return [i]
+                # even if tomato chose attach, evolve is usually better for Alloy
+                if chosen:
+                    o0 = opts[chosen[0]] if chosen[0] < len(opts) else None
+                    if o0 and o0.type in {OptionType.ATTACH, OptionType.END, OptionType.PLAY}:
+                        return [i]
+                break
+
+    return chosen
+
+
+# Bench floor for the tomato_fork lever (how many live bench Pokemon we insist on
+# before letting the delegate spend the turn on anything else).
+_FORK_BENCH_FLOOR = int(os.environ.get("ARCH_IONO_FORK_FLOOR", "2") or 2)
+
+
+def _tomato_fork_preempt(obs):
+    """PRE-delegation bench-depth floor (lever `tomato_fork`).
+
+    Loss DS n200: 100% of tomato losses end with Active=None, i.e. we run out of
+    Pokemon in play after a Lightning wipe. `_tomato_setup_postfilter` (REJECTED,
+    50.3% null) only fired when bench was *completely* empty and only when tomato
+    had already picked a tempo-waste option, so it never changed the commitment
+    decision itself — by the time bench is 0 the recovery line is already gone.
+
+    This lever instead pre-empts the delegate: while live bench < floor, if a
+    basic can be benched right now, bench it. Returns an option index list to
+    play, or None to hand the decision to tomato as usual.
+    """
+    if obs.select is None:
+        return None
+    opts = list(obs.select.option or [])
+    if not opts:
+        return None
+    try:
+        bench_n = len([p for p in my_state(obs).bench if p])
+    except Exception:
+        return None
+    if bench_n >= _FORK_BENCH_FLOOR:
+        return None
+
+    ctx = obs.select.context
+    if ctx == SelectContext.MAIN:
+        want = OptionType.PLAY
+    elif ctx in {
+        SelectContext.SETUP_BENCH_POKEMON,
+        SelectContext.TO_BENCH,
+        SelectContext.TO_FIELD,
+    }:
+        want = OptionType.CARD
+    else:
+        return None
+
+    # Prefer Duraludon (evolves into Archaludon ex, our win condition) over Relicanth.
+    fallback = None
+    for i, o in enumerate(opts):
+        if o.type != want:
+            continue
+        card = option_card(obs, o)
+        cid = card.id if card else None
+        if cid == DURALUDON:
+            return [i]
+        if cid == RELICANTH and fallback is None:
+            fallback = i
+    return [fallback] if fallback is not None else None
+
+
+def _boss2_loaded_threats(obs, attacks):
+    """Tier-2 target set for `tomato_boss2`: the benched 2-prize IONO_THREAT
+    (Bellibolt ex / Kilowattrel) already holding >= 2 energy that our planned
+    attack two-shots. That Pokemon is the one promoted fully charged the moment
+    our active dies, so dragging it up now starts the two-shot on our terms.
+    """
+    best = max((a["damage"] for a in attacks), default=0)
+    if best <= 0:
+        return []
+    out = []
+    for t in opp_bench_pokemon(obs):
+        if not t or t.id not in IONO_THREATS or energy_count(t) < 2:
+            continue
+        hp = getattr(t, "hp", None)
+        if not hp or effective_damage(best, t) * 2 < hp:
+            continue
+        out.append(t)
+    return out
+
+
+def _boss2_active_is_loaded_threat(obs) -> bool:
+    """Gusting a loaded threat while one is already Active is a sidegrade."""
+    oact = opp_active_pokemon(obs)
+    return bool(oact is not None and oact.id in IONO_THREATS and energy_count(oact) >= 2)
+
+
+def _tomato_boss_preempt(obs, lookahead: bool = False):
+    """PRE-delegation gust-for-the-KO (lever `tomato_boss`).
+
+    `lookahead=True` is the `tomato_boss2` widening: tier 1 (immediate KO) is
+    unchanged and still wins whenever it applies, but when no bench target dies
+    this turn we also gust a `_boss2_loaded_threats` target. Rationale: the
+    immediate-KO condition only fires ~0.7x/game against a delegate that
+    declines 95.4% of legal Bosses, so the mechanism is target-starved, not
+    wrong.
+
+    Bucket-matched regret over 13380 schema-v2 games
+    (`recordings/intel/iono_fragile_transition.md`): inside matched
+    (bench, active energy, turn band, own prizes) buckets, PLAY Boss's Orders
+    is 89.42% WR when taken (n=3706) vs 67.62% when legal and declined
+    (n=77655), ci95 disjoint — the delegate takes a legal Boss on only 4.6% of
+    chances and usually spends the supporter on draw instead.
+
+    The same scan closed the bench-depth family: when the bench first empties
+    post-setup, a bench play is legal in only 11.55% of cases, which is why
+    `tomato_fork` was NULL at floors 2 and 3 — there is nothing to bench.
+
+    Unlike REJECTED R14w (25.2%), this does not swap in our own scorer: tomato
+    still plays the whole game, we only pre-empt this one decision, and only
+    when the gust converts into an immediate KO we could not otherwise take.
+    Returns an option index list, or None to defer to the delegate.
+    """
+    if obs.select is None:
+        return None
+    opts = list(obs.select.option or [])
+    if not opts:
+        return None
+    ctx = obs.select.context
+
+    if ctx == SelectContext.MAIN:
+        if getattr(obs.current, "supporterPlayed", False):
+            return None
+        boss_idx = None
+        for i, o in enumerate(opts):
+            if o.type != OptionType.PLAY:
+                continue
+            card = option_card(obs, o)
+            if card and card.id == BOSS:
+                boss_idx = i
+                break
+        if boss_idx is None:
+            return None
+        attacks = planned_archaludon_attacks(obs)
+        if not attacks:
+            return None
+        killable = [
+            t for t in opp_bench_pokemon(obs)
+            if t and any(effective_damage(a["damage"], t) >= t.hp for a in attacks)
+        ]
+        if not killable:
+            if not lookahead or _boss2_active_is_loaded_threat(obs):
+                return None
+            return [boss_idx] if _boss2_loaded_threats(obs, attacks) else None
+        # Taking the prize already in front of us is at least as good unless the
+        # bench holds a fatter target, so only gust when it gains prize value.
+        oact = opp_active_pokemon(obs)
+        if oact is not None and any(
+            effective_damage(a["damage"], oact) >= oact.hp for a in attacks
+        ):
+            if max(prize_value(t) for t in killable) <= prize_value(oact):
+                return None
+        return [boss_idx]
+
+    # Boss target select: take the KO-able opponent Pokemon worth the most prizes.
+    if ctx in {SelectContext.SWITCH, SelectContext.TO_ACTIVE}:
+        attacks = planned_archaludon_attacks(obs)
+        if not attacks:
+            return None
+        yi = obs.current.yourIndex
+        best = None
+        alt = None  # tier-2 (`tomato_boss2`): loaded threat we only two-shot
+        bestdmg = max((a["damage"] for a in attacks), default=0)
+        for i, o in enumerate(opts):
+            if o.playerIndex is None or o.playerIndex == yi:
+                return None  # our own promotion — never hijack it
+            target = option_card(obs, o)
+            hp = getattr(target, "hp", None)
+            if target is None or hp is None:
+                continue
+            if any(effective_damage(a["damage"], target) >= hp for a in attacks):
+                key = (prize_value(target), -hp)
+                if best is None or key > best[0]:
+                    best = (key, i)
+            elif (
+                lookahead
+                and target.id in IONO_THREATS
+                and energy_count(target) >= 2
+                and effective_damage(bestdmg, target) * 2 >= hp
+            ):
+                key = (energy_count(target), -hp)
+                if alt is None or key > alt[0]:
+                    alt = (key, i)
+        if best is not None:
+            return [best[1]]
+        return [alt[1]] if alt is not None else None
+
+    return None
 
 
 def _resolve_deck_path() -> str:
@@ -1249,9 +2960,15 @@ def _resolve_deck_path() -> str:
         packaged = os.path.join(here, "deck.csv")
         if os.path.exists(packaged):
             return packaged
-        repo_default = os.path.join(here, "..", "agent_decks", "archaludon_ex_cinderace.csv")
-        if os.path.exists(repo_default):
-            return repo_default
+        # Canonical 75wr shell (also written to archaludon_ex_cinderace.csv)
+        for name in (
+            "archaludon_ex_cinderace.csv",
+            "nb_archaludon_75wr.csv",
+            "from_notebooks/sample_archaludon_75wr_out_deck.csv",
+        ):
+            repo_default = os.path.join(here, "..", "agent_decks", name.replace("/", os.sep))
+            if os.path.exists(repo_default):
+                return repo_default
     return "/kaggle_simulations/agent/deck.csv"
 
 

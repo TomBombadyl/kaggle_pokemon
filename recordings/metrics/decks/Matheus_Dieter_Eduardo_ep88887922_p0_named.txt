@@ -1,0 +1,20 @@
+1	7x	Basic {G} Energy
+15	4x	Team Rocket's Energy
+400	4x	Team Rocket's Tarountula
+401	4x	Team Rocket's Spidops
+414	2x	Team Rocket's Articuno
+431	2x	Team Rocket's Mewtwo ex
+434	3x	Team Rocket's Mimikyu
+1086	1x	Buddy-Buddy Poffin
+1094	3x	Bug Catching Set
+1121	2x	Ultra Ball
+1134	4x	Team Rocket's Transceiver
+1152	4x	Poké Pad
+1159	1x	Hero’s Cape
+1175	1x	Brave Bangle
+1216	4x	Team Rocket's Ariana
+1217	1x	Team Rocket's Archer
+1218	3x	Team Rocket's Giovanni
+1220	4x	Team Rocket's Proton
+1227	3x	Lillie's Determination
+1257	3x	Team Rocket's Factory

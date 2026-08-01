@@ -65,6 +65,23 @@ ALAKAZAM_TECH = DeckTech(
     ),
 )
 
+# agent_decks/crustle_MissingNo_rank1.csv — Dwebble/Crustle + Ogerpon + Kangaskhan
+CRUSTLE_TECH = DeckTech(
+    name="crustle_missingno",
+    gust_cards=frozenset({1182}),  # Boss's Orders
+    switch_cards=frozenset({1123}),  # Switch
+    draw_cards=frozenset({1227, 1225, 1212}),  # Lillie, Hilda, Cook
+    search_cards=frozenset({1121, 1086, 1122}),  # Ultra Ball, Buddy Poffin, Pokegear
+    stadium_cards=frozenset({1257}),  # Team Rocket's Factory
+    # Our wall *is* Crustle; non_ex_wall_* empty (we are not the anti-wall side).
+    energy_accel_cards=frozenset({756}),  # Kangaskhan Run Errand (draw)
+    setup_priority=(
+        (344, 50.0),  # Dwebble — evolve into wall
+        (756, 45.0),  # Mega Kangaskhan ex — early draw
+        (117, 40.0),  # Cornerstone Ogerpon ex
+    ),
+)
+
 
 def tech_for_deck(deck_ids: list[int]) -> DeckTech:
     ids = set(deck_ids)
@@ -72,4 +89,7 @@ def tech_for_deck(deck_ids: list[int]) -> DeckTech:
         return LUCARIO_TECH
     if {741, 742}.issubset(ids) and (245 in ids or 743 in ids):
         return ALAKAZAM_TECH
+    # Crustle MissingNo shell (Dwebble+Crustle + Ogerpon and/or Kangaskhan)
+    if {344, 345}.issubset(ids) and (117 in ids or 756 in ids):
+        return CRUSTLE_TECH
     return DEFAULT_TECH

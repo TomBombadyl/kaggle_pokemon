@@ -1,0 +1,558 @@
+{
+  "generated_at": "2026-07-30T16:46:00.018907+00:00",
+  "competition": "pokemon-tcg-ai-battle",
+  "top_n": 10,
+  "teams": [
+    {
+      "rank": 1,
+      "teamId": 16448747,
+      "teamName": "Luca",
+      "lb_score": 1167.4,
+      "submissionId": 55058847,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 647,
+          "name": "Marnie's Morgrem",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top01_Luca.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88996371",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 2,
+      "teamId": 16441077,
+      "teamName": "haggle",
+      "lb_score": 1164.3,
+      "submissionId": 55104355,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 648,
+          "name": "Marnie's Grimmsnarl ex",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top02_haggle.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88994421",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 3,
+      "teamId": 16380946,
+      "teamName": "flg",
+      "lb_score": 1164.1,
+      "submissionId": 55033309,
+      "primary_archetype": "rocket_spidops",
+      "top_cards": [
+        {
+          "card_id": 401,
+          "name": "Team Rocket's Spidops",
+          "count": 4
+        },
+        {
+          "card_id": 400,
+          "name": "Team Rocket's Tarountula",
+          "count": 4
+        },
+        {
+          "card_id": 1134,
+          "name": "Team Rocket's Transceiver",
+          "count": 4
+        },
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1220,
+          "name": "Team Rocket's Proton",
+          "count": 4
+        },
+        {
+          "card_id": 1216,
+          "name": "Team Rocket's Ariana",
+          "count": 4
+        },
+        {
+          "card_id": 1257,
+          "name": "Team Rocket's Factory",
+          "count": 3
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top03_flg.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88996831",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 4,
+      "teamId": 16408505,
+      "teamName": "JZ",
+      "lb_score": 1161.9,
+      "submissionId": 55094113,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 1079,
+          "name": "Rare Candy",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top04_JZ.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88995009",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 5,
+      "teamId": 16461850,
+      "teamName": "MissingNo.",
+      "lb_score": 1155.1,
+      "submissionId": 55113837,
+      "primary_archetype": "crustle_iwapalace",
+      "top_cards": [
+        {
+          "card_id": 1122,
+          "name": "Pokégear 3.0",
+          "count": 4
+        },
+        {
+          "card_id": 1147,
+          "name": "Jumbo Ice Cream",
+          "count": 4
+        },
+        {
+          "card_id": 1120,
+          "name": "Crushing Hammer",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 1182,
+          "name": "Boss’s Orders",
+          "count": 4
+        },
+        {
+          "card_id": 344,
+          "name": "Dwebble",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 1225,
+          "name": "Hilda",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top05_MissingNo.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "89001139",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 6,
+      "teamId": 16463316,
+      "teamName": "LiamK",
+      "lb_score": 1152.8,
+      "submissionId": 55090635,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 1097,
+          "name": "Night Stretcher",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top06_LiamK.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88994375",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 7,
+      "teamId": 16374395,
+      "teamName": "Majkel1337",
+      "lb_score": 1149.0,
+      "submissionId": 55039428,
+      "primary_archetype": "crustle_iwapalace",
+      "top_cards": [
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 1182,
+          "name": "Boss’s Orders",
+          "count": 4
+        },
+        {
+          "card_id": 1120,
+          "name": "Crushing Hammer",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 344,
+          "name": "Dwebble",
+          "count": 4
+        },
+        {
+          "card_id": 1147,
+          "name": "Jumbo Ice Cream",
+          "count": 4
+        },
+        {
+          "card_id": 1122,
+          "name": "Pokégear 3.0",
+          "count": 4
+        },
+        {
+          "card_id": 345,
+          "name": "Crustle",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top07_Majkel1337.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88986468",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 8,
+      "teamId": 16371703,
+      "teamName": "やる気元気ミワハルキ",
+      "lb_score": 1142.0,
+      "submissionId": 55081464,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 648,
+          "name": "Marnie's Grimmsnarl ex",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top08_やる気元気ミワハルキ.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "89000463",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 9,
+      "teamId": 16375647,
+      "teamName": "James Cox & Henry Chao",
+      "lb_score": 1140.1,
+      "submissionId": 55063047,
+      "primary_archetype": "mega_kangaskhan_ogerpon",
+      "top_cards": [
+        {
+          "card_id": 1198,
+          "name": "Crispin",
+          "count": 4
+        },
+        {
+          "card_id": 1250,
+          "name": "Area Zero Underdepths",
+          "count": 4
+        },
+        {
+          "card_id": 1121,
+          "name": "Ultra Ball",
+          "count": 4
+        },
+        {
+          "card_id": 1071,
+          "name": "Meowth ex",
+          "count": 3
+        },
+        {
+          "card_id": 756,
+          "name": "Mega Kangaskhan ex",
+          "count": 3
+        },
+        {
+          "card_id": 96,
+          "name": "Teal Mask Ogerpon ex",
+          "count": 3
+        },
+        {
+          "card_id": 1205,
+          "name": "Cyrano",
+          "count": 2
+        },
+        {
+          "card_id": 1098,
+          "name": "Glass Trumpet",
+          "count": 2
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top09_James_Cox_Henry_Chao.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "89001307",
+      "n_episodes_parsed": 4
+    },
+    {
+      "rank": 10,
+      "teamId": 16452116,
+      "teamName": "Raja Biswas",
+      "lb_score": 1137.0,
+      "submissionId": 55086926,
+      "primary_archetype": "marnie_grimmsnarl_ex",
+      "top_cards": [
+        {
+          "card_id": 1152,
+          "name": "Poké Pad",
+          "count": 4
+        },
+        {
+          "card_id": 1227,
+          "name": "Lillie's Determination",
+          "count": 4
+        },
+        {
+          "card_id": 1219,
+          "name": "Team Rocket's Petrel",
+          "count": 4
+        },
+        {
+          "card_id": 1259,
+          "name": "Spikemuth Gym",
+          "count": 4
+        },
+        {
+          "card_id": 112,
+          "name": "Munkidori",
+          "count": 4
+        },
+        {
+          "card_id": 1086,
+          "name": "Buddy-Buddy Poffin",
+          "count": 4
+        },
+        {
+          "card_id": 646,
+          "name": "Marnie's Impidimp",
+          "count": 4
+        },
+        {
+          "card_id": 1079,
+          "name": "Rare Candy",
+          "count": 3
+        }
+      ],
+      "deck_csv": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics\\top_extract\\decks_csv\\top10_Raja_Biswas.csv",
+      "source": "visualize.current.players.deck",
+      "episode_id": "88983737",
+      "n_episodes_parsed": 4
+    }
+  ],
+  "n_deck_records": 80,
+  "meta_note": {
+    "top100_snapshot_approx_2026_07_22": {
+      "marnie_grimmsnarl_ex": 0.31,
+      "alakazam": 0.3,
+      "crustle_iwapalace": 0.13,
+      "rocket_spidops": 0.06,
+      "cynthia_garchomp_ex": 0.06,
+      "dragapult_ex": 0.03
+    }
+  }
+}

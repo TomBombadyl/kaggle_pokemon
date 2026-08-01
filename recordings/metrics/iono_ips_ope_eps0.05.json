@@ -1,0 +1,64 @@
+{
+  "data": "episodes/iono_bc_explore",
+  "eps": 0.05,
+  "split": "all",
+  "results": {
+    "tomato": {
+      "label": "tomato",
+      "decisions": 149071,
+      "games": 3227,
+      "eligible_per_game": 46.19,
+      "baseline_y": 0.46852,
+      "positive_arm_hits": 0,
+      "per_decision_pp": 0.0,
+      "per_decision_se_pp": 0.0,
+      "per_game_pp": 0.0,
+      "per_game_se_pp": 0.0,
+      "per_game_ci95": [
+        0.0,
+        0.0
+      ],
+      "significant": false,
+      "verdict": "UNMEASURABLE",
+      "mean_dec_per_game": 46.19
+    },
+    "uniform": {
+      "label": "uniform",
+      "decisions": 149071,
+      "games": 3227,
+      "eligible_per_game": 46.19,
+      "baseline_y": 0.46852,
+      "positive_arm_hits": 5603,
+      "per_decision_pp": -4.1449,
+      "per_decision_se_pp": 0.4937,
+      "per_game_pp": -191.475,
+      "per_game_se_pp": 22.808,
+      "per_game_ci95": [
+        -236.179,
+        -146.772
+      ],
+      "significant": true,
+      "verdict": "HARMFUL",
+      "mean_dec_per_game": 46.19
+    },
+    "anti_uniform": {
+      "label": "anti_uniform",
+      "decisions": 149071,
+      "games": 3227,
+      "eligible_per_game": 46.19,
+      "baseline_y": 0.46852,
+      "positive_arm_hits": 5603,
+      "per_decision_pp": -5.3639,
+      "per_decision_se_pp": 0.6651,
+      "per_game_pp": -247.786,
+      "per_game_se_pp": 30.725,
+      "per_game_ci95": [
+        -308.006,
+        -187.566
+      ],
+      "significant": true,
+      "verdict": "HARMFUL",
+      "mean_dec_per_game": 46.19
+    }
+  }
+}

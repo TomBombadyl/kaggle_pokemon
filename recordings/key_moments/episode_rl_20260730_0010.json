@@ -1,0 +1,72 @@
+{
+  "started_at": "2026-07-30T00:06:35.983251+00:00",
+  "days_downloaded": [],
+  "n_top_teams": 10,
+  "n_field_decks": 12,
+  "n_traj": 68,
+  "top_archetypes": [
+    {
+      "rank": 1,
+      "team": "flg",
+      "arch": "crustle_iwapalace",
+      "mu": 1205.9
+    },
+    {
+      "rank": 2,
+      "team": "Dries @ Tufa Labs",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1202.5
+    },
+    {
+      "rank": 3,
+      "team": "James Cox & Henry Chao",
+      "arch": "unknown",
+      "mu": 1189.4
+    },
+    {
+      "rank": 4,
+      "team": "Luca",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1185.5
+    },
+    {
+      "rank": 5,
+      "team": "Majkel1337",
+      "arch": "crustle_iwapalace",
+      "mu": 1161.6
+    },
+    {
+      "rank": 6,
+      "team": "LiamK",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1156.9
+    },
+    {
+      "rank": 7,
+      "team": "Raja Biswas",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1145.1
+    },
+    {
+      "rank": 8,
+      "team": "insuperabilehart",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1143.7
+    },
+    {
+      "rank": 9,
+      "team": "李秉叡（ntumlnoob）",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1130.7
+    },
+    {
+      "rank": 10,
+      "team": "Xiangyu Liu",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1123.4
+    }
+  ],
+  "finished_at": "2026-07-30T00:10:01.328210+00:00",
+  "catalog": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\data\\rl_from_episodes\\catalog.json",
+  "metrics": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics"
+}

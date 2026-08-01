@@ -1,0 +1,22 @@
+5	2x	Basic {P} Energy
+13	1x	Enriching Energy
+19	4x	Telepath Psychic Energy
+66	2x	Dudunsparce
+140	1x	Fezandipiti ex
+305	3x	Dunsparce
+343	1x	Shaymin
+741	4x	Abra
+742	4x	Kadabra
+743	4x	Alakazam
+1079	3x	Rare Candy
+1081	4x	Enhanced Hammer
+1086	4x	Buddy-Buddy Poffin
+1097	1x	Night Stretcher
+1129	1x	Sacred Ash
+1152	4x	Poké Pad
+1182	3x	Boss’s Orders
+1184	1x	Lana’s Aid
+1197	3x	Xerosic’s Machinations
+1225	4x	Hilda
+1231	4x	Dawn
+1266	2x	Nighttime Mine

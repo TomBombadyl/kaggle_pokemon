@@ -10,7 +10,8 @@ from pathlib import Path
 from agent.agent import HeuristicScorer, load_deck
 from agent.lucario_policy import LucarioScorer, is_lucario_deck
 
-DEFAULT_SEARCH_COUNT = 12
+# Align with v5 train default (20). Override with LUC_SUBMIT_SEARCH_COUNT.
+DEFAULT_SEARCH_COUNT = 20
 
 
 class LucarioMCTSScorer(HeuristicScorer):
@@ -30,6 +31,7 @@ class LucarioMCTSScorer(HeuristicScorer):
 
             self._fallback = RuleCoreScorer(rng=rng, deck_path=deck_path)
         self._deck = deck_ids or []
+        self._deck_path = deck_path
         self._ready = False
         self._rt = None
         self._model = None
@@ -42,6 +44,15 @@ class LucarioMCTSScorer(HeuristicScorer):
 
             search_count = int(os.environ.get("LUC_SUBMIT_SEARCH_COUNT", DEFAULT_SEARCH_COUNT))
             rt.SEARCH_COUNT = max(1, search_count)
+            # Optional IS-MCTS / prior knobs at submit (defaults keep legacy behavior).
+            if "LUC_DETERMINIZATIONS" in os.environ:
+                rt.DETERMINIZATIONS = max(1, int(os.environ["LUC_DETERMINIZATIONS"]))
+            if "LUC_PUCT_C" in os.environ:
+                rt.PUCT_C = float(os.environ["LUC_PUCT_C"])
+            if "LUC_PRIOR_BLEND" in os.environ:
+                rt.PRIOR_BLEND = max(0.0, min(1.0, float(os.environ["LUC_PRIOR_BLEND"])))
+            if "LUC_POLICY_TARGET" in os.environ:
+                rt.POLICY_TARGET = os.environ["LUC_POLICY_TARGET"].strip().lower()
 
             cfg = {}
             if meta_path and Path(meta_path).is_file():
@@ -56,6 +67,11 @@ class LucarioMCTSScorer(HeuristicScorer):
             ):
                 if key in cfg:
                     setattr(rt, attr, int(cfg[key]))
+            # Prefer meta search depth when submit env not set explicitly.
+            if "LUC_SUBMIT_SEARCH_COUNT" not in os.environ:
+                meta_sc = cfg.get("LUC_SEARCH_COUNT") or cfg.get("search_count")
+                if meta_sc is not None:
+                    rt.SEARCH_COUNT = max(1, int(meta_sc))
 
             d_model = rt.D_MODEL
             device = torch.device("cpu")
@@ -79,6 +95,13 @@ class LucarioMCTSScorer(HeuristicScorer):
 
             if not self._deck:
                 self._deck = list(rt.LUCARIO_DECK)
+
+            # Wire LucarioScorer into runtime when prior blend is requested.
+            if getattr(rt, "PRIOR_BLEND", 0.0) > 0.0 and self._deck_path:
+                try:
+                    rt.set_lucario_lever_teaching(self._deck_path, blend=0.0)
+                except Exception:
+                    pass
 
             self._rt = rt
             self._model = model

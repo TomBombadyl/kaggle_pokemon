@@ -1,0 +1,24 @@
+1	2x	Basic {G} Energy
+11	4x	Mist Energy
+14	4x	Spiky Energy
+18	4x	Grow Grass Energy
+20	2x	Rock Fighting Energy
+117	1x	Cornerstone Mask Ogerpon ex
+344	4x	Dwebble
+345	3x	Crustle
+756	2x	Mega Kangaskhan ex
+1086	2x	Buddy-Buddy Poffin
+1121	2x	Ultra Ball
+1122	4x	Pokégear 3.0
+1123	1x	Switch
+1137	1x	Tool Scrapper
+1147	4x	Jumbo Ice Cream
+1159	1x	Hero’s Cape
+1182	4x	Boss’s Orders
+1194	2x	Colress’s Tenacity
+1197	1x	Xerosic’s Machinations
+1219	4x	Team Rocket's Petrel
+1225	2x	Hilda
+1227	4x	Lillie's Determination
+1257	1x	Team Rocket's Factory
+1264	1x	Battle Cage

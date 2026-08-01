@@ -1,0 +1,541 @@
+{
+  "generated_at": "2026-07-30T23:36:50.362505+00:00",
+  "src": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\notebooks\\kaggle_pull",
+  "n_notebooks": 19,
+  "by_status": {
+    "ready_integrate": 11,
+    "needs_rewrite": 3,
+    "analysis_only": 5
+  },
+  "items": [
+    {
+      "slug": "advanced_heuristic",
+      "notebook": "notebooks\\kaggle_pull\\advanced_heuristic\\pok-mon-tcg-advanced-heuristic-agent.ipynb",
+      "n_code_cells": 3,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\advanced_heuristic\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)"
+      ],
+      "decks": [
+        {
+          "path": "agent_decks\\from_notebooks\\advanced_heuristic_0__.csv",
+          "n": 60,
+          "label": "DECK"
+        }
+      ],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": true,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.032218+00:00"
+    },
+    {
+      "slug": "alakazam_2304_audit",
+      "notebook": "notebooks\\kaggle_pull\\alakazam_2304_audit\\ptcg-alakazam-2-304-game-audit-12-visuals.ipynb",
+      "n_code_cells": 21,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\alakazam_2304_audit\\_notebook_code.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "cg battle loop"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "needs_rewrite",
+        "has_agent_entry": true,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.048251+00:00"
+    },
+    {
+      "slug": "alakazam_search_v12",
+      "notebook": "notebooks\\kaggle_pull\\alakazam_search_v12\\ptcg-ai-battle-search-audited-alakazam-v12.ipynb",
+      "n_code_cells": 6,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\alakazam_search_v12\\_notebook_code.py"
+      ],
+      "entrypoints": [
+        "cg battle loop"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "analysis_only",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.058785+00:00"
+    },
+    {
+      "slug": "alakazam_search_v9",
+      "notebook": "notebooks\\kaggle_pull\\alakazam_search_v9\\ptcg-ai-battle-search-audited-alakazam-v9.ipynb",
+      "n_code_cells": 8,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\alakazam_search_v9\\_notebook_code.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "cg battle loop"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "needs_rewrite",
+        "has_agent_entry": true,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.069381+00:00"
+    },
+    {
+      "slug": "archaludon_metal_gpu_v28",
+      "notebook": "notebooks\\kaggle_pull\\archaludon_metal_gpu_v28\\archaludon-metal-gpu-v28-agents-only.ipynb",
+      "n_code_cells": 11,
+      "writefiles": [
+        "README.txt",
+        "deck.csv",
+        "gpu_submission_inference_v28.py",
+        "group.txt",
+        "main.py",
+        "main_baseline_v3.py",
+        "main_meta_a.py",
+        "main_rank1.py",
+        "selector_weights_v28.json",
+        "shared_challenger_engine.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\archaludon_metal_gpu_v28\\README.txt",
+        "extracted_agents\\archaludon_metal_gpu_v28\\deck.csv",
+        "extracted_agents\\archaludon_metal_gpu_v28\\gpu_submission_inference_v28.py",
+        "extracted_agents\\archaludon_metal_gpu_v28\\group.txt",
+        "extracted_agents\\archaludon_metal_gpu_v28\\main.py",
+        "extracted_agents\\archaludon_metal_gpu_v28\\main_baseline_v3.py",
+        "extracted_agents\\archaludon_metal_gpu_v28\\main_meta_a.py",
+        "extracted_agents\\archaludon_metal_gpu_v28\\main_rank1.py",
+        "extracted_agents\\archaludon_metal_gpu_v28\\selector_weights_v28.json",
+        "extracted_agents\\archaludon_metal_gpu_v28\\shared_challenger_engine.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "def act(...)",
+        "MCTS/UCB keywords",
+        "RL library"
+      ],
+      "decks": [
+        {
+          "path": "agent_decks\\from_notebooks\\archaludon_metal_gpu_v28_0__.csv",
+          "n": 60,
+          "label": "deck.csv"
+        }
+      ],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": true,
+        "has_deck": true,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.124999+00:00"
+    },
+    {
+      "slug": "dragapult_ucb1",
+      "notebook": "notebooks\\kaggle_pull\\dragapult_ucb1\\dragapult-ucb1-search-baseline-establishment.ipynb",
+      "n_code_cells": 13,
+      "writefiles": [
+        "main_baseline_a.py",
+        "main_baseline_b.py",
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\dragapult_ucb1\\main_baseline_a.py",
+        "extracted_agents\\dragapult_ucb1\\main_baseline_b.py",
+        "extracted_agents\\dragapult_ucb1\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "MCTS/UCB keywords",
+        "RL library"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": true,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.156829+00:00"
+    },
+    {
+      "slug": "meta_router_844",
+      "notebook": "notebooks\\kaggle_pull\\meta_router_844\\ptcg-844-4-observable-meta-router-visuals.ipynb",
+      "n_code_cells": 6,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\meta_router_844\\_notebook_code.py"
+      ],
+      "entrypoints": [],
+      "decks": [],
+      "usability": {
+        "status": "analysis_only",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.167256+00:00"
+    },
+    {
+      "slug": "official_abomasnow",
+      "notebook": "notebooks\\kaggle_pull\\official_abomasnow\\a-sample-rule-based-agent-mega-abomasnow-ex-deck.ipynb",
+      "n_code_cells": 2,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\official_abomasnow\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.171438+00:00"
+    },
+    {
+      "slug": "official_dragapult",
+      "notebook": "notebooks\\kaggle_pull\\official_dragapult\\a-sample-rule-based-agent-dragapult-ex-deck.ipynb",
+      "n_code_cells": 2,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\official_dragapult\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "RL library"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.178834+00:00"
+    },
+    {
+      "slug": "official_iono",
+      "notebook": "notebooks\\kaggle_pull\\official_iono\\a-sample-rule-based-agent-iono-s-deck.ipynb",
+      "n_code_cells": 2,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\official_iono\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "RL library"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.183033+00:00"
+    },
+    {
+      "slug": "official_lucario",
+      "notebook": "notebooks\\kaggle_pull\\official_lucario\\a-sample-rule-based-agent-mega-lucario-ex-deck.ipynb",
+      "n_code_cells": 2,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\official_lucario\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.188251+00:00"
+    },
+    {
+      "slug": "official_rl_mcts",
+      "notebook": "notebooks\\kaggle_pull\\official_rl_mcts\\reinforcement-learning-and-mcts-sample-code.ipynb",
+      "n_code_cells": 1,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\official_rl_mcts\\_notebook_code.py"
+      ],
+      "entrypoints": [
+        "MCTS/UCB keywords",
+        "cg battle loop"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "needs_rewrite",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": true,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.200361+00:00"
+    },
+    {
+      "slug": "pub_1070_alakazam",
+      "notebook": "notebooks\\kaggle_pull\\pub_1070_alakazam\\ptcg-1070-9-alakazam-rule-based-skeleton.ipynb",
+      "n_code_cells": 7,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\pub_1070_alakazam\\_notebook_code.py"
+      ],
+      "entrypoints": [],
+      "decks": [],
+      "usability": {
+        "status": "analysis_only",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.214459+00:00"
+    },
+    {
+      "slug": "pub_1084_baseline",
+      "notebook": "notebooks\\kaggle_pull\\pub_1084_baseline\\pokemon-tcg-ai-battle-1084-5-baseline.ipynb",
+      "n_code_cells": 6,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\pub_1084_baseline\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "cg battle loop"
+      ],
+      "decks": [
+        {
+          "path": "agent_decks\\from_notebooks\\pub_1084_baseline_0__.csv",
+          "n": 60,
+          "label": "DECK"
+        }
+      ],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": true,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.233213+00:00"
+    },
+    {
+      "slug": "pub_1208_loader",
+      "notebook": "notebooks\\kaggle_pull\\pub_1208_loader\\ptcg-rmy-surface-souta-1208-loader-v1.ipynb",
+      "n_code_cells": 9,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\pub_1208_loader\\_notebook_code.py"
+      ],
+      "entrypoints": [
+        "cg battle loop"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "analysis_only",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.250937+00:00"
+    },
+    {
+      "slug": "pub_950_v10",
+      "notebook": "notebooks\\kaggle_pull\\pub_950_v10\\strong-start-baseline-agent-v10-lb-950.ipynb",
+      "n_code_cells": 3,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\pub_950_v10\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "MCTS/UCB keywords"
+      ],
+      "decks": [
+        {
+          "path": "agent_decks\\from_notebooks\\pub_950_v10_0__.csv",
+          "n": 60,
+          "label": "DECK"
+        }
+      ],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": true,
+        "has_deck": true,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.268127+00:00"
+    },
+    {
+      "slug": "pub_control_v11",
+      "notebook": "notebooks\\kaggle_pull\\pub_control_v11\\ptcg-ai-battle-control-v11-meta-portfolio.ipynb",
+      "n_code_cells": 7,
+      "writefiles": [
+        "main.py"
+      ],
+      "saved_files": [
+        "extracted_agents\\pub_control_v11\\main.py"
+      ],
+      "entrypoints": [
+        "def agent(...)",
+        "cg battle loop",
+        "RL library"
+      ],
+      "decks": [],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.291826+00:00"
+    },
+    {
+      "slug": "pub_meta_score_band",
+      "notebook": "notebooks\\kaggle_pull\\pub_meta_score_band\\ptcg-ai-battle-leaderboard-deck-meta-by-score-band.ipynb",
+      "n_code_cells": 14,
+      "writefiles": [],
+      "saved_files": [
+        "extracted_agents\\pub_meta_score_band\\_notebook_code.py"
+      ],
+      "entrypoints": [],
+      "decks": [],
+      "usability": {
+        "status": "analysis_only",
+        "has_agent_entry": false,
+        "has_main_py": false,
+        "has_mcts_search": false,
+        "has_deck": false,
+        "deps": []
+      },
+      "extracted_at": "2026-07-30T23:36:50.325722+00:00"
+    },
+    {
+      "slug": "sample_archaludon_75wr",
+      "notebook": "notebooks\\kaggle_pull\\sample_archaludon_75wr\\a-sample-archaludon-75-wr-vs-my-1300-starmie.ipynb",
+      "n_code_cells": 2,
+      "writefiles": [
+        "main.py",
+        "deck.csv"
+      ],
+      "saved_files": [
+        "extracted_agents\\sample_archaludon_75wr\\main.py",
+        "extracted_agents\\sample_archaludon_75wr\\deck.csv"
+      ],
+      "entrypoints": [
+        "def agent(...)"
+      ],
+      "decks": [
+        {
+          "path": "agent_decks\\from_notebooks\\sample_archaludon_75wr_0__.csv",
+          "n": 60,
+          "label": "deck.csv"
+        }
+      ],
+      "usability": {
+        "status": "ready_integrate",
+        "has_agent_entry": true,
+        "has_main_py": true,
+        "has_mcts_search": false,
+        "has_deck": true,
+        "deps": [
+          "cg"
+        ]
+      },
+      "extracted_at": "2026-07-30T23:36:50.336806+00:00"
+    }
+  ],
+  "paths": {
+    "agents": "extracted_agents",
+    "decks": "agent_decks\\from_notebooks",
+    "metrics": "recordings\\metrics\\notebook_extracts"
+  }
+}

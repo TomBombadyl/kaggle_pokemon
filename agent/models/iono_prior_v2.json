@@ -1,0 +1,8 @@
+{
+  "checkpoint": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\artifacts\\iono_prior_v2\\iono_prior_20260731T011433Z.pt",
+  "out": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\agent\\models\\iono_prior_v2.npz",
+  "bytes": 781348,
+  "state_dim": 25,
+  "option_dim": 21,
+  "max_options": 32
+}

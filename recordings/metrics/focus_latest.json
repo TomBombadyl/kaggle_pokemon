@@ -1,0 +1,24 @@
+{
+  "ts": "2026-07-31T08:04:32.662782+00:00",
+  "cycle": 1050,
+  "iono_wr": 52.5,
+  "majkel_wr": 93.3,
+  "flg_wr": 95.0,
+  "dual_overall": 97.5,
+  "ok": true,
+  "iono_rc": 0,
+  "majkel_rc": 0,
+  "flg_rc": 0,
+  "dual_rc": 0,
+  "ship_ready": false,
+  "ship_decision": "REGRESS",
+  "ship_reasons": [
+    "iono 52.8125 < 55.0",
+    "dual 96.875 < baseline 98.2375 (no regression)"
+  ],
+  "ship_source": "focus_pool_n8",
+  "ship_iono_pool": 52.8125,
+  "ship_crustle_pool": 92.475,
+  "ship_dual_pool": 96.875,
+  "ship_arch": 85.4
+}

@@ -28,8 +28,29 @@ def main() -> int:
         print("[ERROR] kagglehub missing: python -m pip install kagglehub")
         return 3
 
+    # Clear known-bad partial archives from previous interrupted downloads.
+    partial_dir = os.path.join(PROJ, "data", "sim_download")
+    if os.path.isdir(partial_dir):
+        for name in os.listdir(partial_dir):
+            if "pokemon-tcg-ai-battle" in name and (
+                name.endswith(".kaggle-partial") or name.endswith(".zip")
+            ):
+                p = os.path.join(partial_dir, name)
+                try:
+                    # Drop empty / tiny / partial files so kagglehub/CLI can redo.
+                    if name.endswith(".kaggle-partial") or os.path.getsize(p) < 1_000_000:
+                        os.remove(p)
+                        print("Removed corrupt/partial:", p)
+                except OSError as e:
+                    print("Could not remove", p, e)
+
     print(f"Downloading '{COMP}' (all files, ~324MB incl. PDFs)...")
-    src = kagglehub.competition_download(COMP)
+    try:
+        src = kagglehub.competition_download(COMP)
+    except Exception as e:
+        print("[ERROR] kagglehub download failed:", e)
+        print("Tip: delete ~/.cache/kagglehub/competitions/pokemon-tcg-ai-battle and retry.")
+        return 1
     print("Cached at:", src)
 
     dst = os.path.join(PROJ, "data", "sim")

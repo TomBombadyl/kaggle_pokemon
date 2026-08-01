@@ -1,0 +1,24 @@
+2	4x	Basic {R} Energy
+5	4x	Basic {P} Energy
+119	4x	Dreepy
+120	4x	Drakloak
+121	3x	Dragapult ex
+131	2x	Duskull
+132	1x	Dusclops
+133	1x	Dusknoir
+140	1x	Fezandipiti ex
+184	1x	Latias ex
+235	1x	Budew
+1071	1x	Meowth ex
+1079	2x	Rare Candy
+1080	1x	Unfair Stamp
+1086	4x	Buddy-Buddy Poffin
+1097	2x	Night Stretcher
+1120	3x	Crushing Hammer
+1121	3x	Ultra Ball
+1152	3x	Poké Pad
+1182	3x	Boss’s Orders
+1198	4x	Crispin
+1210	2x	Brock’s Scouting
+1227	4x	Lillie's Determination
+1256	2x	Team Rocket's Watchtower

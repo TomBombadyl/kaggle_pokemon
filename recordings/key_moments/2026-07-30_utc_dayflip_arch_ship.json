@@ -1,0 +1,11 @@
+{
+    "event":  "utc_dayflip_archaludon_ship",
+    "ts":  "2026-07-30T00:00:09Z",
+    "publicScore_initial":  600,
+    "note":  "baseline mu after COMPLETE; matchmaking will move; target pin 1196 / top 1198.4",
+    "refs":  [
+                 "55094308",
+                 "55094337"
+             ],
+    "live_prior":  793.7
+}

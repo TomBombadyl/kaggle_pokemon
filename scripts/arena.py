@@ -259,6 +259,13 @@ def _play_game_scored(job: tuple) -> tuple[int, int]:
         if scorer_name == "rulecore":
             from agent.rule_core import RuleCoreScorer
             return Agent(seed=seed, deck_path=path, scorer=RuleCoreScorer(deck_path=path))
+        if scorer_name == "crustle_search":
+            from agent.search_policy import CrustleSearchScorer
+            return Agent(
+                seed=seed,
+                deck_path=path,
+                scorer=CrustleSearchScorer(deck_path=path),
+            )
         # 'learned' scorer retired in the Session-44 reset (see RULINGS.md R3).
         return Agent(seed=seed, deck_path=path)
 

@@ -1,0 +1,241 @@
+[
+  {
+    "variant": "lucario200",
+    "desc": "LucarioSearchScorer 200ms guard_k=2",
+    "kwargs": {
+      "budget_ms": 200.0,
+      "guard_top_k": 2,
+      "heuristic_blend": 0.0
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 40,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 16.666666666666668,
+    "overall_ci": [
+      11.055912012704825,
+      24.34543939102381
+    ],
+    "overall_wins": 20,
+    "overall_games": 120,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 12.5,
+        "wins": 5,
+        "losses": 35,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 15.0,
+        "wins": 6,
+        "losses": 34,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 22.5,
+        "wins": 9,
+        "losses": 31,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 7.2
+  },
+  {
+    "variant": "lucario400",
+    "desc": "LucarioSearchScorer 400ms guard_k=2",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "guard_top_k": 2,
+      "heuristic_blend": 0.0
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 40,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 25.833333333333332,
+    "overall_ci": [
+      18.83728380805067,
+      34.32869595965259
+    ],
+    "overall_wins": 31,
+    "overall_games": 120,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 30.0,
+        "wins": 12,
+        "losses": 28,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 30.0,
+        "wins": 12,
+        "losses": 28,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 17.5,
+        "wins": 7,
+        "losses": 33,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 7.7
+  },
+  {
+    "variant": "lucario400_k3",
+    "desc": "LucarioSearchScorer 400ms guard_k=3 (looser)",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "guard_top_k": 3,
+      "heuristic_blend": 0.0
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 40,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 21.008403361344538,
+    "overall_ci": [
+      14.654279199949027,
+      29.175823957287612
+    ],
+    "overall_wins": 25,
+    "overall_games": 119,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 5.128205128205129,
+        "wins": 2,
+        "losses": 37,
+        "draws": 1
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 32.5,
+        "wins": 13,
+        "losses": 27,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 25.0,
+        "wins": 10,
+        "losses": 30,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 7.1
+  },
+  {
+    "variant": "lucario400_blend02",
+    "desc": "LucarioSearch 400ms + Lucario-rank blend 0.2",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "guard_top_k": 2,
+      "heuristic_blend": 0.2
+    },
+    "brain": "lucario_search",
+    "games_per_opp": 40,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 28.333333333333332,
+    "overall_ci": [
+      21.040509198244724,
+      36.970369214178895
+    ],
+    "overall_wins": 34,
+    "overall_games": 120,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 25.0,
+        "wins": 10,
+        "losses": 30,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 22.5,
+        "wins": 9,
+        "losses": 31,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 37.5,
+        "wins": 15,
+        "losses": 25,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 6.9
+  },
+  {
+    "variant": "budget400_blend015",
+    "desc": "SearchScorer 400ms + heuristic blend 0.15",
+    "kwargs": {
+      "budget_ms": 400.0,
+      "heuristic_blend": 0.15
+    },
+    "brain": "search",
+    "games_per_opp": 40,
+    "suite": "core",
+    "opponents": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono"
+    ],
+    "overall_wr_pct": 19.166666666666668,
+    "overall_ci": [
+      13.124933052612613,
+      27.12131699583638
+    ],
+    "overall_wins": 23,
+    "overall_games": 120,
+    "matchups": [
+      {
+        "opponent": "dragapult_ex_sample",
+        "wr_pct": 12.5,
+        "wins": 5,
+        "losses": 35,
+        "draws": 0
+      },
+      {
+        "opponent": "real_mega_abomasnow_ex",
+        "wr_pct": 22.5,
+        "wins": 9,
+        "losses": 31,
+        "draws": 0
+      },
+      {
+        "opponent": "real_iono",
+        "wr_pct": 22.5,
+        "wins": 9,
+        "losses": 31,
+        "draws": 0
+      }
+    ],
+    "elapsed_s": 5.4
+  }
+]

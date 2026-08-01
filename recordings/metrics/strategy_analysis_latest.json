@@ -1,0 +1,82 @@
+{
+  "ts": "2026-07-30T01:19:33.075279+00:00",
+  "leaderboard_top": [
+    {
+      "teamId": 16531269,
+      "teamName": "Dries @ Tufa Labs",
+      "score": 1201.9
+    },
+    {
+      "teamId": 16448747,
+      "teamName": "Luca",
+      "score": 1199.5
+    },
+    {
+      "teamId": 16380946,
+      "teamName": "flg",
+      "score": 1185.6
+    },
+    {
+      "teamId": 16375647,
+      "teamName": "James Cox & Henry Chao",
+      "score": 1182.5
+    },
+    {
+      "teamId": 16374395,
+      "teamName": "Majkel1337",
+      "score": 1177.2
+    },
+    {
+      "teamId": 16505594,
+      "teamName": "Pokemon Fan",
+      "score": 1152.1
+    },
+    {
+      "teamId": 16463316,
+      "teamName": "LiamK",
+      "score": 1149.6
+    },
+    {
+      "teamId": 16452116,
+      "teamName": "Raja Biswas",
+      "score": 1146.3
+    }
+  ],
+  "our_best": {
+    "ref": "55095576",
+    "score": 843.9,
+    "status": "COMPLETE"
+  },
+  "focus": {
+    "iono_wr": null,
+    "majkel_wr": null,
+    "flg_wr": null,
+    "dual_overall": null,
+    "cycle": null
+  },
+  "top_archetype_guess": {
+    "marnie_grimmsnarl_ex": 2,
+    "crustle_iwapalace": 2,
+    "unknown": 2
+  },
+  "top1_hypothesis": {
+    "team": "Dries @ Tufa Labs",
+    "mu": 1201.9,
+    "likely_core": "marnie_grimmsnarl_ex"
+  },
+  "our_gaps": [
+    "μ gap to #1: 358.0 (us 843.9 vs 1201.9)"
+  ],
+  "next_directions": [
+    "PRIORITY-2: Keep 75wr Arch shell; deep Crustle already strong vs random pilots — next need native/stronger pilots or belief search for flg/Dries quality",
+    "Study #1 Dries @ Tufa Labs (@1201.9) archetype≈marnie_grimmsnarl_ex; pull fresh episodes if μ drifts"
+  ],
+  "ship_recommendation": "HOLD",
+  "sources": [
+    "kaggle competitions leaderboard pokemon-tcg-ai-battle",
+    "kaggle competitions submissions (ours)",
+    "recordings/metrics/focus_latest.json",
+    "recordings/metrics/top_decks_*.json (episode deck restore)",
+    "prior meta: ptcg-meta / community 7/22 snapshot Grimmsnarl~31% Alakazam~30% Crustle~13%"
+  ]
+}

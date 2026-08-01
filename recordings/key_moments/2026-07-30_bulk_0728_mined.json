@@ -1,0 +1,11 @@
+{
+    "n_episodes":  4385,
+    "n_gauntlet":  70,
+    "path":  "episodes/raw/2026-07-28",
+    "alakazam_seen":  600,
+    "ts":  "2026-07-30T00:41:48.0889391Z",
+    "n_decks_parsed":  8770,
+    "event":  "bulk_day_2026-07-28_mined",
+    "alakazam_wins":  252,
+    "n_field":  79
+}

@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-07-31T03:41:11.471426+00:00",
+  "source_replays": 114,
+  "excluded_replays": 198,
+  "decks_classified": 228,
+  "unknown_decks": 24,
+  "known_decks": 204,
+  "rows": [
+    {
+      "archetype": "marnie_grimmsnarl_ex",
+      "decks_seen": 124,
+      "share": 0.6078,
+      "share_ci95": [
+        0.5394,
+        0.6723
+      ],
+      "decided_games": 124,
+      "win_rate_pct": 54.8
+    },
+    {
+      "archetype": "dragapult_psychic",
+      "decks_seen": 24,
+      "share": 0.1176,
+      "share_ci95": [
+        0.0803,
+        0.1691
+      ],
+      "decided_games": 24,
+      "win_rate_pct": 50.0
+    },
+    {
+      "archetype": "mega_kangaskhan_ogerpon",
+      "decks_seen": 20,
+      "share": 0.098,
+      "share_ci95": [
+        0.0644,
+        0.1466
+      ],
+      "decided_games": 20,
+      "win_rate_pct": 60.0
+    },
+    {
+      "archetype": "crustle_iwapalace",
+      "decks_seen": 14,
+      "share": 0.0686,
+      "share_ci95": [
+        0.0413,
+        0.1119
+      ],
+      "decided_games": 14,
+      "win_rate_pct": 28.6
+    },
+    {
+      "archetype": "rocket_spidops",
+      "decks_seen": 8,
+      "share": 0.0392,
+      "share_ci95": [
+        0.02,
+        0.0755
+      ],
+      "decided_games": 8,
+      "win_rate_pct": 0.0
+    },
+    {
+      "archetype": "alakazam_psychic",
+      "decks_seen": 8,
+      "share": 0.0392,
+      "share_ci95": [
+        0.02,
+        0.0755
+      ],
+      "decided_games": 8,
+      "win_rate_pct": 25.0
+    },
+    {
+      "archetype": "cynthia_line",
+      "decks_seen": 4,
+      "share": 0.0196,
+      "share_ci95": [
+        0.0077,
+        0.0493
+      ],
+      "decided_games": 4,
+      "win_rate_pct": 50.0
+    },
+    {
+      "archetype": "lucario_mirror",
+      "decks_seen": 2,
+      "share": 0.0098,
+      "share_ci95": [
+        0.0027,
+        0.035
+      ],
+      "decided_games": 2,
+      "win_rate_pct": 0.0
+    }
+  ],
+  "proposed_weights_v2": {
+    "marnie_grimmsnarl_ex": 0.6078,
+    "dragapult_psychic": 0.1176,
+    "mega_kangaskhan_ogerpon": 0.098,
+    "crustle_iwapalace": 0.0686,
+    "rocket_spidops": 0.0392,
+    "alakazam_psychic": 0.0392,
+    "cynthia_line": 0.0196,
+    "lucario_mirror": 0.0098
+  },
+  "current_weights_v1": {
+    "alakazam_psychic": 0.189,
+    "lucario_mirror": 0.392,
+    "iono_lightning": 0.041,
+    "dragapult_psychic": 0.365,
+    "kyogre_water": 0.014
+  },
+  "current_weights_source": "report\\meta\\deck_by_mu_band_2026-06-26.json",
+  "current_weights_updated": "2026-06-26"
+}

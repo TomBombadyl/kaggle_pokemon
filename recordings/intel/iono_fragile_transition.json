@@ -1,0 +1,325 @@
+{
+  "games": 13380,
+  "wins": 6848,
+  "base_wr": 51.18,
+  "files": [
+    "iono_decisions_real_iono_tomato_s0_20260731T002727Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T010147Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T011237Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T011303Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T012429Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T012505Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T012835Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T013202Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T013532Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T013904Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T014240Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T014620Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T015008Z.jsonl",
+    "iono_decisions_real_iono_tomato_s0_20260731T015426Z.jsonl"
+  ],
+  "q1_bench_empty_entry": {
+    "games": 13380,
+    "wins": 6848,
+    "entered": 4026,
+    "entered_loss": 3131,
+    "legal_bench_play": 465,
+    "legal_bench_play_loss": 334,
+    "no_option_at_all": 0
+  },
+  "q1_hand_at_entry": {
+    "win": 7.05,
+    "loss": 6.22
+  },
+  "q2_pokemon_discard": {
+    "Relicanth": {
+      "n": 8767,
+      "wr": 46.61
+    },
+    "Duraludon": {
+      "n": 85933,
+      "wr": 51.22
+    },
+    "Archaludon ex": {
+      "n": 77775,
+      "wr": 53.8
+    },
+    "Cinderace": {
+      "n": 18303,
+      "wr": 55.53
+    }
+  },
+  "q2_games_with_pokemon_discard": {
+    "games": 13134,
+    "wr": 52.13,
+    "share_of_games": 98.16
+  },
+  "q3_regret": [
+    {
+      "type": "END",
+      "card": "-",
+      "card_id": 0,
+      "chosen_n": 5639,
+      "chosen_wr": 21.1,
+      "chosen_ci": [
+        20.06,
+        22.19
+      ],
+      "declined_n": 333284,
+      "declined_wr": 54.66,
+      "declined_ci": [
+        54.49,
+        54.83
+      ],
+      "delta_pp": -33.56,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Boss's Orders",
+      "card_id": 1182,
+      "chosen_n": 3706,
+      "chosen_wr": 89.42,
+      "chosen_ci": [
+        88.39,
+        90.37
+      ],
+      "declined_n": 77655,
+      "declined_wr": 67.62,
+      "declined_ci": [
+        67.29,
+        67.95
+      ],
+      "delta_pp": 21.81,
+      "disjoint": true
+    },
+    {
+      "type": "EVOLVE",
+      "card": "Archaludon ex",
+      "card_id": 190,
+      "chosen_n": 30610,
+      "chosen_wr": 55.33,
+      "chosen_ci": [
+        54.77,
+        55.88
+      ],
+      "declined_n": 84934,
+      "declined_wr": 66.76,
+      "declined_ci": [
+        66.44,
+        67.08
+      ],
+      "delta_pp": -11.43,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Lillie's Determination",
+      "card_id": 1227,
+      "chosen_n": 14278,
+      "chosen_wr": 53.17,
+      "chosen_ci": [
+        52.35,
+        53.98
+      ],
+      "declined_n": 108330,
+      "declined_wr": 63.18,
+      "declined_ci": [
+        62.9,
+        63.47
+      ],
+      "delta_pp": -10.02,
+      "disjoint": true
+    },
+    {
+      "type": "RETREAT",
+      "card": "-",
+      "card_id": 0,
+      "chosen_n": 12870,
+      "chosen_wr": 61.52,
+      "chosen_ci": [
+        60.68,
+        62.36
+      ],
+      "declined_n": 71087,
+      "declined_wr": 55.51,
+      "declined_ci": [
+        55.15,
+        55.88
+      ],
+      "delta_pp": 6.01,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "-1",
+      "card_id": -1,
+      "chosen_n": 43033,
+      "chosen_wr": 57.89,
+      "chosen_ci": [
+        57.42,
+        58.35
+      ],
+      "declined_n": 112157,
+      "declined_wr": 62.65,
+      "declined_ci": [
+        62.37,
+        62.93
+      ],
+      "delta_pp": -4.76,
+      "disjoint": true
+    },
+    {
+      "type": "ATTACK",
+      "card": "-",
+      "card_id": 0,
+      "chosen_n": 75126,
+      "chosen_wr": 58.87,
+      "chosen_ci": [
+        58.51,
+        59.22
+      ],
+      "declined_n": 232357,
+      "declined_wr": 61.52,
+      "declined_ci": [
+        61.33,
+        61.72
+      ],
+      "delta_pp": -2.66,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Duraludon",
+      "card_id": 169,
+      "chosen_n": 34829,
+      "chosen_wr": 55.23,
+      "chosen_ci": [
+        54.71,
+        55.75
+      ],
+      "declined_n": 15225,
+      "declined_wr": 57.69,
+      "declined_ci": [
+        56.9,
+        58.47
+      ],
+      "delta_pp": -2.46,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Relicanth",
+      "card_id": 57,
+      "chosen_n": 8594,
+      "chosen_wr": 58.01,
+      "chosen_ci": [
+        56.96,
+        59.05
+      ],
+      "declined_n": 5353,
+      "declined_wr": 60.17,
+      "declined_ci": [
+        58.85,
+        61.48
+      ],
+      "delta_pp": -2.17,
+      "disjoint": false
+    },
+    {
+      "type": "PLAY",
+      "card": "Explorer's Guidance",
+      "card_id": 1185,
+      "chosen_n": 28401,
+      "chosen_wr": 56.45,
+      "chosen_ci": [
+        55.87,
+        57.02
+      ],
+      "declined_n": 41324,
+      "declined_wr": 58.52,
+      "declined_ci": [
+        58.04,
+        58.99
+      ],
+      "delta_pp": -2.08,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Ultra Ball",
+      "card_id": 1121,
+      "chosen_n": 15030,
+      "chosen_wr": 55.46,
+      "chosen_ci": [
+        54.66,
+        56.25
+      ],
+      "declined_n": 96082,
+      "declined_wr": 54.26,
+      "declined_ci": [
+        53.94,
+        54.57
+      ],
+      "delta_pp": 1.2,
+      "disjoint": true
+    },
+    {
+      "type": "PLAY",
+      "card": "Poke Pad",
+      "card_id": 1152,
+      "chosen_n": 23555,
+      "chosen_wr": 56.12,
+      "chosen_ci": [
+        55.48,
+        56.75
+      ],
+      "declined_n": 13484,
+      "declined_wr": 55.98,
+      "declined_ci": [
+        55.15,
+        56.82
+      ],
+      "delta_pp": 0.13,
+      "disjoint": false
+    },
+    {
+      "type": "PLAY",
+      "card": "Pokegear 3.0",
+      "card_id": 1122,
+      "chosen_n": 23176,
+      "chosen_wr": 55.64,
+      "chosen_ci": [
+        55.0,
+        56.28
+      ],
+      "declined_n": 13831,
+      "declined_wr": 55.71,
+      "declined_ci": [
+        54.88,
+        56.53
+      ],
+      "delta_pp": -0.07,
+      "disjoint": false
+    },
+    {
+      "type": "ATTACH",
+      "card": "-1",
+      "card_id": -1,
+      "chosen_n": 55269,
+      "chosen_wr": 55.91,
+      "chosen_ci": [
+        55.5,
+        56.33
+      ],
+      "declined_n": 98494,
+      "declined_wr": 55.95,
+      "declined_ci": [
+        55.64,
+        56.26
+      ],
+      "delta_pp": -0.04,
+      "disjoint": false
+    }
+  ]
+}

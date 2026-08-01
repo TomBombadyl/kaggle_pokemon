@@ -24,7 +24,15 @@ from eval.gates import (  # noqa: E402
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--games", type=int, default=20)
-    ap.add_argument("--suite", choices=["core", "full", "lucario", "alakazam", "starmie"], default="full")
+    ap.add_argument(
+        "--suite",
+        choices=[
+            "core", "full", "baseline", "lucario", "alakazam", "starmie",
+            "meta", "meta_fast", "dual", "top6", "notebooks", "sprint",
+            "arch_mirror",
+        ],
+        default="full",
+    )
     ap.add_argument("--opponents", nargs="*", default=None)
     ap.add_argument("--weighted", action="store_true")
     ap.add_argument(

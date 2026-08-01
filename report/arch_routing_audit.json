@@ -1,0 +1,472 @@
+[
+  {
+    "deck": "dragapult_ex_sample",
+    "expected": "dragapult",
+    "full_board_route": "dragapult",
+    "solo_routes": {
+      "dragapult": [
+        119,
+        120,
+        121
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_alakazam_yushin",
+    "expected": "alakazam",
+    "full_board_route": "alakazam",
+    "solo_routes": {
+      "alakazam": [
+        741,
+        742,
+        743
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_crustle_flg",
+    "expected": "crustle",
+    "full_board_route": "crustle",
+    "solo_routes": {
+      "crustle": [
+        117,
+        344,
+        345,
+        756
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "crustle"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "meta_crustle_majkel",
+    "expected": "crustle",
+    "full_board_route": "crustle",
+    "solo_routes": {
+      "crustle": [
+        117,
+        344,
+        345,
+        756
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "crustle"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "meta_grimmsnarl_dries",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_grimmsnarl_liamak",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_grimmsnarl_liamk",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_grimmsnarl_luca",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "meta_kangaskhan_james",
+    "expected": "crustle",
+    "full_board_route": "crustle",
+    "solo_routes": {
+      "crustle": [
+        756
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "crustle"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "nb_alakazam_heuristic",
+    "expected": "alakazam",
+    "full_board_route": "alakazam",
+    "solo_routes": {
+      "alakazam": [
+        741,
+        742,
+        743
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "nb_archaludon_75wr",
+    "expected": "generic",
+    "full_board_route": "generic",
+    "solo_routes": {},
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "nb_dragapult_ucb1",
+    "expected": "dragapult",
+    "full_board_route": "generic",
+    "solo_routes": {},
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "nb_official_abomasnow",
+    "expected": "generic",
+    "full_board_route": "generic",
+    "solo_routes": {},
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "nb_official_dragapult",
+    "expected": "dragapult",
+    "full_board_route": "dragapult",
+    "solo_routes": {
+      "dragapult": [
+        119,
+        120,
+        121
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "nb_official_iono",
+    "expected": "iono",
+    "full_board_route": "iono",
+    "solo_routes": {
+      "iono": [
+        265,
+        268,
+        269,
+        270,
+        271
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "iono"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "nb_official_lucario",
+    "expected": "lucario",
+    "full_board_route": "lucario",
+    "solo_routes": {
+      "lucario": [
+        677,
+        678
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "lucario"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "real_dragapult_ex",
+    "expected": "dragapult",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112
+      ],
+      "dragapult": [
+        119,
+        120,
+        121
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "real_iono",
+    "expected": "iono",
+    "full_board_route": "iono",
+    "solo_routes": {
+      "iono": [
+        265,
+        268,
+        269,
+        270,
+        271
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "iono"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "real_mega_abomasnow_ex",
+    "expected": "generic",
+    "full_board_route": "generic",
+    "solo_routes": {},
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "real_mega_lucario_ex",
+    "expected": "lucario",
+    "full_board_route": "lucario",
+    "solo_routes": {
+      "lucario": [
+        677,
+        678
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "lucario"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "ryotasueyoshi_alakazam_best5",
+    "expected": "alakazam",
+    "full_board_route": "alakazam",
+    "solo_routes": {
+      "alakazam": [
+        741,
+        742,
+        743
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "starmie_cinderace_hybrid",
+    "expected": "starmie",
+    "full_board_route": "starmie",
+    "solo_routes": {
+      "starmie": [
+        1030,
+        1031
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "starmie"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "starmie_froslass_ashleysandlin",
+    "expected": "starmie",
+    "full_board_route": "starmie",
+    "solo_routes": {
+      "starmie": [
+        1030,
+        1031
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "starmie"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "starmie_froslass_risky_ruins",
+    "expected": "starmie",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112
+      ],
+      "starmie": [
+        1030,
+        1031
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [
+      "starmie"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_01_flg",
+    "expected": "crustle",
+    "full_board_route": "generic",
+    "solo_routes": {},
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_02_dries",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_03_luca",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_04_james",
+    "expected": "crustle",
+    "full_board_route": "crustle",
+    "solo_routes": {
+      "crustle": [
+        756
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "crustle"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_05_majkel",
+    "expected": "crustle",
+    "full_board_route": "crustle",
+    "solo_routes": {
+      "crustle": [
+        117,
+        344,
+        345,
+        756
+      ]
+    },
+    "tomato_owns_full_board": false,
+    "hijack_routes": [
+      "crustle"
+    ],
+    "misroute": false
+  },
+  {
+    "deck": "top_lb_06_liamk",
+    "expected": "grimmsnarl",
+    "full_board_route": "grimmsnarl",
+    "solo_routes": {
+      "grimmsnarl": [
+        112,
+        646,
+        647,
+        648
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  },
+  {
+    "deck": "top_mined_alakazam",
+    "expected": "alakazam",
+    "full_board_route": "alakazam",
+    "solo_routes": {
+      "alakazam": [
+        741,
+        742,
+        743
+      ]
+    },
+    "tomato_owns_full_board": true,
+    "hijack_routes": [],
+    "misroute": false
+  }
+]

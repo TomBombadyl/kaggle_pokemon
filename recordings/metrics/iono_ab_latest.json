@@ -1,0 +1,24 @@
+{
+  "ts": "2026-07-30T17:37:34.834897+00:00",
+  "games": 200,
+  "rows": [
+    {
+      "lever": "r14n",
+      "iono_wr": null,
+      "n": 200,
+      "wrs": {},
+      "flg_wr": null,
+      "majkel_wr": null
+    },
+    {
+      "lever": "r14v",
+      "iono_wr": null,
+      "n": 200,
+      "wrs": {},
+      "flg_wr": null,
+      "majkel_wr": null
+    }
+  ],
+  "baseline": null,
+  "target": 55.0
+}

@@ -218,6 +218,15 @@ class RuleCoreScorer(HeuristicScorer):
         if ot == T.ATTACK:
             return self._score_attack(ctx, opt)
         if ot == T.ABILITY:
+            # Crustle pilot: Mega Kangaskhan Run Errand (draw 2) is P1 early.
+            if ctx.tech.name == "crustle_missingno":
+                from agent.crustle_levers import ability_score_pilot, my_active_id
+
+                pilot_ab = ability_score_pilot(
+                    ctx.obs, my_active_id(ctx.obs), turn=ctx.turn
+                )
+                if pilot_ab > 0:
+                    return pilot_ab
             return 30000.0
         if ot == T.PLAY:
             return self._score_play(ctx, opt)
@@ -226,6 +235,13 @@ class RuleCoreScorer(HeuristicScorer):
         if ot == T.ATTACH:
             return self._score_attach(ctx, opt)
         if ot == T.RETREAT:
+            # Crustle pilot: promote wall / early Kangaskhan / Ogerpon stance.
+            if ctx.tech.name == "crustle_missingno":
+                from agent.crustle_levers import retreat_score_pilot
+
+                pilot_r = retreat_score_pilot(ctx.obs, turn=ctx.turn)
+                if pilot_r != 0.0:
+                    return pilot_r
             if ctx.archetype["crustle_wall"] and ctx.wall_ready_index >= 1:
                 return 20000.0
             # retreat only to bring the planned (benched) attacker up
@@ -280,8 +296,24 @@ class RuleCoreScorer(HeuristicScorer):
                 return 18000.0 - 1500.0 * max(0, dup - 1)
             return -1.0
         if card.id in ctx.tech.gust_cards:
+            # Crustle pilot: Boss non-ex wall-breakers even before plan locks.
+            if ctx.tech.name == "crustle_missingno":
+                from agent.crustle_levers import boss_play_score_pilot
+
+                pilot_boss = boss_play_score_pilot(
+                    ctx.obs, plan_targets_bench=self._plan.target >= 1
+                )
+                if pilot_boss > 0:
+                    return pilot_boss
+                return -1.0
             return 12000.0 if self._plan.target >= 1 else -1.0
         if card.id in ctx.tech.switch_cards:
+            if ctx.tech.name == "crustle_missingno":
+                from agent.crustle_levers import switch_play_score_pilot
+
+                pilot_sw = switch_play_score_pilot(ctx.obs, turn=ctx.turn)
+                if pilot_sw > 0:
+                    return pilot_sw
             if ctx.archetype["crustle_wall"] and ctx.wall_ready_index >= 1:
                 return 22000.0
             return 9000.0 if self._plan.attacker >= 1 and ctx.wall_ready_index != -1 else -1.0
@@ -292,8 +324,14 @@ class RuleCoreScorer(HeuristicScorer):
                 and (ctx.me.deckCount <= 35 or ctx.wall_focus_energy >= 2)
             ):
                 return -1.0
+            # Crustle pilot: keep drawing early (consistency > wall energy gate).
+            if ctx.tech.name == "crustle_missingno":
+                return -1.0 if ctx.low_deck else 9000.0
             return -1.0 if ctx.low_deck else 8500.0
         if card.id in ctx.tech.search_cards:
+            if ctx.tech.name == "crustle_missingno":
+                # Find Dwebble / energy / Boss; don't hard-stop search like anti-wall.
+                return -1.0 if ctx.low_deck else 9200.0
             if ctx.archetype["crustle_wall"]:
                 if ctx.wall_focus_index >= 0 and ctx.wall_focus_energy >= 2:
                     return -1.0
@@ -309,6 +347,13 @@ class RuleCoreScorer(HeuristicScorer):
         poke = ctx.inplay_card(opt.inPlayArea, opt.inPlayIndex)
         bonus = len(poke.energies) if poke is not None else 0
         card = ctx.hand_card(opt.index)
+        # Crustle pilot: always evolve Dwebble → Crustle (wall online).
+        if ctx.tech.name == "crustle_missingno" and card is not None:
+            from agent.crustle_levers import evolve_score_pilot
+
+            pilot_ev = evolve_score_pilot(card.id, bonus)
+            if pilot_ev > 0:
+                return pilot_ev
         if (
             card is not None
             and card.id in ctx.tech.non_ex_wall_attackers
@@ -331,6 +376,11 @@ class RuleCoreScorer(HeuristicScorer):
                 score += 5000.0 if board_index == ctx.wall_focus_index else 1000.0
             else:
                 score += 80.0
+        # Crustle pilot: Crustle > Ogerpon > Kangaskhan energy homes.
+        if ctx.tech.name == "crustle_missingno":
+            from agent.crustle_levers import energy_attach_priority
+
+            score += energy_attach_priority(poke.id) * 40.0
         # prize-worthy attackers are better energy homes
         score += ctx.prize_count(poke) * 40.0
         score += max(0, 3 - len(poke.energies)) * 30.0
@@ -597,12 +647,49 @@ class _Read:
         if pidx != self.my_index:
             area = _enum_val(opt.area)
             board_index = opt.index + 1 if area == self.api.AreaType.BENCH.value else opt.index
-            return 300.0 if board_index == self._planned_target_index() else self.target_score(card) / 20.0
+            base = 300.0 if board_index == self._planned_target_index() else self.target_score(card) / 20.0
+            # Crustle pilot Boss/gust: prefer non-ex wall-breakers.
+            if self.tech.name == "crustle_missingno":
+                from agent.crustle_levers import boss_target_score, card_has_ability
+
+                data = self.card(card.id)
+                is_ex = bool(data is not None and (data.ex or data.megaEx))
+                base += boss_target_score(card.id, is_ex, card_has_ability(card.id)) / 10.0
+            return base
         setup_bonus = dict(self.tech.setup_priority).get(card.id, 0.0)
         # promote the most prize-worthy, energized attacker
         score = self.prize_count(card) * 100.0 + len(card.energies) * 20.0 + card.hp / 10.0
         if self.select_context == self.api.SelectContext.SETUP_ACTIVE_POKEMON:
             score += setup_bonus
+        # Crustle MissingNo pilot: P0 wall promote / P1 Kangaskhan draw / Ogerpon.
+        if self.tech.name == "crustle_missingno":
+            from agent.crustle_levers import (
+                CRUSTLE_ID,
+                active_choice_score as crustle_active_score,
+                opp_active_flags,
+                should_promote_crustle,
+            )
+
+            is_ex, has_ab, single = opp_active_flags(self.obs)
+            sc = self.select_context
+            if sc == self.api.SelectContext.SETUP_ACTIVE_POKEMON:
+                ctx_name = "setup_active"
+            elif sc == self.api.SelectContext.TO_ACTIVE:
+                ctx_name = "to_active"
+            else:
+                ctx_name = "switch"
+            score += crustle_active_score(
+                card.id,
+                opp_active_is_ex=is_ex,
+                opp_active_has_ability=has_ab,
+                opp_active_is_single_prize=single,
+                turn=self.turn,
+                select_context=ctx_name,
+                energies=len(card.energies),
+                hp=card.hp,
+            )
+            if should_promote_crustle(self.obs) and card.id == CRUSTLE_ID:
+                score += 3000.0
         if card.id in self.tech.wall_line and self.archetype["crustle_wall"]:
             score += 80.0 + len(card.energies) * 20.0
             if self.select_context in (self.api.SelectContext.SWITCH, self.api.SelectContext.TO_ACTIVE):
@@ -664,6 +751,12 @@ class _Read:
                 return -100.0
         if card.id in self.tech.wall_line and self.archetype["crustle_wall"]:
             score += 80.0
+        # Crustle pilot energy destination priority.
+        if self.tech.name == "crustle_missingno":
+            from agent.crustle_levers import energy_attach_priority
+
+            score += energy_attach_priority(card.id) * 8.0
+            score += max(0, 3 - len(card.energies)) * 20.0
         return score
 
     def setup_bench_choices(self) -> list[int]:

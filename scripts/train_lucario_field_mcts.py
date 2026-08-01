@@ -282,6 +282,10 @@ def write_run_meta(
             "LUC_ENC_LAYERS": rt.ENC_LAYERS,
             "LUC_DEC_LAYERS": rt.DEC_LAYERS,
             "LUC_SEARCH_COUNT": rt.SEARCH_COUNT,
+            "LUC_DETERMINIZATIONS": rt.DETERMINIZATIONS,
+            "LUC_PUCT_C": rt.PUCT_C,
+            "LUC_PRIOR_BLEND": rt.PRIOR_BLEND,
+            "LUC_POLICY_TARGET": rt.POLICY_TARGET,
             "opponent_brain": args.opponent_brain,
             "eval_opponent": args.eval_opponent,
             "mirror_brain": args.mirror_brain,
@@ -491,6 +495,22 @@ def main(argv: list[str] | None = None) -> int:
         help="field=promote on field WR vs official pilots; mirror=self-play gate; latest=always",
     )
     ap.add_argument("--search-count", type=int, default=12)
+    ap.add_argument(
+        "--determinizations", type=int, default=1,
+        help="IS-MCTS-lite: independent search_begin samples per decision (1=legacy)",
+    )
+    ap.add_argument(
+        "--puct-c", type=float, default=None,
+        help="PUCT exploration scale (default: runtime LUC_PUCT_C / 0.4)",
+    )
+    ap.add_argument(
+        "--prior-blend", type=float, default=0.0,
+        help="Blend LucarioScorer one-hot into root NN prior (0=off, try 0.15–0.35)",
+    )
+    ap.add_argument(
+        "--policy-target", choices=("value", "visits"), default="value",
+        help="LearnSample policy: value=legacy relative Q; visits=AlphaZero N^{1/t}",
+    )
     ap.add_argument("--gate-games", type=int, default=20,
                     help="Games per opponent for field gate eval (gate-mode=field)")
     ap.add_argument(
@@ -539,6 +559,11 @@ def main(argv: list[str] | None = None) -> int:
         args.lucario_mirror_games = 2
 
     rt.SEARCH_COUNT = args.search_count
+    rt.DETERMINIZATIONS = max(1, int(args.determinizations))
+    if args.puct_c is not None:
+        rt.PUCT_C = float(args.puct_c)
+    rt.PRIOR_BLEND = max(0.0, min(1.0, float(args.prior_blend)))
+    rt.POLICY_TARGET = str(args.policy_target).strip().lower()
     rt.GATE_GAMES = args.gate_games
     rt.GATE_WINRATE = args.gate_winrate
     rt.REPLAY_ITERS = args.replay_iters

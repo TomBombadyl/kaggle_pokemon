@@ -1,0 +1,72 @@
+{
+  "started_at": "2026-07-30T16:03:07.868742+00:00",
+  "days_downloaded": [],
+  "n_top_teams": 10,
+  "n_field_decks": 19,
+  "n_traj": 140,
+  "top_archetypes": [
+    {
+      "rank": 1,
+      "team": "flg",
+      "arch": "rocket_spidops",
+      "mu": 1169.7
+    },
+    {
+      "rank": 2,
+      "team": "JZ",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1167.4
+    },
+    {
+      "rank": 3,
+      "team": "Luca",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1167.4
+    },
+    {
+      "rank": 4,
+      "team": "haggle",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1164.3
+    },
+    {
+      "rank": 5,
+      "team": "MissingNo.",
+      "arch": "rocket_spidops",
+      "mu": 1163.2
+    },
+    {
+      "rank": 6,
+      "team": "LiamK",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1152.8
+    },
+    {
+      "rank": 7,
+      "team": "Majkel1337",
+      "arch": "crustle_iwapalace",
+      "mu": 1149.5
+    },
+    {
+      "rank": 8,
+      "team": "James Cox & Henry Chao",
+      "arch": "mega_kangaskhan_ogerpon",
+      "mu": 1137.2
+    },
+    {
+      "rank": 9,
+      "team": "Raja Biswas",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1137.0
+    },
+    {
+      "rank": 10,
+      "team": "やる気元気ミワハルキ",
+      "arch": "marnie_grimmsnarl_ex",
+      "mu": 1134.3
+    }
+  ],
+  "finished_at": "2026-07-30T16:05:20.555011+00:00",
+  "catalog": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\data\\rl_from_episodes\\catalog.json",
+  "metrics": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics"
+}

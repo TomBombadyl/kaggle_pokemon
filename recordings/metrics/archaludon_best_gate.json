@@ -1,0 +1,8 @@
+{
+  "id": "archaludon",
+  "wr": 87.5,
+  "suite": "top6",
+  "games_per_opp": 24,
+  "updated_at": "2026-07-30T00:49:01.860861+00:00",
+  "tail": "6.2, 100.0]  W24/L0/D0/U0 OK\n  top_lb_03_luca                   (random:top_lb_03_luca )   95.8%  [79.8,  99.3]  W23/L1/D0/U0 OK\n  top_lb_04_james                  (random:top_lb_04_james)   95.8%  [79.8,  99.3]  W23/L1/D0/U0 OK\n  top_lb_05_majkel                 (random:top_lb_05_majkel)   50.0%  [31.4,  68.6]  W12/L12/D0/U0 OK\n  top_lb_06_liamk                  (random:top_lb_06_liamk)  100.0%  [86.2, 100.0]  W24/L0/D0/U0 OK\n\n  OVERALL (gated)                                           87.5%  [81.1,  91.9]  n=6 decks\n\nReport: E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\eval\\gate_archaludon.md\n"
+}

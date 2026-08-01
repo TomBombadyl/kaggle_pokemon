@@ -1,0 +1,73 @@
+# Iono bottleneck train config — feed to field MCTS / episode RL
+# Generated 2026-07-31 after R14n A/B (+6pp local gate vs none @ n400)
+#
+# Usage (examples):
+#   set ARCH_IONO_LEVER=r14n
+#   python scripts/train_lucario_field_mcts.py --device cuda --cycles 25 \
+#     --opponents real_iono top_mined_iono --games-per-opp 80
+#
+# Gate before ship:
+#   python scripts/gate_archaludon.py --games 80 --opponents real_iono
+#   ship only if iono_wr >= 55 and crustle flg/majkel stay >= 85
+
+version: 1
+name: iono_r14n_focus
+updated: "2026-07-31"
+
+hero:
+  deck: agent_decks/archaludon_ex_cinderace.csv
+  brain: archaludon_agent
+  env:
+    ARCH_IONO_LEVER: r14n   # KEEP: MD pressure when Relicanth+MD legal
+
+gate:
+  iono_target_wr: 55.0
+  iono_min_n: 80
+  crustle_min_wr: 85.0
+  opponents_iono: [real_iono]
+  opponents_guard:
+    - meta_crustle_flg
+    - meta_crustle_majkel
+
+# Oversample Iono in any multi-opponent train mixture
+train:
+  primary_opponents:
+    - real_iono
+    - top_mined_iono
+  sample_weights:
+    real_iono: 0.45
+    top_mined_iono: 0.25
+    meta_crustle_flg: 0.10
+    meta_crustle_majkel: 0.10
+    meta_grimmsnarl_dries: 0.05
+    meta_grimmsnarl_luca: 0.05
+  games_per_cycle: 200
+  search: 40
+  device: cuda
+  promote_if_iono_delta_pp: 3.0
+  reject_if_crustle_drop_pp: 5.0
+
+# A/B ledger (local gate, real_iono) — updated after full round1
+ab_ledger:
+  none_pooled_n800: 29.8
+  r14n_pooled_n2400: 32.2   # KEEP default (+2.4pp pooled; decisive pair +6pp)
+  r14m_n160: 29.4           # NULL
+  r14o_relicanth_n400: 28.5 # REJECT
+  r14p_fml_n400: 32.5       # NULL
+  r14q_attach_n400: 25.8    # REJECT
+  r14r_turbo_n400: 31.2     # REJECT
+  r14s_boss_n400: 26.2      # REJECT
+  r14n2_hard_lethal_n400: 27.8  # REJECT
+  r14u_rh_fallback_n400: 27.5   # REJECT
+  r14k_light_stack_n48: 14.6    # REJECT full light rewire
+  deck_2x_relicanth_n800: 29.5  # NULL vs base 29.1; majkel slight drop — REJECT ship
+  r14v_pre_md_engine: null      # A/B 2026-07-31 — r14n + soft pre-MD; pending n200/n400
+
+notes:
+  - "Do NOT rewire full _apply_iono_light_overrides (R14k regress)."
+  - "Single-lever only; stack only after n>=400 confirm."
+  - "Rule ceiling ~32%; gap to 55% ≈23pp — needs iono-oversampled MCTS/BC or new engine."
+  - "Deck is 1x Relicanth only; +1 Relicanth did NOT lift iono at n800."
+  - "Crustle levers must stay isolated — iono matchup gate only."
+  - "Ship floor: iono>=55 AND flg/majkel>=85; currently HOLD."
+  - "r14v = expert-iter candidate: pre-MD Active metal + Relicanth online + END penalty; keep r14n late."

@@ -1,0 +1,131 @@
+{
+  "ts": "2026-07-31T03:48:35+00:00",
+  "utc_day": "2026-07-31",
+  "dayroll_sec": 72684.945465,
+  "submits": 2,
+  "remaining": 3,
+  "snapshot": {
+    "ts_utc": "2026-07-31T03:48:35+00:00",
+    "arch_overall": 79.06,
+    "iono": 48.4375,
+    "crustle_flg": 95.625,
+    "crustle_majkel": 96.4625,
+    "crustle_min": 95.625,
+    "dual_overall": 96.75,
+    "source": "focus_pool_n8",
+    "raw": {
+      "pool_n": 8,
+      "iono_mean": 48.4375,
+      "iono_n": 8,
+      "flg_mean": 95.625,
+      "majkel_mean": 96.4625,
+      "crustle_min_mean": 95.625,
+      "crustle_min_estimator": "min(mean_flg, mean_majkel)",
+      "crustle_mean_of_cycle_mins": 94.375,
+      "dual_mean": 96.75,
+      "instant": {
+        "ts": "2026-07-31T03:47:50.899135+00:00",
+        "cycle": 364,
+        "iono_wr": 60.0,
+        "majkel_wr": 95.0,
+        "flg_wr": 90.0,
+        "dual_overall": 95.8,
+        "ok": true,
+        "iono_rc": 0,
+        "majkel_rc": 0,
+        "flg_rc": 0,
+        "dual_rc": 0
+      },
+      "iono_series": [
+        47.5,
+        47.5,
+        35.0,
+        47.5,
+        45.0,
+        52.5,
+        52.5,
+        60.0
+      ],
+      "crustle_min_series": [
+        95.0,
+        95.0,
+        95.0,
+        95.0,
+        95.0,
+        95.0,
+        95.0,
+        90.0
+      ],
+      "dual_series": [
+        95.8,
+        95.8,
+        99.2,
+        95.8,
+        97.5,
+        95.8,
+        98.3,
+        95.8
+      ],
+      "arch_source": "pooled:arch_r5_A_base n=250 config=default",
+      "arch_pooled": {
+        "mean": 79.06,
+        "stderr": 0.8,
+        "n": 250,
+        "label": "arch_r5_A_base",
+        "role": "arch",
+        "ts": "2026-07-31T11:46:53.3704437+08:00",
+        "config": "default",
+        "rejected_nondefault": [
+          {
+            "label": "dir_r3_archmeta_confirm",
+            "mean": 76.72,
+            "ts": "2026-07-31T11:26:40.8433112+08:00",
+            "why": "no config provenance (pre-dates env_effective recording)"
+          },
+          {
+            "label": "arch_r3_B_nogeneric",
+            "mean": 77.34,
+            "ts": "2026-07-31T11:27:49.0751131+08:00",
+            "why": "no config provenance (pre-dates env_effective recording)"
+          },
+          {
+            "label": "arch_r4_A_base",
+            "mean": 78.48,
+            "ts": "2026-07-31T11:34:47.2321750+08:00",
+            "why": "no config provenance (pre-dates env_effective recording)"
+          },
+          {
+            "label": "arch_r4_meta_B_grimtomato",
+            "mean": 78.6,
+            "ts": "2026-07-31T11:40:31.6089087+08:00",
+            "why": "no config provenance (pre-dates env_effective recording)"
+          }
+        ]
+      },
+      "arch_best_gate_latch": 85.4
+    }
+  },
+  "verdict": {
+    "ship": false,
+    "decision": "HOLD",
+    "reasons": [
+      "arch 79.06 < 83.0",
+      "iono 48.4375 < 55.0"
+    ],
+    "thresholds": {
+      "arch_overall": 83.0,
+      "iono": 55.0,
+      "crustle_min": 89.0,
+      "dual_floor": 90.0
+    },
+    "dual_baseline": 95.725
+  },
+  "processes": {
+    "self_check": "ok"
+  },
+  "public_mu": {
+    "live_board": "648.4 / 699.7",
+    "pin": 1196.1,
+    "top1": 1198.4
+  }
+}

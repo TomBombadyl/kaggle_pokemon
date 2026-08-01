@@ -1,0 +1,125 @@
+{
+  "as_of": "2026-07-30T17:55:15+00:00",
+  "utc_day": "2026-07-30",
+  "submits_utc_today": 5,
+  "latest2": [
+    648.4,
+    694.3
+  ],
+  "live_board": "648.4 / 694.3",
+  "today": [
+    {
+      "ref": "55095587",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "01:00:05.970000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 648.4
+    },
+    {
+      "ref": "55095576",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:59:26.533000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 694.3
+    },
+    {
+      "ref": "55095564",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:58:30.980000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 600.0
+    },
+    {
+      "ref": "55094337",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:00:30.927000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 690.1
+    },
+    {
+      "ref": "55094308",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:00:08.377000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 703.3
+    }
+  ],
+  "recent": [
+    {
+      "ref": "55095587",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "01:00:05.970000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 648.4
+    },
+    {
+      "ref": "55095576",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:59:26.533000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 694.3
+    },
+    {
+      "ref": "55095564",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:58:30.980000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 600.0
+    },
+    {
+      "ref": "55094337",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:00:30.927000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 690.1
+    },
+    {
+      "ref": "55094308",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-30",
+      "time": "00:00:08.377000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 703.3
+    },
+    {
+      "ref": "55093941",
+      "file": "dragapult_ex_sample.tar.gz",
+      "date": "2026-07-29",
+      "time": "23:27:04.947000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 502.8
+    },
+    {
+      "ref": "55093940",
+      "file": "archaludon.tar.gz",
+      "date": "2026-07-29",
+      "time": "23:26:58.467000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 599.8
+    },
+    {
+      "ref": "55093083",
+      "file": "submission-bc-v2-s20260730-step2000.tar.gz",
+      "date": "2026-07-29",
+      "time": "22:14:09.690000",
+      "status": "SubmissionStatus.COMPLETE",
+      "publicScore": 579.4
+    }
+  ],
+  "pin": 1196.1,
+  "top1": 1198.4,
+  "blocked": [
+    "dragapult_ex_sample",
+    "dragapult",
+    "alakazam"
+  ]
+}

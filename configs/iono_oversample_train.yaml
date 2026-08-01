@@ -1,0 +1,114 @@
+# Iono oversample BC training spec — authored by fleet role `iono`, 2026-07-31
+#
+# WHY THIS EXISTS
+#   The rule/postfilter path is exhausted. Pooled truth (6x150, n=900, 2026-07-31):
+#     ARCH_IONO_LEVER=tomato  ->  mean 52.00%  se 2.19  ci95 [47.71, 56.29]
+#   The old "56.5% n200" headline in iono_tomato_train.yaml was single-seed noise.
+#   tomato is capped by sample_75wr itself (pure tomato pooled 51.7%), so no
+#   wrapper around it reaches 55%. A learned policy trained on Iono loss states
+#   is the only remaining lever with headroom.
+#
+# WHO CONSUMES THIS
+#   fleet role `gputrain` (RTX 4080). Requested via fleet/state/gputrain_REQUESTS.md.
+#   Role `iono` does NOT train; it only specifies data + acceptance.
+
+version: 1
+name: iono_oversample_bc
+updated: "2026-07-31"
+requested_by: iono
+target_metric: real_iono win rate >= 55.0 (pooled, >= 6 shards)
+
+# ---------------------------------------------------------------- data
+dataset:
+  root: E:/PTCG_AI_Battle_Challenge/recordings/cleaned/episodes/raw/2026-07-28
+  n_episodes_available: 4373
+  # Stage 1: select episodes whose OPPONENT is the Iono / Lightning archetype.
+  select:
+    opponent_archetype: [iono, lightning]
+    # keep both outcomes: losses teach the failure mode, wins teach the target line
+    outcomes: [win, loss]
+  # Stage 2: oversample the diagnosed failure mode.
+  # Diagnosis (tomato loss DS n200): 100% of losses end Active=None, i.e. we run
+  # out of Pokemon in play after a Lightning board wipe; Archaludon ex present in
+  # only 10% of losses vs 95% of wins.
+  oversample:
+    - name: board_wipe_precursor
+      # states from a LOST game, within N decisions before we first hit bench==0
+      filter: {outcome: loss, live_bench_le: 1, window_before_no_active: 6}
+      weight: 4.0
+    - name: wipe_recovery_win
+      # states from a WON game where we were at bench<=1 and still recovered
+      filter: {outcome: win, live_bench_le: 1}
+      weight: 3.0
+    - name: arch_online_win
+      filter: {outcome: win, has_in_play: archaludon_ex}
+      weight: 1.5
+    - name: rest_of_iono
+      filter: {}
+      weight: 1.0
+  min_states: 150000
+  holdout_frac: 0.1
+  holdout_split_by: episode_id   # never split within an episode (leakage)
+
+# ---------------------------------------------------------------- features/labels
+policy:
+  kind: behavior_cloning
+  label: chosen option index (expert = winning side of the episode)
+  # Must consume the SAME observation encoding the runtime agent can build, or the
+  # policy is unshippable. Reuse the encoder from train_lucario_field_mcts.py.
+  encoder: reuse:train_lucario_field_mcts.py
+  must_include_features:
+    - live_bench_count            # the diagnosed decision axis
+    - hand_basic_count
+    - opp_active_id, opp_bench_count
+    - our_active_id, our_active_energy, archaludon_in_play
+    - prizes_remaining_both
+  action_masking: legal options only (illegal logits -> -inf before softmax)
+
+train:
+  device: cuda
+  precision: bf16
+  # Director order 2026-07-31: GPU was at 42% / 6.6GB of 16GB. Push it.
+  batch_size: 1024          # raise until ~14GB VRAM, do not spill
+  grad_accum: 1
+  epochs: 8
+  optimizer: adamw
+  lr: 3.0e-4
+  lr_schedule: cosine
+  weight_decay: 0.01
+  early_stop_on: holdout_top1_acc
+  out: artifacts/iono_bc_v1/
+
+# ---------------------------------------------------------------- shipping
+runtime:
+  # Ship as a NEW lever value so the A/B stays single-lever and rollback is free.
+  lever: ARCH_IONO_LEVER=tomato_bc
+  wiring: |
+    In agent/archaludon_agent.py::_agent_impl, for lever `tomato_bc`, consult the
+    BC policy first inside the tomato-delegated branch; fall back to the tomato
+    delegate whenever the policy is unavailable, throws, or its argmax option is
+    not legal. This mirrors the existing `tomato_fork` pre-empt hook, so the
+    delegate stays the safety net and non-Iono matchups are untouched.
+  hard_constraint: weights must be <= 40MB and CPU-inference < 30ms/decision
+                   (Kaggle sim runs CPU-only, per-step time limit)
+
+# ---------------------------------------------------------------- acceptance
+acceptance:
+  # A NULL result here is a real answer; do not tune the floor to pass.
+  baseline: {lever: tomato, mean: 52.00, se: 2.19, n: 900, ts: "2026-07-31"}
+  keep_rule: pooled mean(tomato_bc) - 52.00 >= 2 * pooled_se, or ci95 disjoint
+  command: |
+    E:\PTCG_AI_Battle_Challenge\fleet\Shard-Gate.ps1 -Role iono `
+      -Script scripts\gate_archaludon.py -Games 300 `
+      -Extra @('--opponents','real_iono') `
+      -Env @{ARCH_IONO_LEVER='tomato_bc'} -Label iono_bc_v1
+  guard_must_also_pass:
+    # A KEEP that breaks another role's floor is a REJECT.
+    - crustle: min(meta_crustle_flg, meta_crustle_majkel) >= 89, n >= 120 pooled
+    - arch_overall: >= 83 on -Suite meta_fast
+    - dual_overall: >= 90
+
+notes:
+  - "Do NOT retrain or disturb the Lucario field weights for this; new artifact dir."
+  - "Iono-only scope: non-Iono matchups must be byte-identical to lever=tomato."
+  - "See fleet/state/iono_STATE.md for the live REJECT ledger before proposing levers."

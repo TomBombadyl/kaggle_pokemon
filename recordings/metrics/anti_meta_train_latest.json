@@ -1,0 +1,1018 @@
+{
+  "ts_utc": "2026-07-31T01:13:02+00:00",
+  "mode": "full",
+  "args": {
+    "mode": "full",
+    "data": "episodes/iono_bc_v2",
+    "collect_games": 800,
+    "max_decisions": 0,
+    "device": "auto",
+    "epochs": 40,
+    "batch_size": 8192,
+    "hidden": 256,
+    "loss_weight": 2.0,
+    "fragile_loss_weight": 3.0,
+    "fragile_win_weight": 1.5,
+    "gate": false,
+    "gate_games": 80
+  },
+  "director": {
+    "submits_today": 2,
+    "snapshot": {
+      "ts_utc": "2026-07-31T01:13:02+00:00",
+      "arch_overall": 85.4,
+      "iono": 50.3125,
+      "crustle_flg": 89.6875,
+      "crustle_majkel": 88.35,
+      "crustle_min": 86.575,
+      "dual_overall": 91.5625,
+      "source": "focus_pool_n8",
+      "raw": {
+        "pool_n": 8,
+        "iono_mean": 50.3125,
+        "iono_n": 8,
+        "flg_mean": 89.6875,
+        "majkel_mean": 88.35,
+        "crustle_min_mean": 86.575,
+        "dual_mean": 91.5625,
+        "instant": {
+          "ts": "2026-07-31T00:23:15.524258+00:00",
+          "cycle": 101,
+          "iono_wr": 57.5,
+          "majkel_wr": 91.7,
+          "flg_wr": 90.0,
+          "dual_overall": 92.5,
+          "ok": true,
+          "iono_rc": 0,
+          "majkel_rc": 0,
+          "flg_rc": 0,
+          "dual_rc": 0
+        },
+        "iono_series": [
+          50.0,
+          47.5,
+          57.5,
+          40.0,
+          52.5,
+          40.0,
+          57.5,
+          57.5
+        ],
+        "crustle_min_series": [
+          85.0,
+          82.5,
+          81.7,
+          86.7,
+          90.0,
+          86.7,
+          90.0,
+          90.0
+        ],
+        "dual_series": [
+          89.2,
+          90.8,
+          95.0,
+          89.2,
+          93.3,
+          90.8,
+          91.7,
+          92.5
+        ]
+      }
+    },
+    "verdict": {
+      "ship": false,
+      "reasons": [
+        "iono 50.3125 < 55.0",
+        "crustle_min 86.575 < 89.0"
+      ],
+      "thresholds": {
+        "arch_overall": 83.0,
+        "iono": 55.0,
+        "crustle_min": 89.0,
+        "dual_floor": 90.0
+      },
+      "snapshot": {
+        "ts_utc": "2026-07-31T01:13:02+00:00",
+        "arch_overall": 85.4,
+        "iono": 50.3125,
+        "crustle_flg": 89.6875,
+        "crustle_majkel": 88.35,
+        "crustle_min": 86.575,
+        "dual_overall": 91.5625,
+        "source": "focus_pool_n8",
+        "raw": {
+          "pool_n": 8,
+          "iono_mean": 50.3125,
+          "iono_n": 8,
+          "flg_mean": 89.6875,
+          "majkel_mean": 88.35,
+          "crustle_min_mean": 86.575,
+          "dual_mean": 91.5625,
+          "instant": {
+            "ts": "2026-07-31T00:23:15.524258+00:00",
+            "cycle": 101,
+            "iono_wr": 57.5,
+            "majkel_wr": 91.7,
+            "flg_wr": 90.0,
+            "dual_overall": 92.5,
+            "ok": true,
+            "iono_rc": 0,
+            "majkel_rc": 0,
+            "flg_rc": 0,
+            "dual_rc": 0
+          },
+          "iono_series": [
+            50.0,
+            47.5,
+            57.5,
+            40.0,
+            52.5,
+            40.0,
+            57.5,
+            57.5
+          ],
+          "crustle_min_series": [
+            85.0,
+            82.5,
+            81.7,
+            86.7,
+            90.0,
+            86.7,
+            90.0,
+            90.0
+          ],
+          "dual_series": [
+            89.2,
+            90.8,
+            95.0,
+            89.2,
+            93.3,
+            90.8,
+            91.7,
+            92.5
+          ]
+        }
+      },
+      "dual_baseline": 90.0,
+      "decision": "HOLD"
+    }
+  },
+  "steps": [
+    {
+      "cmd": [
+        "E:\\PTCG_AI_Battle_Challenge\\.venv\\Scripts\\python.exe",
+        "-u",
+        "scripts/collect_iono_decisions.py",
+        "--games",
+        "800",
+        "--out",
+        "episodes/iono_bc_v2",
+        "--opponent",
+        "real_iono"
+      ],
+      "rc": 0,
+      "elapsed_s": 71.8,
+      "stdout_tail": "[collect] 20/800 wr=71.4% decisions=1210 2s\n[collect] 40/800 wr=58.5% decisions=2363 3s\n[collect] 60/800 wr=62.3% decisions=3602 5s\n[collect] 80/800 wr=59.3% decisions=4612 7s\n[collect] 100/800 wr=55.4% decisions=5696 9s\n[collect] 120/800 wr=55.4% decisions=6791 10s\n[collect] 140/800 wr=56.0% decisions=8034 12s\n[collect] 160/800 wr=54.0% decisions=9073 14s\n[collect] 180/800 wr=53.0% decisions=10255 15s\n[collect] 200/800 wr=53.2% decisions=11410 17s\n[collect] 220/800 wr=53.8% decisions=12496 19s\n[collect] 240/800 wr=54.4% decisions=13707 20s\n[collect] 260/800 wr=54.0% decisions=14899 22s\n[collect] 280/800 wr=55.2% decisions=16083 24s\n[collect] 300/800 wr=54.2% decisions=17365 26s\n[collect] 320/800 wr=53.0% decisions=18469 28s\n[collect] 340/800 wr=52.8% decisions=19495 29s\n[collect] 360/800 wr=53.2% decisions=20628 31s\n[collect] 380/800 wr=53.0% decisions=21813 33s\n[collect] 400/800 wr=53.1% decisions=22967 35s\n[collect] 420/800 wr=53.9% decisions=24199 37s\n[collect] 440/800 wr=54.6% decisions=25323 38s\n[collect] 460/800 wr=54.2% decisions=26519 40s\n[collect] 480/800 wr=53.4% decisions=27675 42s\n[collect] 500/800 wr=52.9% decisions=28735 43s\n[collect] 520/800 wr=53.0% decisions=30009 45s\n[collect] 540/800 wr=52.7% decisions=31239 47s\n[collect] 560/800 wr=52.0% decisions=32293 49s\n[collect] 580/800 wr=51.8% decisions=33345 50s\n[collect] 600/800 wr=51.4% decisions=34518 52s\n[collect] 620/800 wr=50.9% decisions=35722 54s\n[collect] 640/800 wr=50.7% decisions=36912 56s\n[collect] 660/800 wr=51.0% decisions=38066 58s\n[collect] 680/800 wr=50.8% decisions=39117 59s\n[collect] 700/800 wr=50.8% decisions=40341 61s\n[collect] 720/800 wr=50.8% decisions=41560 63s\n[collect] 740/800 wr=50.2% decisions=42740 65s\n[collect] 760/800 wr=50.7% decisions=43912 67s\n[collect] 780/800 wr=50.4% decisions=45056 69s\n\nreal_iono (gated) 50.4%  n=800\nOVERALL (gated) 50.4%\n[collect] wrote 800 games / 46046 decisions -> E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\episodes\\iono_bc_v2\\iono_decisions_real_iono_tomato_s0_20260731T011303Z.jsonl\n"
+    },
+    {
+      "cmd": [
+        "E:\\PTCG_AI_Battle_Challenge\\.venv\\Scripts\\python.exe",
+        "-u",
+        "scripts/analyze_iono_loss_clusters.py",
+        "--data",
+        "episodes/iono_bc_v2",
+        "--out",
+        "recordings/intel/iono_loss_clusters"
+      ],
+      "rc": 0,
+      "elapsed_s": 2.0,
+      "stdout_tail": "{\"games\": 3260, \"wins\": 1642, \"losses\": 1618, \"pooled_wr_pct\": 50.37}\nwrote E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\intel\\iono_loss_clusters.md and E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\intel\\iono_loss_clusters.json\n"
+    },
+    {
+      "cmd": [
+        "E:\\PTCG_AI_Battle_Challenge\\.venv\\Scripts\\python.exe",
+        "-u",
+        "scripts/train_iono_prior.py",
+        "--data",
+        "episodes/iono_bc_v2",
+        "--out",
+        "artifacts/iono_prior_v2",
+        "--device",
+        "auto",
+        "--epochs",
+        "40",
+        "--batch-size",
+        "8192",
+        "--hidden",
+        "256",
+        "--objective",
+        "pos",
+        "--select-on",
+        "prior",
+        "--loss-weight",
+        "2.0",
+        "--fragile-loss-weight",
+        "3.0",
+        "--fragile-win-weight",
+        "1.5"
+      ],
+      "rc": 0,
+      "elapsed_s": 18.2,
+      "stdout_tail": "isions=75989 skipped: schema=0 multi=21283 wide=0 draw_games=0\n[weights] loss_weight=2.0 fragile_loss_weight=3.0 fragile_win_weight=1.5 fragile_decisions=101214 (loss=53284, win=47930)\n[ep   0] loss=1.0261 prior=+0.3996 value=0.6265 | val_bce=0.5707 val_acc=0.684 agree_top1=0.526 win_multi_top1=0.454\n[ep   1] loss=0.8806 prior=+0.3222 value=0.5584 | val_bce=0.5445 val_acc=0.691 agree_top1=0.508 win_multi_top1=0.437\n[ep   2] loss=0.8476 prior=+0.3049 value=0.5428 | val_bce=0.5390 val_acc=0.695 agree_top1=0.530 win_multi_top1=0.468\n[ep   3] loss=0.8321 prior=+0.2941 value=0.5380 | val_bce=0.5346 val_acc=0.700 agree_top1=0.538 win_multi_top1=0.475\n[ep   4] loss=0.8193 prior=+0.2840 value=0.5353 | val_bce=0.5335 val_acc=0.702 agree_top1=0.541 win_multi_top1=0.482\n[ep   5] loss=0.8138 prior=+0.2800 value=0.5338 | val_bce=0.5320 val_acc=0.703 agree_top1=0.556 win_multi_top1=0.502\n[ep   6] loss=0.8028 prior=+0.2709 value=0.5319 | val_bce=0.5303 val_acc=0.704 agree_top1=0.574 win_multi_top1=0.520\n[ep   7] loss=0.7977 prior=+0.2661 value=0.5315 | val_bce=0.5297 val_acc=0.704 agree_top1=0.585 win_multi_top1=0.529\n[ep   8] loss=0.7920 prior=+0.2623 value=0.5297 | val_bce=0.5289 val_acc=0.703 agree_top1=0.594 win_multi_top1=0.540\n[ep   9] loss=0.7852 prior=+0.2556 value=0.5296 | val_bce=0.5280 val_acc=0.705 agree_top1=0.598 win_multi_top1=0.545\n[ep  10] loss=0.7819 prior=+0.2533 value=0.5286 | val_bce=0.5281 val_acc=0.705 agree_top1=0.602 win_multi_top1=0.550\n[ep  11] loss=0.7785 prior=+0.2504 value=0.5281 | val_bce=0.5274 val_acc=0.704 agree_top1=0.609 win_multi_top1=0.559\n[ep  12] loss=0.7798 prior=+0.2517 value=0.5281 | val_bce=0.5269 val_acc=0.705 agree_top1=0.610 win_multi_top1=0.559\n[ep  13] loss=0.7767 prior=+0.2488 value=0.5278 | val_bce=0.5274 val_acc=0.706 agree_top1=0.615 win_multi_top1=0.564\n[ep  14] loss=0.7742 prior=+0.2475 value=0.5267 | val_bce=0.5279 val_acc=0.704 agree_top1=0.614 win_multi_top1=0.564\n[ep  15] loss=0.7740 prior=+0.2472 value=0.5268 | val_bce=0.5261 val_acc=0.706 agree_top1=0.617 win_multi_top1=0.568\n[ep  16] loss=0.7699 prior=+0.2438 value=0.5261 | val_bce=0.5261 val_acc=0.706 agree_top1=0.614 win_multi_top1=0.564\n[ep  17] loss=0.7698 prior=+0.2435 value=0.5263 | val_bce=0.5252 val_acc=0.706 agree_top1=0.620 win_multi_top1=0.570\n[ep  18] loss=0.7653 prior=+0.2402 value=0.5251 | val_bce=0.5253 val_acc=0.706 agree_top1=0.616 win_multi_top1=0.564\n[ep  19] loss=0.7676 prior=+0.2424 value=0.5252 | val_bce=0.5245 val_acc=0.708 agree_top1=0.620 win_multi_top1=0.570\n[ep  20] loss=0.7629 prior=+0.2379 value=0.5250 | val_bce=0.5245 val_acc=0.707 agree_top1=0.627 win_multi_top1=0.580\n[ep  21] loss=0.7634 prior=+0.2391 value=0.5243 | val_bce=0.5244 val_acc=0.707 agree_top1=0.629 win_multi_top1=0.581\n[ep  22] loss=0.7610 prior=+0.2367 value=0.5243 | val_bce=0.5240 val_acc=0.707 agree_top1=0.628 win_multi_top1=0.578\n[ep  23] loss=0.7593 prior=+0.2352 value=0.5241 | val_bce=0.5242 val_acc=0.707 agree_top1=0.627 win_multi_top1=0.578\n[ep  24] loss=0.7592 prior=+0.2356 value=0.5235 | val_bce=0.5240 val_acc=0.707 agree_top1=0.631 win_multi_top1=0.581\n[ep  25] loss=0.7570 prior=+0.2336 value=0.5235 | val_bce=0.5237 val_acc=0.708 agree_top1=0.626 win_multi_top1=0.578\n[ep  26] loss=0.7568 prior=+0.2333 value=0.5235 | val_bce=0.5234 val_acc=0.706 agree_top1=0.630 win_multi_top1=0.580\n[ep  27] loss=0.7562 prior=+0.2332 value=0.5231 | val_bce=0.5236 val_acc=0.708 agree_top1=0.629 win_multi_top1=0.579\n[ep  28] loss=0.7548 prior=+0.2316 value=0.5232 | val_bce=0.5231 val_acc=0.707 agree_top1=0.629 win_multi_top1=0.581\n[ep  29] loss=0.7564 prior=+0.2334 value=0.5230 | val_bce=0.5230 val_acc=0.708 agree_top1=0.630 win_multi_top1=0.582\n[ep  30] loss=0.7556 prior=+0.2329 value=0.5228 | val_bce=0.5231 val_acc=0.707 agree_top1=0.631 win_multi_top1=0.583\n[ep  31] loss=0.7522 prior=+0.2300 value=0.5222 | val_bce=0.5229 val_acc=0.707 agree_top1=0.630 win_multi_top1=0.581\n[ep  32] loss=0.7535 prior=+0.2315 value=0.5221 | val_bce=0.5229 val_acc=0.707 agree_top1=0.631 win_multi_top1=0.582\n[ep  33] loss=0.7533 prior=+0.2312 value=0.5221 | val_bce=0.5228 val_acc=0.708 agree_top1=0.632 win_multi_top1=0.584\n[ep  34] loss=0.7531 prior=+0.2309 value=0.5222 | val_bce=0.5228 val_acc=0.708 agree_top1=0.632 win_multi_top1=0.582\n[ep  35] loss=0.7527 prior=+0.2304 value=0.5223 | val_bce=0.5228 val_acc=0.708 agree_top1=0.631 win_multi_top1=0.583\n[ep  36] loss=0.7530 prior=+0.2308 value=0.5221 | val_bce=0.5228 val_acc=0.708 agree_top1=0.630 win_multi_top1=0.581\n[ep  37] loss=0.7532 prior=+0.2310 value=0.5222 | val_bce=0.5228 val_acc=0.708 agree_top1=0.629 win_multi_top1=0.580\n[ep  38] loss=0.7527 prior=+0.2303 value=0.5224 | val_bce=0.5227 val_acc=0.708 agree_top1=0.628 win_multi_top1=0.579\n[ep  39] loss=0.7528 prior=+0.2307 value=0.5220 | val_bce=0.5227 val_acc=0.708 agree_top1=0.628 win_multi_top1=0.580\n\n[done] 8s  best_val_bce=-0.5838  -> E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\artifacts\\iono_prior_v2\\iono_prior_20260731T011433Z.pt\n"
+    }
+  ],
+  "loss_clusters": {
+    "ts_utc": "2026-07-31T01:14:16.006176+00:00",
+    "schema_version": 2,
+    "games": 3260,
+    "wins": 1642,
+    "losses": 1618,
+    "pooled_wr_pct": 50.37,
+    "sources": [
+      {
+        "file": "iono_decisions_real_iono_tomato_s0_20260731T002727Z.jsonl",
+        "wins": 32,
+        "losses": 28,
+        "games": 60,
+        "wr_pct": 53.33,
+        "skipped": 0
+      },
+      {
+        "file": "iono_decisions_real_iono_tomato_s0_20260731T010147Z.jsonl",
+        "wins": 416,
+        "losses": 384,
+        "games": 800,
+        "wr_pct": 52.0,
+        "skipped": 0
+      },
+      {
+        "file": "iono_decisions_real_iono_tomato_s0_20260731T011237Z.jsonl",
+        "wins": 387,
+        "losses": 413,
+        "games": 800,
+        "wr_pct": 48.38,
+        "skipped": 0
+      },
+      {
+        "file": "iono_decisions_real_iono_tomato_s0_20260731T011303Z.jsonl",
+        "wins": 403,
+        "losses": 397,
+        "games": 800,
+        "wr_pct": 50.38,
+        "skipped": 0
+      },
+      {
+        "file": "iono_decisions_real_iono_tomato_s20_20260731T002801Z.jsonl",
+        "wins": 185,
+        "losses": 215,
+        "games": 400,
+        "wr_pct": 46.25,
+        "skipped": 0
+      },
+      {
+        "file": "iono_decisions_real_iono_tomato_s21_20260731T002801Z.jsonl",
+        "wins": 219,
+        "losses": 181,
+        "games": 400,
+        "wr_pct": 54.75,
+        "skipped": 0
+      }
+    ],
+    "clusters": [
+      {
+        "cluster": "fragile_board_any",
+        "loss_n": 717,
+        "loss_pct": 44.31,
+        "loss_ci95": [
+          41.91,
+          46.75
+        ],
+        "win_n": 95,
+        "win_pct": 5.79,
+        "win_ci95": [
+          4.76,
+          7.02
+        ],
+        "delta_pp": 38.53
+      },
+      {
+        "cluster": "setup_incomplete_active",
+        "loss_n": 469,
+        "loss_pct": 28.99,
+        "loss_ci95": [
+          26.83,
+          31.24
+        ],
+        "win_n": 55,
+        "win_pct": 3.35,
+        "win_ci95": [
+          2.58,
+          4.33
+        ],
+        "delta_pp": 25.64
+      },
+      {
+        "cluster": "active_energy_lt2",
+        "loss_n": 430,
+        "loss_pct": 26.58,
+        "loss_ci95": [
+          24.48,
+          28.78
+        ],
+        "win_n": 32,
+        "win_pct": 1.95,
+        "win_ci95": [
+          1.38,
+          2.74
+        ],
+        "delta_pp": 24.63
+      },
+      {
+        "cluster": "bench_empty",
+        "loss_n": 455,
+        "loss_pct": 28.12,
+        "loss_ci95": [
+          25.98,
+          30.36
+        ],
+        "win_n": 23,
+        "win_pct": 1.4,
+        "win_ci95": [
+          0.94,
+          2.09
+        ],
+        "delta_pp": 26.72
+      },
+      {
+        "cluster": "opponent_prizes_le2",
+        "loss_n": 1388,
+        "loss_pct": 85.78,
+        "loss_ci95": [
+          84.0,
+          87.4
+        ],
+        "win_n": 683,
+        "win_pct": 41.6,
+        "win_ci95": [
+          39.23,
+          44.0
+        ],
+        "delta_pp": 44.19
+      },
+      {
+        "cluster": "hero_prizes_ge4",
+        "loss_n": 765,
+        "loss_pct": 47.28,
+        "loss_ci95": [
+          44.86,
+          49.72
+        ],
+        "win_n": 87,
+        "win_pct": 5.3,
+        "win_ci95": [
+          4.32,
+          6.49
+        ],
+        "delta_pp": 41.98
+      },
+      {
+        "cluster": "prize_deficit_ge2",
+        "loss_n": 869,
+        "loss_pct": 53.71,
+        "loss_ci95": [
+          51.27,
+          56.13
+        ],
+        "win_n": 20,
+        "win_pct": 1.22,
+        "win_ci95": [
+          0.79,
+          1.87
+        ],
+        "delta_pp": 52.49
+      },
+      {
+        "cluster": "hand_le2",
+        "loss_n": 261,
+        "loss_pct": 16.13,
+        "loss_ci95": [
+          14.42,
+          18.0
+        ],
+        "win_n": 165,
+        "win_pct": 10.05,
+        "win_ci95": [
+          8.69,
+          11.6
+        ],
+        "delta_pp": 6.08
+      },
+      {
+        "cluster": "deck_le5",
+        "loss_n": 31,
+        "loss_pct": 1.92,
+        "loss_ci95": [
+          1.35,
+          2.71
+        ],
+        "win_n": 128,
+        "win_pct": 7.8,
+        "win_ci95": [
+          6.59,
+          9.19
+        ],
+        "delta_pp": -5.88
+      },
+      {
+        "cluster": "turn_ge12",
+        "loss_n": 1009,
+        "loss_pct": 62.36,
+        "loss_ci95": [
+          59.97,
+          64.69
+        ],
+        "win_n": 1511,
+        "win_pct": 92.02,
+        "win_ci95": [
+          90.61,
+          93.24
+        ],
+        "delta_pp": -29.66
+      },
+      {
+        "cluster": "iono_threat_active",
+        "loss_n": 25,
+        "loss_pct": 1.55,
+        "loss_ci95": [
+          1.05,
+          2.27
+        ],
+        "win_n": 9,
+        "win_pct": 0.55,
+        "win_ci95": [
+          0.29,
+          1.04
+        ],
+        "delta_pp": 1.0
+      }
+    ],
+    "last_active": {
+      "loss": {
+        "archaludon_ex": {
+          "n": 1073,
+          "pct": 66.32
+        },
+        "duraludon": {
+          "n": 285,
+          "pct": 17.61
+        },
+        "relicanth": {
+          "n": 183,
+          "pct": 11.31
+        },
+        "cinderace": {
+          "n": 76,
+          "pct": 4.7
+        },
+        "none": {
+          "n": 1,
+          "pct": 0.06
+        }
+      },
+      "win": {
+        "archaludon_ex": {
+          "n": 1565,
+          "pct": 95.31
+        },
+        "duraludon": {
+          "n": 48,
+          "pct": 2.92
+        },
+        "cinderace": {
+          "n": 22,
+          "pct": 1.34
+        },
+        "relicanth": {
+          "n": 7,
+          "pct": 0.43
+        }
+      }
+    },
+    "decision_rule": "use last non-setup hero decision in each completed game",
+    "caveat": "terminal-state enrichment is associative, not a causal action label"
+  },
+  "train_summary": {
+    "ts": "2026-07-31T01:14:33.552883+00:00",
+    "checkpoint": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\artifacts\\iono_prior_v2\\iono_prior_20260731T011433Z.pt",
+    "decisions": 167282,
+    "val_decisions": 25092,
+    "objective": "pos",
+    "select_on": "prior",
+    "loss_weight": 2.0,
+    "fragile_loss_weight": 3.0,
+    "fragile_win_weight": 1.5,
+    "fragile_decisions": 101214,
+    "fragile_loss_decisions": 53284,
+    "fragile_win_decisions": 47930,
+    "best_criterion": -0.5837962031364441,
+    "best_val_win_multi_top1": 0.5837962031364441,
+    "final": {
+      "epoch": 39,
+      "train_loss": 0.7527522047360738,
+      "train_prior": 0.23073839230669868,
+      "train_value": 0.5220138132572174,
+      "val_value_bce": 0.5227203369140625,
+      "val_value_acc": 0.7077555060386658,
+      "val_prior_top1": 0.6284074783325195,
+      "val_win_top1": 0.6141399145126343,
+      "val_win_multi_top1": 0.5799079537391663,
+      "lr": 0.0
+    },
+    "elapsed_s": 7.9,
+    "device": "cuda",
+    "history": [
+      {
+        "epoch": 0,
+        "train_loss": 1.026054670413335,
+        "train_prior": 0.3995975073840883,
+        "train_value": 0.6264571646849314,
+        "val_value_bce": 0.5706587433815002,
+        "val_value_acc": 0.6839630603790283,
+        "val_prior_top1": 0.5257452726364136,
+        "val_win_top1": 0.4986151456832886,
+        "val_win_multi_top1": 0.4541342556476593,
+        "lr": 0.000998458666866564
+      },
+      {
+        "epoch": 1,
+        "train_loss": 0.8806309931808047,
+        "train_prior": 0.322230479783482,
+        "train_value": 0.5584005117416382,
+        "val_value_bce": 0.5444594621658325,
+        "val_value_acc": 0.6914156079292297,
+        "val_prior_top1": 0.5075322985649109,
+        "val_win_top1": 0.4829445779323578,
+        "val_win_multi_top1": 0.4370734691619873,
+        "lr": 0.0009938441702975688
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.8476190235879686,
+        "train_prior": 0.3048582590288586,
+        "train_value": 0.5427607695261637,
+        "val_value_bce": 0.5389652252197266,
+        "val_value_acc": 0.6949625611305237,
+        "val_prior_top1": 0.5303682684898376,
+        "val_win_top1": 0.5113702416419983,
+        "val_win_multi_top1": 0.4680209457874298,
+        "lr": 0.0009861849601988382
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.832132551405165,
+        "train_prior": 0.2941441039244334,
+        "train_value": 0.5379884408579932,
+        "val_value_bce": 0.5346258878707886,
+        "val_value_acc": 0.6999043822288513,
+        "val_prior_top1": 0.5376614332199097,
+        "val_win_top1": 0.517711341381073,
+        "val_win_multi_top1": 0.47492459416389465,
+        "lr": 0.0009755282581475767
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.8192865351835886,
+        "train_prior": 0.28398365444607204,
+        "train_value": 0.5353028807375166,
+        "val_value_bce": 0.5335105657577515,
+        "val_value_acc": 0.7018970251083374,
+        "val_prior_top1": 0.5407699942588806,
+        "val_win_top1": 0.5244897603988647,
+        "val_win_multi_top1": 0.4823043942451477,
+        "lr": 0.0009619397662556432
+      },
+      {
+        "epoch": 5,
+        "train_loss": 0.8138337201542325,
+        "train_prior": 0.28000497321287793,
+        "train_value": 0.5338287452856699,
+        "val_value_bce": 0.531965970993042,
+        "val_value_acc": 0.7029332518577576,
+        "val_prior_top1": 0.5562331080436707,
+        "val_win_top1": 0.5421282649040222,
+        "val_win_multi_top1": 0.5015076994895935,
+        "lr": 0.0009455032620941838
+      },
+      {
+        "epoch": 6,
+        "train_loss": 0.802846246295505,
+        "train_prior": 0.2709490954875946,
+        "train_value": 0.5318971541192796,
+        "val_value_bce": 0.5302688479423523,
+        "val_value_acc": 0.7041686773300171,
+        "val_prior_top1": 0.5740076899528503,
+        "val_win_top1": 0.5591107606887817,
+        "val_win_multi_top1": 0.5199968218803406,
+        "lr": 0.000926320082177046
+      },
+      {
+        "epoch": 7,
+        "train_loss": 0.797655979792277,
+        "train_prior": 0.26613470084137386,
+        "train_value": 0.5315212739838494,
+        "val_value_bce": 0.5297403335571289,
+        "val_value_acc": 0.7036107182502747,
+        "val_prior_top1": 0.585365891456604,
+        "val_win_top1": 0.5672740340232849,
+        "val_win_multi_top1": 0.5288842916488647,
+        "lr": 0.0009045084971874736
+      },
+      {
+        "epoch": 8,
+        "train_loss": 0.7919893893930647,
+        "train_prior": 0.26231906231906676,
+        "train_value": 0.5296703279018402,
+        "val_value_bce": 0.5288574695587158,
+        "val_value_acc": 0.7031325101852417,
+        "val_prior_top1": 0.5938944816589355,
+        "val_win_top1": 0.5774781107902527,
+        "val_win_multi_top1": 0.5399936437606812,
+        "lr": 0.0008802029828000154
+      },
+      {
+        "epoch": 9,
+        "train_loss": 0.7851544684833951,
+        "train_prior": 0.25556818064716125,
+        "train_value": 0.5295862853527069,
+        "val_value_bce": 0.5279755592346191,
+        "val_value_acc": 0.7051251530647278,
+        "val_prior_top1": 0.5978798270225525,
+        "val_win_top1": 0.5817784070968628,
+        "val_win_multi_top1": 0.5446754097938538,
+        "lr": 0.0008535533905932736
+      },
+      {
+        "epoch": 10,
+        "train_loss": 0.7818782296445634,
+        "train_prior": 0.2532595271865527,
+        "train_value": 0.528618699974484,
+        "val_value_bce": 0.5281389951705933,
+        "val_value_acc": 0.7047665119171143,
+        "val_prior_top1": 0.6023035645484924,
+        "val_win_top1": 0.5867346525192261,
+        "val_win_multi_top1": 0.5500714182853699,
+        "lr": 0.0008247240241650918
+      },
+      {
+        "epoch": 11,
+        "train_loss": 0.7784975137975481,
+        "train_prior": 0.2503749082485835,
+        "train_value": 0.5281226105160184,
+        "val_value_bce": 0.5274404287338257,
+        "val_value_acc": 0.7042882442474365,
+        "val_prior_top1": 0.6094372868537903,
+        "val_win_top1": 0.5948979258537292,
+        "val_win_multi_top1": 0.558958888053894,
+        "lr": 0.0007938926261462365
+      },
+      {
+        "epoch": 12,
+        "train_loss": 0.779835992389255,
+        "train_prior": 0.2517433199617598,
+        "train_value": 0.5280926724274954,
+        "val_value_bce": 0.5269383788108826,
+        "val_value_acc": 0.7051251530647278,
+        "val_prior_top1": 0.6102741956710815,
+        "val_win_top1": 0.5951894521713257,
+        "val_win_multi_top1": 0.559276282787323,
+        "lr": 0.0007612492823579742
+      },
+      {
+        "epoch": 13,
+        "train_loss": 0.7766534719202254,
+        "train_prior": 0.24883288227849537,
+        "train_value": 0.5278205871582031,
+        "val_value_bce": 0.5273511409759521,
+        "val_value_acc": 0.7059222459793091,
+        "val_prior_top1": 0.614578366279602,
+        "val_win_top1": 0.5995626449584961,
+        "val_win_multi_top1": 0.5640374422073364,
+        "lr": 0.0007269952498697732
+      },
+      {
+        "epoch": 14,
+        "train_loss": 0.774216439988878,
+        "train_prior": 0.2475034933951166,
+        "train_value": 0.5267129474216037,
+        "val_value_bce": 0.5279012322425842,
+        "val_value_acc": 0.7044476866722107,
+        "val_prior_top1": 0.6137414574623108,
+        "val_win_top1": 0.599781334400177,
+        "val_win_multi_top1": 0.5642755031585693,
+        "lr": 0.0006913417161825447
+      },
+      {
+        "epoch": 15,
+        "train_loss": 0.773999873134825,
+        "train_prior": 0.2472435807188352,
+        "train_value": 0.5267562899324629,
+        "val_value_bce": 0.5260995030403137,
+        "val_value_acc": 0.7064802050590515,
+        "val_prior_top1": 0.6173282265663147,
+        "val_win_top1": 0.6031340956687927,
+        "val_win_multi_top1": 0.5679256916046143,
+        "lr": 0.0006545084971874736
+      },
+      {
+        "epoch": 16,
+        "train_loss": 0.7699170211950938,
+        "train_prior": 0.24384859618213442,
+        "train_value": 0.5260684291521708,
+        "val_value_bce": 0.526124894618988,
+        "val_value_acc": 0.705722987651825,
+        "val_prior_top1": 0.6135421991348267,
+        "val_win_top1": 0.5991982221603394,
+        "val_win_multi_top1": 0.5636406540870667,
+        "lr": 0.0006167226819279527
+      },
+      {
+        "epoch": 17,
+        "train_loss": 0.7697837418980069,
+        "train_prior": 0.2435181571377648,
+        "train_value": 0.5262655781375037,
+        "val_value_bce": 0.525171160697937,
+        "val_value_acc": 0.7055635452270508,
+        "val_prior_top1": 0.6196796298027039,
+        "val_win_top1": 0.6051748991012573,
+        "val_win_multi_top1": 0.5701475739479065,
+        "lr": 0.0005782172325201154
+      },
+      {
+        "epoch": 18,
+        "train_loss": 0.7653453515635597,
+        "train_prior": 0.24019872231615913,
+        "train_value": 0.5251466267638736,
+        "val_value_bce": 0.5252625346183777,
+        "val_value_acc": 0.7058823704719543,
+        "val_prior_top1": 0.615893542766571,
+        "val_win_top1": 0.5997084379196167,
+        "val_win_multi_top1": 0.5641961693763733,
+        "lr": 0.0005392295478639224
+      },
+      {
+        "epoch": 19,
+        "train_loss": 0.7675804826948378,
+        "train_prior": 0.24238943143023384,
+        "train_value": 0.525191048781077,
+        "val_value_bce": 0.5245461463928223,
+        "val_value_acc": 0.7077953219413757,
+        "val_prior_top1": 0.6204367876052856,
+        "val_win_top1": 0.60466468334198,
+        "val_win_multi_top1": 0.5695921182632446,
+        "lr": 0.0004999999999999999
+      },
+      {
+        "epoch": 20,
+        "train_loss": 0.7629155748420291,
+        "train_prior": 0.23788425160778892,
+        "train_value": 0.5250313215785556,
+        "val_value_bce": 0.5245389342308044,
+        "val_value_acc": 0.7066794633865356,
+        "val_prior_top1": 0.6273314356803894,
+        "val_win_top1": 0.6142128109931946,
+        "val_win_multi_top1": 0.5799872875213623,
+        "lr": 0.0004607704521360775
+      },
+      {
+        "epoch": 21,
+        "train_loss": 0.7633708781666226,
+        "train_prior": 0.23905449940098655,
+        "train_value": 0.5243163771099515,
+        "val_value_bce": 0.5243663787841797,
+        "val_value_acc": 0.7071178555488586,
+        "val_prior_top1": 0.6290850043296814,
+        "val_win_top1": 0.6148687601089478,
+        "val_win_multi_top1": 0.580701470375061,
+        "lr": 0.0004217827674798846
+      },
+      {
+        "epoch": 22,
+        "train_loss": 0.760963522725635,
+        "train_prior": 0.23665133118629456,
+        "train_value": 0.5243121882279714,
+        "val_value_bce": 0.5240391492843628,
+        "val_value_acc": 0.7069982886314392,
+        "val_prior_top1": 0.6283676028251648,
+        "val_win_top1": 0.6125364303588867,
+        "val_win_multi_top1": 0.5781621932983398,
+        "lr": 0.0003832773180720472
+      },
+      {
+        "epoch": 23,
+        "train_loss": 0.7592557933595445,
+        "train_prior": 0.23517656243509716,
+        "train_value": 0.5240792367193434,
+        "val_value_bce": 0.5241678953170776,
+        "val_value_acc": 0.7073968052864075,
+        "val_prior_top1": 0.6274510025978088,
+        "val_win_top1": 0.6123177409172058,
+        "val_win_multi_top1": 0.5779241323471069,
+        "lr": 0.0003454915028125262
+      },
+      {
+        "epoch": 24,
+        "train_loss": 0.759164896276262,
+        "train_prior": 0.23562292257944742,
+        "train_value": 0.5235419703854455,
+        "val_value_bce": 0.5239588618278503,
+        "val_value_acc": 0.7065997123718262,
+        "val_prior_top1": 0.6312370896339417,
+        "val_win_top1": 0.6147230267524719,
+        "val_win_multi_top1": 0.5805427432060242,
+        "lr": 0.00030865828381745506
+      },
+      {
+        "epoch": 25,
+        "train_loss": 0.7570486101839278,
+        "train_prior": 0.2335736710164282,
+        "train_value": 0.5234749416510264,
+        "val_value_bce": 0.5237265229225159,
+        "val_value_acc": 0.7076359391212463,
+        "val_prior_top1": 0.6263749599456787,
+        "val_win_top1": 0.6122448444366455,
+        "val_win_multi_top1": 0.5778447985649109,
+        "lr": 0.0002730047501302265
+      },
+      {
+        "epoch": 26,
+        "train_loss": 0.7567708161142137,
+        "train_prior": 0.23328705297576058,
+        "train_value": 0.5234837664498223,
+        "val_value_bce": 0.5234045386314392,
+        "val_value_acc": 0.7062808871269226,
+        "val_prior_top1": 0.6296827793121338,
+        "val_win_top1": 0.6146501302719116,
+        "val_win_multi_top1": 0.5804634094238281,
+        "lr": 0.0002387507176420255
+      },
+      {
+        "epoch": 27,
+        "train_loss": 0.7562354769971635,
+        "train_prior": 0.23315790709522036,
+        "train_value": 0.5230775707297854,
+        "val_value_bce": 0.5235919952392578,
+        "val_value_acc": 0.7075960636138916,
+        "val_prior_top1": 0.6288857460021973,
+        "val_win_top1": 0.6136296987533569,
+        "val_win_multi_top1": 0.5793524384498596,
+        "lr": 0.0002061073738537634
+      },
+      {
+        "epoch": 28,
+        "train_loss": 0.7548479835192362,
+        "train_prior": 0.2316043484542105,
+        "train_value": 0.5232436325814989,
+        "val_value_bce": 0.5230585336685181,
+        "val_value_acc": 0.7067192792892456,
+        "val_prior_top1": 0.6293639540672302,
+        "val_win_top1": 0.6153789758682251,
+        "val_win_multi_top1": 0.5812569260597229,
+        "lr": 0.00017527597583490815
+      },
+      {
+        "epoch": 29,
+        "train_loss": 0.7564438150988685,
+        "train_prior": 0.23339896400769553,
+        "train_value": 0.5230448577139113,
+        "val_value_bce": 0.5230487585067749,
+        "val_value_acc": 0.708154022693634,
+        "val_prior_top1": 0.629842221736908,
+        "val_win_top1": 0.6158162951469421,
+        "val_win_multi_top1": 0.5817330479621887,
+        "lr": 0.0001464466094067262
+      },
+      {
+        "epoch": 30,
+        "train_loss": 0.7556425266795688,
+        "train_prior": 0.2328605353832245,
+        "train_value": 0.5227819912963443,
+        "val_value_bce": 0.5231420397758484,
+        "val_value_acc": 0.7072373628616333,
+        "val_prior_top1": 0.6311175227165222,
+        "val_win_top1": 0.6167638301849365,
+        "val_win_multi_top1": 0.5827646255493164,
+        "lr": 0.00011979701719998447
+      },
+      {
+        "epoch": 31,
+        "train_loss": 0.7522419095039368,
+        "train_prior": 0.23001436640818915,
+        "train_value": 0.522227535645167,
+        "val_value_bce": 0.5228659510612488,
+        "val_value_acc": 0.7074366807937622,
+        "val_prior_top1": 0.6295233964920044,
+        "val_win_top1": 0.6152331829071045,
+        "val_win_multi_top1": 0.581098198890686,
+        "lr": 9.549150281252627e-05
+      },
+      {
+        "epoch": 32,
+        "train_loss": 0.7535244524478912,
+        "train_prior": 0.2314660284254286,
+        "train_value": 0.5220584173997244,
+        "val_value_bce": 0.5228523015975952,
+        "val_value_acc": 0.707277238368988,
+        "val_prior_top1": 0.630519688129425,
+        "val_win_top1": 0.6158891916275024,
+        "val_win_multi_top1": 0.5818123817443848,
+        "lr": 7.367991782295387e-05
+      },
+      {
+        "epoch": 33,
+        "train_loss": 0.7533149123191833,
+        "train_prior": 0.23123376982079613,
+        "train_value": 0.5220811367034912,
+        "val_value_bce": 0.5228064060211182,
+        "val_value_acc": 0.7081938982009888,
+        "val_prior_top1": 0.6321138143539429,
+        "val_win_top1": 0.6177113652229309,
+        "val_win_multi_top1": 0.5837962031364441,
+        "lr": 5.4496737905816076e-05
+      },
+      {
+        "epoch": 34,
+        "train_loss": 0.7531075676282247,
+        "train_prior": 0.23086515482929018,
+        "train_value": 0.5222424103154076,
+        "val_value_bce": 0.5227903723716736,
+        "val_value_acc": 0.7076359391212463,
+        "val_prior_top1": 0.6315957307815552,
+        "val_win_top1": 0.6163265109062195,
+        "val_win_multi_top1": 0.5822885036468506,
+        "lr": 3.806023374435661e-05
+      },
+      {
+        "epoch": 35,
+        "train_loss": 0.7526747584342957,
+        "train_prior": 0.23040294730001026,
+        "train_value": 0.522271818584866,
+        "val_value_bce": 0.5227670669555664,
+        "val_value_acc": 0.7081938982009888,
+        "val_prior_top1": 0.6308385133743286,
+        "val_win_top1": 0.6166909337043762,
+        "val_win_multi_top1": 0.5826852917671204,
+        "lr": 2.447174185242322e-05
+      },
+      {
+        "epoch": 36,
+        "train_loss": 0.752973735332489,
+        "train_prior": 0.23082817097504935,
+        "train_value": 0.5221455660131242,
+        "val_value_bce": 0.5227565765380859,
+        "val_value_acc": 0.7076757550239563,
+        "val_prior_top1": 0.6296827793121338,
+        "val_win_top1": 0.6152331829071045,
+        "val_win_multi_top1": 0.581098198890686,
+        "lr": 1.3815039801161714e-05
+      },
+      {
+        "epoch": 37,
+        "train_loss": 0.7531814674536387,
+        "train_prior": 0.23097073203987545,
+        "train_value": 0.5222107403808169,
+        "val_value_bce": 0.5227565765380859,
+        "val_value_acc": 0.7083532810211182,
+        "val_prior_top1": 0.6286067366600037,
+        "val_win_top1": 0.6139941215515137,
+        "val_win_multi_top1": 0.5797492265701294,
+        "lr": 6.155829702431168e-06
+      },
+      {
+        "epoch": 38,
+        "train_loss": 0.7527350385983785,
+        "train_prior": 0.23030869911114374,
+        "train_value": 0.5224263336923387,
+        "val_value_bce": 0.522716760635376,
+        "val_value_acc": 0.7077555060386658,
+        "val_prior_top1": 0.6284074783325195,
+        "val_win_top1": 0.6131923794746399,
+        "val_win_multi_top1": 0.5788763761520386,
+        "lr": 1.5413331334360176e-06
+      },
+      {
+        "epoch": 39,
+        "train_loss": 0.7527522047360738,
+        "train_prior": 0.23073839230669868,
+        "train_value": 0.5220138132572174,
+        "val_value_bce": 0.5227203369140625,
+        "val_value_acc": 0.7077555060386658,
+        "val_prior_top1": 0.6284074783325195,
+        "val_win_top1": 0.6141399145126343,
+        "val_win_multi_top1": 0.5799079537391663,
+        "lr": 0.0
+      }
+    ],
+    "_path": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\artifacts\\iono_prior_v2\\iono_prior_20260731T011433Z.json"
+  }
+}

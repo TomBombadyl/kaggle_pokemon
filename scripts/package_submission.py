@@ -83,6 +83,11 @@ LUCARIO_SEARCH_AGENT_INIT = (
     "_AGENT = build_agent(seed=0, deck_path=KAGGLE_DECK, "
     "scorer=LucarioSearchScorer(deck_path=KAGGLE_DECK))"
 )
+CRUSTLE_SEARCH_AGENT_INIT = (
+    "from agent.search_policy import CrustleSearchScorer\n\n"
+    "_AGENT = build_agent(seed=0, deck_path=KAGGLE_DECK, "
+    "scorer=CrustleSearchScorer(deck_path=KAGGLE_DECK))"
+)
 LUCARIO_MCTS_AGENT_INIT = (
     "from agent.lucario_mcts_policy import build_lucario_mcts_scorer\n\n"
     "_AGENT = build_agent(seed=0, deck_path=KAGGLE_DECK, "
@@ -151,6 +156,9 @@ def build(
     elif scorer == "lucario_search":
         scorer_import = ""
         agent_init = LUCARIO_SEARCH_AGENT_INIT
+    elif scorer == "crustle_search":
+        scorer_import = ""
+        agent_init = CRUSTLE_SEARCH_AGENT_INIT
     elif scorer == "lucario_mcts":
         scorer_import = ""
         agent_init = LUCARIO_MCTS_AGENT_INIT
@@ -168,6 +176,9 @@ def build(
     )
     shutil.copy2(deck, build_dir / "deck.csv")
     _copytree(ROOT / "agent", build_dir / "agent")
+    # Kaggle main.py loads deck_path=/kaggle_simulations/agent/deck.csv —
+    # must match the packaged deck, not whatever is currently in live agent/.
+    shutil.copy2(deck, build_dir / "agent" / "deck.csv")
     if scorer == "learned" and model_path is not None:
         src_model = model_path if model_path.is_absolute() else ROOT / model_path
         if not src_model.exists():
@@ -295,6 +306,7 @@ def main() -> int:
             "rulecore",
             "lucario",
             "lucario_search",
+            "crustle_search",
             "lucario_mcts",
         ),
         default="heuristic",

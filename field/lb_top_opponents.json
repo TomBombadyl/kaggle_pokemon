@@ -1,0 +1,30 @@
+﻿{
+    "generated":  "2026-07-30T08:10:43.0827286+08:00",
+    "archaludon_extra_opponents":  [
+                                       {
+                                           "arch":  "crustle",
+                                           "name":  "lb_flg_crustle",
+                                           "deck":  "agent_decks/top_lb_flg_crustle.csv"
+                                       },
+                                       {
+                                           "arch":  "grimmsnarl",
+                                           "name":  "lb_dries_grimmsnarl",
+                                           "deck":  "agent_decks/top_lb_dries_grimmsnarl.csv"
+                                       },
+                                       {
+                                           "arch":  "grimmsnarl",
+                                           "name":  "lb_luca_grimmsnarl",
+                                           "deck":  "agent_decks/top_lb_luca_grimmsnarl.csv"
+                                       },
+                                       {
+                                           "arch":  "crustle",
+                                           "name":  "lb_majkel_crustle",
+                                           "deck":  "agent_decks/top_lb_majkel_crustle.csv"
+                                       },
+                                       {
+                                           "arch":  "grimmsnarl",
+                                           "name":  "lb_liamk_grimmsnarl",
+                                           "deck":  "agent_decks/top_lb_liamk_grimmsnarl.csv"
+                                       }
+                                   ]
+}

@@ -1,0 +1,30 @@
+{
+  "ts": "2026-07-30T00:10:01Z",
+  "event": "episode_rl_top10_complete",
+  "n_teams": 10,
+  "n_replays": 68,
+  "n_deck_records": 80,
+  "n_trajectories": 68,
+  "n_gauntlet": 12,
+  "meta": {
+    "grimmsnarl_count_in_top10": 7,
+    "crustle_count": 2,
+    "other": 1,
+    "leader_flg": {"mu": 1205.9, "arch": "crustle_iwapalace"},
+    "second_dries": {"mu": 1202.5, "arch": "marnie_grimmsnarl_ex"}
+  },
+  "paths": {
+    "summary": "recordings/metrics/top_extract/top_decks_20260730.json",
+    "decks": "recordings/metrics/top_extract/decks_csv/",
+    "catalog": "data/rl_from_episodes/catalog.json",
+    "hint": "recordings/metrics/archaludon_matchup_hint.json",
+    "agent_decks": "agent_decks/top_lb_*.csv"
+  },
+  "integration": {
+    "aggressive_loop": "episode_refresh calls episode_rl_pipeline --top-only daily",
+    "gate_opponents": "agent_decks/top_lb_* + field/decks/mined_top",
+    "bc_targets": "data/rl_from_episodes/bc_manifest.json",
+    "bulk_days": "background kagglehub 2026-07-28 then 2026-07-27"
+  },
+  "archaludon_implication": "Primary ladder threats are Grimmsnarl (オーロンゲ) and Crustle, not Alakazam-only; Archaludon gates must include these decks."
+}

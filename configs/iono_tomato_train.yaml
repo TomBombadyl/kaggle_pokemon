@@ -1,0 +1,70 @@
+# Iono bottleneck — KEEP lever: tomato (sample_archaludon_75wr) matchup-gated delegate
+# Confirmed 2026-07-31 local gate: real_iono 56.5% n200 (target ≥55%)
+#
+# Usage:
+#   set ARCH_IONO_LEVER=tomato
+#   python scripts/gate_archaludon.py --games 80 --opponents real_iono
+#   python scripts/gate_archaludon.py --games 48 --opponents meta_crustle_flg meta_crustle_majkel
+#
+# Ship only if: iono>=55 AND flg/majkel>=85 (director floors: 55/89)
+
+version: 2
+name: iono_tomato_delegate
+updated: "2026-07-31"
+
+hero:
+  deck: agent_decks/archaludon_ex_cinderace.csv
+  brain: archaludon_agent
+  env:
+    ARCH_IONO_LEVER: tomato   # KEEP: iono-only sample_75wr full-agent delegate
+
+gate:
+  iono_target_wr: 55.0
+  iono_min_n: 80
+  crustle_min_wr: 85.0
+  opponents_iono: [real_iono]
+  opponents_guard:
+    - meta_crustle_flg
+    - meta_crustle_majkel
+
+# Why tomato wins vs score-stack levers
+diagnosis:
+  rule_score_ceiling_pct: 32
+  loss_mode: "board wipe / no_active (Voltorb closer); Arch dies before MD closes"
+  tomato_brain_alone_iono_n200: 44.0   # pure tomato agent
+  tomato_brain_our_deck_n200: 54.5
+  hybrid_matchup_gate_n200: 56.5       # KEEP default
+  pure_tomato_crustle_flg_n80: 75.0    # FAIL floor — never full-swap
+  pure_tomato_crustle_majkel_n80: 80.0
+
+ab_ledger:
+  none_n400: 31.2
+  r14n_ceiling_pooled: 32.2      # superseded
+  tomato_multi_mean_5x200: 50.7  # KEEP default (true mean)
+  tomato_gate_n400_range: "47.2–55.5"  # seed variance; peak hits 55
+  pure_tomato_mean_5x200: 51.7   # ceiling of sample_75wr alone
+  tomato_strict_n400: 53.5
+  tomato_setup_mean_3x200: 50.3  # NULL
+  tomato_md_mean_3x200: 34.7     # REJECT hard
+  r14k_light_stack: 14.6         # REJECT
+  r14v_pre_md_engine_n400: 28.5  # NULL
+  r14w_prize_boss_n400: 25.2     # REJECT
+  r14y_cape_n400: 28.8           # NULL
+  deck_2x_relicanth_n800: 29.5   # NULL
+
+train:
+  # No Arch RL path yet; tomato is pure rules. Optional: oversample iono self-play
+  # only if a future Arch MCTS trainer exists. Do NOT retrain Lucario for this gate.
+  note: "Rules hybrid — no weight train required. Gate + package is enough."
+  sample_weights:
+    real_iono: 0.45
+    top_mined_iono: 0.25
+    meta_crustle_flg: 0.15
+    meta_crustle_majkel: 0.15
+
+notes:
+  - "Do NOT rewire full _apply_iono_light_overrides (R14k regress)."
+  - "Do NOT default pure tomato agent (Crustle collapse)."
+  - "Single lever only: ARCH_IONO_LEVER=tomato (matchup-gated in _agent_impl)."
+  - "Requires extracted_agents/sample_archaludon_75wr/main.py on disk."
+  - "Ship floor: iono>=55 AND crustle min>=89; reconfirm after any Arch edit."

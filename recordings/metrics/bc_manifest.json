@@ -1,0 +1,7 @@
+{
+  "type": "deck_level_expert_targets",
+  "n_top_teams": 0,
+  "n_focus_grim_alak": 0,
+  "n_opponent_decks": 69,
+  "note": "Full decision trajectories require episode step parse; decks ready for matchup gates now."
+}

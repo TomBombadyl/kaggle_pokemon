@@ -1,0 +1,1 @@
+[2026-07-30T17:55:11.513441+00:00] factory_monitor START (restart supervisor only if dead; never kill workers)

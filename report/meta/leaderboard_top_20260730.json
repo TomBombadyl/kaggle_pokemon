@@ -1,0 +1,43 @@
+{
+  "as_of": "2026-07-30",
+  "source": "user_browser_snap",
+  "top": [
+    {
+      "rank": 1,
+      "team": "flg",
+      "score": 1198.4
+    },
+    {
+      "rank": 2,
+      "team": "Dries @ Tufa Labs",
+      "score": 1197.7
+    },
+    {
+      "rank": 3,
+      "team": "James Cox & Henry Chao",
+      "score": 1190.3
+    },
+    {
+      "rank": 4,
+      "team": "LiamK",
+      "score": 1183.1
+    },
+    {
+      "rank": 5,
+      "team": "Majkel1337",
+      "score": 1182.2
+    },
+    {
+      "rank": 6,
+      "team": "Luca",
+      "score": 1176.5
+    }
+  ],
+  "our_live": {
+    "archaludon": 681.6,
+    "note": "publicScore ~793.7"
+  },
+  "our_pin": 1196.1,
+  "goal": "re-hit pin 1196.1 and enter 1190+ first tier",
+  "strategy": "Archaludon primary; quality ships only; deep local gates"
+}

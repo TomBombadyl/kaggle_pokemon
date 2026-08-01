@@ -55,15 +55,29 @@ def _normalize_status(value: str) -> str:
 
 def fetch_submissions_csv(competition: str) -> str:
     """Return the raw CSV text from the Kaggle CLI (READ ONLY command)."""
-    cmd = ["kaggle", "competitions", "submissions", "-c", competition, "-v"]
+    import sys
+    import os
+
+    # Prefer python -m kaggle (venv) over bare `kaggle` on PATH.
+    cmd = [sys.executable, "-m", "kaggle", "competitions", "submissions", "-c", competition, "-v"]
+    env = os.environ.copy()
+    # Load token from common drop locations if not already set.
+    if not env.get("KAGGLE_API_TOKEN"):
+        for p in (
+            Path.home() / ".kaggle" / "access_token",
+            Path(__file__).resolve().parents[1] / ".kaggle" / "access_token",
+        ):
+            if p.exists():
+                env["KAGGLE_API_TOKEN"] = p.read_text(encoding="utf-8").strip()
+                break
     try:
         proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=120, check=False,
+            cmd, capture_output=True, text=True, timeout=120, check=False, env=env,
         )
     except FileNotFoundError as exc:
         raise RuntimeError(
-            "kaggle CLI not found on PATH. Install with `pip install kaggle` and "
-            "place kaggle.json credentials, then retry."
+            "python/kaggle not found. Install with `pip install kaggle` and "
+            "place access_token / kaggle.json, then retry."
         ) from exc
     if proc.returncode != 0:
         raise RuntimeError(

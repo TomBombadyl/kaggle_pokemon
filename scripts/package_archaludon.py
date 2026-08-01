@@ -24,11 +24,15 @@ ENGINE_CG = os.path.join(ROOT, "data", "sim", "sample_submission", "cg")
 AGENT_SRC = os.path.join(ROOT, "agent", "archaludon_agent.py")
 BENCH_GUARD_SRC = os.path.join(ROOT, "agent", "archaludon_bench_guard.py")
 EMPTY_GUARD_SRC = os.path.join(ROOT, "agent", "empty_bench_guard.py")
+TOMATO_SRC = os.path.join(
+    ROOT, "extracted_agents", "sample_archaludon_75wr", "main.py"
+)
+# 2026-07-30: canonical shell = sample_archaludon_75wr (4×Cinderace, 4×FML, 11×Metal)
 DECK_SRC = os.path.join(ROOT, "agent_decks", "archaludon_ex_cinderace.csv")
 NAME = "archaludon"
 LADDER_REF = "54083197"
 LADDER_MU = 1224.2
-KAGGLE_UPLOAD_ALIASES = ("archaludon_ex_cinderace_r7_bench",)
+KAGGLE_UPLOAD_ALIASES = ("archaludon_ex_cinderace_r7_bench", "archaludon_75wr")
 BUILD_DIR = os.path.join(ROOT, "dist", "submission_build", NAME)
 CAND_DIR = os.path.join(ROOT, "dist", "candidates")
 TARBALL = os.path.join(CAND_DIR, NAME + ".tar.gz")
@@ -37,6 +41,9 @@ MANIFEST = os.path.join(CAND_DIR, NAME + ".manifest.json")
 MAIN_PY = '''"""Kaggle cabt submission entry point — Archaludon ex / Cinderace."""
 import os
 import sys
+
+# Iono KEEP (2026-07-31): tomato matchup-gated delegate
+os.environ.setdefault("ARCH_IONO_LEVER", "tomato")
 
 _agent_dir = os.getcwd()
 if _agent_dir not in sys.path:
@@ -74,7 +81,7 @@ def _copytree_no_pyc(src: str, dst: str) -> None:
 def build() -> None:
     if not os.path.isdir(ENGINE_CG):
         raise FileNotFoundError(f"engine cg/ not found: {ENGINE_CG}")
-    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, DECK_SRC):
+    for p in (AGENT_SRC, BENCH_GUARD_SRC, EMPTY_GUARD_SRC, DECK_SRC, TOMATO_SRC):
         if not os.path.exists(p):
             raise FileNotFoundError(p)
     deck_lines = [x for x in open(DECK_SRC, encoding="utf-8").read().split("\n") if x.strip()]
@@ -89,6 +96,8 @@ def build() -> None:
     shutil.copy2(AGENT_SRC, os.path.join(BUILD_DIR, "archaludon_agent.py"))
     shutil.copy2(BENCH_GUARD_SRC, os.path.join(BUILD_DIR, "archaludon_bench_guard.py"))
     shutil.copy2(EMPTY_GUARD_SRC, os.path.join(BUILD_DIR, "empty_bench_guard.py"))
+    # Name must match _get_tomato_agent candidates in archaludon_agent.py
+    shutil.copy2(TOMATO_SRC, os.path.join(BUILD_DIR, "sample_archaludon_75wr_main.py"))
     shutil.copy2(DECK_SRC, os.path.join(BUILD_DIR, "deck.csv"))
     _copytree_no_pyc(ENGINE_CG, os.path.join(BUILD_DIR, "cg"))
 
@@ -99,6 +108,7 @@ def build() -> None:
             "archaludon_agent.py",
             "archaludon_bench_guard.py",
             "empty_bench_guard.py",
+            "sample_archaludon_75wr_main.py",
             "deck.csv",
             "cg",
         ):
@@ -106,13 +116,15 @@ def build() -> None:
 
     manifest = {
         "name": NAME,
-        "agent": "agent/archaludon_agent.py (community v5 + R7 empty-bench guard)",
+        "agent": "archaludon_agent + tomato Iono delegate (sample_75wr matchup-gated)",
         "deck": "agent_decks/archaludon_ex_cinderace.csv",
+        "iono_lever": "tomato",
         "ladder_benchmark_mu": LADDER_MU,
         "ladder_benchmark_ref": LADDER_REF,
         "kaggle_upload_aliases": list(KAGGLE_UPLOAD_ALIASES),
         "deck_sha1": _sha(DECK_SRC),
         "agent_sha1": _sha(AGENT_SRC),
+        "tomato_sha1": _sha(TOMATO_SRC),
         "git_commit": _git_commit(),
         "built_at": datetime.now(timezone.utc).isoformat(),
         "tarball": os.path.relpath(TARBALL, ROOT),
@@ -124,8 +136,8 @@ def build() -> None:
             "status": "COMPLETE",
             "local_gate_overall_pct": 72.7,
             "kaggle_message": (
-                "archaludon_rules x archaludon_ex_cinderace: community v5 + R7 empty-bench guard; "
-                "local 72.7% full n=30"
+                "archaludon + tomato Iono delegate (sample_75wr); "
+                "local iono target >=55%"
             ),
         },
     }

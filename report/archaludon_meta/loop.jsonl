@@ -1,0 +1,3 @@
+{"ts": "2026-07-30T00:20:32+00:00", "event": "loop_start", "pin": 798.4, "submit_bar": 70.0}
+{"ts": "2026-07-30T00:20:33+00:00", "event": "mcts_spawned", "log": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\report\\archaludon_meta\\mcts_side.log"}
+{"ts": "2026-07-30T00:20:33+00:00", "event": "cycle_start", "games_meta": 20, "games_core": 30}

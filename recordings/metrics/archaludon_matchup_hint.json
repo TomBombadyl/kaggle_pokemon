@@ -1,0 +1,13 @@
+{
+  "updated_at": "2026-07-30T16:59:17.906537+00:00",
+  "primary": "archaludon",
+  "priority_matchups": [
+    "marnie_grimmsnarl_ex",
+    "alakazam"
+  ],
+  "focus_decks": [],
+  "all_top_decks": [],
+  "gauntlet_dir": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\report\\deck_rl\\mined_decks",
+  "field_mined": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\field\\decks\\mined_top",
+  "instruction": "gate_archaludon / selfplay should include these as extra opponents when present"
+}

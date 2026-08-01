@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-07-30T16:47:49.844755+00:00",
+  "days_downloaded": [
+    "2026-07-29",
+    "2026-07-28"
+  ],
+  "n_top_teams": 0,
+  "n_field_decks": 69,
+  "n_traj": 150,
+  "top_archetypes": [],
+  "finished_at": "2026-07-30T16:59:17.908040+00:00",
+  "catalog": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\data\\rl_from_episodes\\catalog.json",
+  "metrics": "E:\\PTCG_AI_Battle_Challenge\\kaggle_pokemon\\recordings\\metrics"
+}

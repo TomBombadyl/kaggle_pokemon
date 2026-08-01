@@ -1,72 +1,305 @@
 {
-  "version": 1,
+  "version": 2,
   "decks_dir": "agent_decks",
   "opponents": {
     "dragapult_ex_sample": {
       "deck_path": "agent_decks/dragapult_ex_sample.csv",
       "archetype": "dragapult_psychic",
-      "suites": ["core", "full"],
+      "suites": [
+        "core",
+        "full",
+        "baseline"
+      ],
       "opponent_brain": "native"
     },
     "real_mega_abomasnow_ex": {
       "deck_path": "agent_decks/real_mega_abomasnow_ex.csv",
       "archetype": "abomasnow_water",
-      "suites": ["core", "full"],
+      "suites": [
+        "core",
+        "full",
+        "baseline"
+      ],
       "opponent_brain": "native"
     },
     "real_iono": {
       "deck_path": "agent_decks/real_iono.csv",
       "archetype": "iono_lightning",
-      "suites": ["core", "full"],
+      "suites": [
+        "core",
+        "full",
+        "baseline",
+        "meta"
+      ],
       "opponent_brain": "native"
     },
     "real_dragapult_ex": {
       "deck_path": "agent_decks/real_dragapult_ex.csv",
       "archetype": "dragapult_psychic",
-      "suites": ["full"],
+      "suites": [
+        "full"
+      ],
       "opponent_brain": "native"
     },
     "real_mega_lucario_ex": {
       "deck_path": "agent_decks/real_mega_lucario_ex.csv",
       "archetype": "lucario_mirror",
-      "suites": ["full"],
+      "suites": [
+        "full",
+        "baseline",
+        "lucario"
+      ],
       "opponent_brain": "native"
     },
     "top_mined_alakazam": {
       "deck_path": "agent_decks/top_mined_alakazam.csv",
       "archetype": "alakazam_psychic",
-      "suites": ["alakazam"],
+      "suites": [
+        "alakazam"
+      ],
       "opponent_brain": "native"
     },
     "ryotasueyoshi_alakazam_best5": {
       "deck_path": "agent_decks/ryotasueyoshi_alakazam_best5.csv",
       "archetype": "alakazam_psychic",
-      "suites": ["alakazam"],
+      "suites": [
+        "alakazam"
+      ],
       "opponent_brain": "native"
     },
     "starmie_froslass_ashleysandlin": {
       "deck_path": "agent_decks/starmie_froslass_ashleysandlin.csv",
       "archetype": "starmie_water",
-      "suites": ["starmie"],
-      "opponent_brain": "native",
-      "notes": "Gold-medal list (ashleysandlin) + repo starmie_agent rule pilot."
+      "suites": [
+        "starmie",
+        "full",
+        "sprint"
+      ],
+      "opponent_brain": "native"
     },
     "starmie_cinderace_hybrid": {
       "deck_path": "agent_decks/starmie_cinderace_hybrid.csv",
       "archetype": "starmie_water",
-      "suites": ["starmie"],
-      "opponent_brain": "native",
-      "notes": "Ladder-dominant Starmie/Cinderace + Crushing Hammer (9/23 replay cluster)."
+      "suites": [
+        "starmie"
+      ],
+      "opponent_brain": "native"
     },
     "starmie_froslass_risky_ruins": {
       "deck_path": "agent_decks/starmie_froslass_risky_ruins.csv",
       "archetype": "starmie_water",
-      "suites": ["starmie"],
+      "suites": [
+        "starmie"
+      ],
+      "opponent_brain": "native"
+    },
+    "meta_crustle_flg": {
+      "deck_path": "agent_decks/mined_top/top01_flg.csv",
+      "archetype": "crustle_iwapalace",
+      "suites": [
+        "meta",
+        "meta_fast",
+        "dual",
+        "sprint",
+        "top6"
+      ],
+      "opponent_brain": "random",
+      "notes": "LB#1 flg Crustle (イワパレス)"
+    },
+    "meta_crustle_majkel": {
+      "deck_path": "agent_decks/mined_top/top05_Majkel1337.csv",
+      "archetype": "crustle_iwapalace",
+      "suites": [
+        "meta",
+        "meta_fast",
+        "dual",
+        "top6"
+      ],
+      "opponent_brain": "random",
+      "notes": "LB#5 Majkel Crustle"
+    },
+    "meta_grimmsnarl_dries": {
+      "deck_path": "agent_decks/mined_top/top02_Dries_Tufa_Labs.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "meta",
+        "meta_fast",
+        "dual",
+        "sprint",
+        "top6"
+      ],
+      "opponent_brain": "random",
+      "notes": "LB#2 Dries Grimmsnarl"
+    },
+    "meta_grimmsnarl_luca": {
+      "deck_path": "agent_decks/mined_top/top03_Luca.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "meta",
+        "meta_fast",
+        "dual",
+        "top6"
+      ],
+      "opponent_brain": "random",
+      "notes": "LB#3 Luca Grimmsnarl"
+    },
+    "meta_grimmsnarl_liamk": {
+      "deck_path": "agent_decks/mined_top/top06_LiamK.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "meta",
+        "meta_fast",
+        "dual",
+        "top6"
+      ],
+      "opponent_brain": "random",
+      "notes": "LB#6 LiamK Grimmsnarl"
+    },
+    "meta_grimmsnarl_liamak": {
+      "deck_path": "agent_decks/mined_top/top06_LiamK.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "meta"
+      ],
+      "opponent_brain": "random",
+      "notes": "alias"
+    },
+    "meta_kangaskhan_james": {
+      "deck_path": "agent_decks/mined_top/top04_James_Cox_Henry_Chao.csv",
+      "archetype": "mega_kangaskhan_ogerpon",
+      "suites": [
+        "meta",
+        "top6"
+      ],
       "opponent_brain": "native",
-      "notes": "Tournament spread: Froslass + Munkidori + Risky Ruins (Pokemon.com pattern)."
+      "notes": "LB#4 Kangaskhan/Ogerpon"
+    },
+    "meta_alakazam_yushin": {
+      "deck_path": "agent_decks/mined_top/top11_Yushin_Ito.csv",
+      "archetype": "alakazam",
+      "suites": [
+        "meta"
+      ],
+      "opponent_brain": "native"
+    },
+    "top_lb_01_flg": {
+      "deck_path": "agent_decks/top_lb_01_flg.csv",
+      "archetype": "crustle_iwapalace",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "top_lb_02_dries": {
+      "deck_path": "agent_decks/top_lb_02_Dries_Tufa_Labs.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "top_lb_03_luca": {
+      "deck_path": "agent_decks/top_lb_03_Luca.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "top_lb_04_james": {
+      "deck_path": "agent_decks/top_lb_04_James_Cox_Henry_Chao.csv",
+      "archetype": "mega_kangaskhan_ogerpon",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "top_lb_05_majkel": {
+      "deck_path": "agent_decks/top_lb_05_Majkel1337.csv",
+      "archetype": "crustle_iwapalace",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "top_lb_06_liamk": {
+      "deck_path": "agent_decks/top_lb_06_LiamK.csv",
+      "archetype": "marnie_grimmsnarl_ex",
+      "suites": [
+        "top6"
+      ],
+      "opponent_brain": "random"
+    },
+    "nb_archaludon_75wr": {
+      "deck_path": "agent_decks/from_notebooks/sample_archaludon_75wr_out_deck.csv",
+      "archetype": "archaludon_metal",
+      "suites": [
+        "notebooks",
+        "arch_mirror"
+      ],
+      "opponent_brain": "random"
+    },
+    "nb_dragapult_ucb1": {
+      "deck_path": "agent_decks/from_notebooks/dragapult_ucb1_out_deck.csv",
+      "archetype": "dragapult_psychic",
+      "suites": [
+        "notebooks"
+      ],
+      "opponent_brain": "native"
+    },
+    "nb_alakazam_heuristic": {
+      "deck_path": "agent_decks/from_notebooks/advanced_heuristic_alakazam_rising_tide_deck.csv",
+      "archetype": "alakazam_psychic",
+      "suites": [
+        "notebooks",
+        "alakazam"
+      ],
+      "opponent_brain": "native"
+    },
+    "nb_official_lucario": {
+      "deck_path": "agent_decks/from_notebooks/official_lucario_submission_deck.csv",
+      "archetype": "lucario_mirror",
+      "suites": [
+        "notebooks",
+        "baseline"
+      ],
+      "opponent_brain": "native"
+    },
+    "nb_official_dragapult": {
+      "deck_path": "agent_decks/from_notebooks/official_dragapult_submission_deck.csv",
+      "archetype": "dragapult_psychic",
+      "suites": [
+        "notebooks",
+        "baseline"
+      ],
+      "opponent_brain": "native"
+    },
+    "nb_official_iono": {
+      "deck_path": "agent_decks/from_notebooks/official_iono_submission_deck.csv",
+      "archetype": "iono_lightning",
+      "suites": [
+        "notebooks",
+        "baseline"
+      ],
+      "opponent_brain": "native"
+    },
+    "nb_official_abomasnow": {
+      "deck_path": "agent_decks/from_notebooks/official_abomasnow_submission_deck.csv",
+      "archetype": "abomasnow_water",
+      "suites": [
+        "notebooks",
+        "baseline"
+      ],
+      "opponent_brain": "native"
     }
   },
   "suites": {
+    "baseline": [
+      "dragapult_ex_sample",
+      "real_mega_abomasnow_ex",
+      "real_iono",
+      "real_mega_lucario_ex"
+    ],
     "core": [
       "dragapult_ex_sample",
       "real_mega_abomasnow_ex",
@@ -77,19 +310,82 @@
       "real_mega_abomasnow_ex",
       "real_iono",
       "real_dragapult_ex",
-      "real_mega_lucario_ex"
+      "real_mega_lucario_ex",
+      "starmie_froslass_ashleysandlin",
+      "meta_crustle_flg",
+      "meta_grimmsnarl_dries"
+    ],
+    "dual": [
+      "meta_crustle_flg",
+      "meta_crustle_majkel",
+      "meta_grimmsnarl_dries",
+      "meta_grimmsnarl_luca",
+      "meta_grimmsnarl_liamk"
+    ],
+    "meta_fast": [
+      "meta_crustle_flg",
+      "meta_crustle_majkel",
+      "meta_grimmsnarl_dries",
+      "meta_grimmsnarl_luca",
+      "meta_grimmsnarl_liamk"
+    ],
+    "top6": [
+      "top_lb_01_flg",
+      "top_lb_02_dries",
+      "top_lb_03_luca",
+      "top_lb_04_james",
+      "top_lb_05_majkel",
+      "top_lb_06_liamk"
+    ],
+    "meta": [
+      "meta_crustle_flg",
+      "meta_grimmsnarl_dries",
+      "meta_grimmsnarl_luca",
+      "meta_crustle_majkel",
+      "meta_grimmsnarl_liamk",
+      "meta_kangaskhan_james",
+      "top_mined_alakazam",
+      "ryotasueyoshi_alakazam_best5",
+      "real_iono",
+      "dragapult_ex_sample"
+    ],
+    "notebooks": [
+      "nb_official_lucario",
+      "nb_official_dragapult",
+      "nb_official_iono",
+      "nb_official_abomasnow",
+      "nb_dragapult_ucb1",
+      "nb_alakazam_heuristic",
+      "nb_archaludon_75wr"
+    ],
+    "sprint": [
+      "real_iono",
+      "meta_crustle_flg",
+      "meta_crustle_majkel",
+      "meta_grimmsnarl_dries",
+      "meta_grimmsnarl_luca"
     ],
     "lucario": [
       "real_mega_lucario_ex"
     ],
     "alakazam": [
       "top_mined_alakazam",
-      "ryotasueyoshi_alakazam_best5"
+      "ryotasueyoshi_alakazam_best5",
+      "nb_alakazam_heuristic"
     ],
     "starmie": [
       "starmie_froslass_ashleysandlin",
       "starmie_cinderace_hybrid",
       "starmie_froslass_risky_ruins"
+    ],
+    "arch_mirror": [
+      "nb_archaludon_75wr"
+    ],
+    "dragapult": [
+      "dragapult_ex_sample",
+      "real_dragapult_ex",
+      "nb_official_dragapult",
+      "nb_dragapult_ucb1"
     ]
   }
 }
